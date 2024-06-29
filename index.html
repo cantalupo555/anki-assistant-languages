@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Gemini e ElevenLabs</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked@3.0.7/marked.min.js"></script>
+</head>
+<body>
+  <h1>API Gemini 1.5 Flash</h1>
+  <input type="text" id="palavra" placeholder="Digite a palavra" aria-label="Palavra para tradução">
+  <button id="executar">Executar</button>
+  <div id="resultado"></div>
+  <div id="contagemTokens"></div>
+
+  <h2>Converta Texto para Fala</h2>
+  <textarea id="texto" placeholder="Digite seu texto aqui..." aria-label="Texto para converter em fala"></textarea>
+  <select id="voiceSelect" aria-label="Selecione a voz"></select>
+  <button id="btnFalar">Falar</button>
+  <audio id="audioPlayer" controls></audio>
+  <button id="btnDownload" style="display: none;">Download MP3</button>
+
+  <script src="gemini.js"></script>
+  <script src="elevenlabs.js"></script>
+</body>
+</html>
