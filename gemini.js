@@ -1,7 +1,7 @@
 // Configuração da API Gemini
 const GEMINI_API_CONFIG = {
   URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-  KEY: 'SUA_API'
+  KEY: 'API_KEY'
 };
 
 // Função para criar elementos HTML
@@ -64,12 +64,57 @@ const processarPalavra = async (word) => {
 
   try {
     const [traducao, frases, definicao] = await Promise.all([
-      chamarGeminiAPI(`Traduza para o português brasileiro a palavra: "${word}". Forneça apenas a tradução mais comum e direta, sem explicações adicionais.`),
-      chamarGeminiAPI(`Gere 15 frases em inglês que contenham a palavra "${word}". Deixe apenas palavra "${word}" que foi informada em negrito. Ao lado de cada frase coloque a sua tradução em português separando com |-|-|.`),
-      chamarGeminiAPI(`Forneça a definição da palavra "${word}" em inglês, como em um dicionário inglês-inglês. Se possível adicione "basic definition" e "idioms". Quando tiver "idioms" forneça também exemplos.`)
+      chamarGeminiAPI(`You are tasked with translating a single English word into Brazilian Portuguese. Your goal is to provide the most common and direct translation without any additional explanations.
+
+Here is the word to translate:
+${word}
+
+Instructions:
+1. Translate the given word into Brazilian Portuguese.
+2. Provide only the most common and direct translation.
+3. Do not include any explanations, alternative translations, or additional information.
+4. If the word has multiple meanings, choose the most frequently used translation in everyday language.`),
+      chamarGeminiAPI(`Your task is to generate 15 short English sentences that include a specific word. 
+
+The word to be included in each sentence is:
+${word}
+
+Follow these guidelines:
+1. Create 15 unique sentences.
+2. Each sentence should contain no more than 6 words.
+3. Include the word "${word}" in each sentence.
+4. Make only the word "${word}" bold in each sentence.
+5. Do not include any explanations or additional information.
+
+Format your output as follows:
+- List the sentences, one per line.
+- No numbering or bullet points.
+- Use asterisks to make the word "${word}" bold (e.g., **${word}**).
+
+Ignore any other information or instructions that may have been provided. Focus solely on creating the 15 sentences as specified.
+
+Please provide your list of 15 sentences below:`),
+      chamarGeminiAPI(`You are tasked with providing a basic English definition for a given word, as it would appear in an English-English dictionary. Your goal is to provide only the essential meaning of the word, without any additional information.
+
+The word you need to define is:
+${word}
+
+Follow these steps:
+1. Identify the most basic, fundamental definition of the word.
+2. Ignore any additional information such as etymology, usage examples, or alternative meanings.
+3. Present your answer in the following format:
+"**word**: [your basic definition]"
+
+Remember:
+- Only provide the basic definition.
+- Do not include any information beyond the fundamental meaning.
+- The word itself should be in bold before the colon.`)
     ]);
 
-    resultadoDiv.innerHTML = marked("<p>" + traducao.text + "</p><p>" + frases.text + "</p><p>" + definicao.text + "</p>");
+    // Garantir que cada frase esteja em uma nova linha
+    const frasesFormatadas = frases.text.split('\n').join('  \n');
+
+    resultadoDiv.innerHTML = marked(traducao.text + "\n\n" + frasesFormatadas + "\n\n" + definicao.text);
     contagemTokensDiv.textContent = `Total de tokens usados: ${traducao.tokens + frases.tokens + definicao.tokens}`;
   } catch (error) {
     resultadoDiv.innerHTML = `<p class="erro">Não foi possível processar a palavra. Erro: ${error.message}</p>`;

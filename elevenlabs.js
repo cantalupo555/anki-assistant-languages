@@ -1,7 +1,7 @@
 // Configuração da API ElevenLabs
 const ELEVENLABS_API_CONFIG = {
     URL: 'https://api.elevenlabs.io/v1',
-    KEY: 'SUA_API'
+    KEY: 'API_KEY'
   };
   
   // Função para fazer chamadas à API
