@@ -54,6 +54,53 @@ const chamarGeminiAPI = async (promptText) => {
   }
 };
 
+// Função para salvar a frase no localStorage
+const saveSentence = (sentence) => {
+  const savedSentences = getSavedSentences();
+  savedSentences.push(sentence); // Agora salvamos a frase com os asteriscos
+  localStorage.setItem('savedSentences', JSON.stringify(savedSentences));
+};
+
+// Função para recuperar frases salvas
+const getSavedSentences = () => {
+  return JSON.parse(localStorage.getItem('savedSentences') || '[]');
+};
+
+// Função para limpar o localStorage
+const clearSavedSentences = () => {
+  localStorage.removeItem('savedSentences');
+  displaySavedSentences(); // Atualiza a exibição após limpar
+};
+
+// Função para exibir frases salvas
+const displaySavedSentences = () => {
+  const savedSentencesDiv = document.getElementById('savedSentences');
+  const savedSentences = getSavedSentences();
+  
+  savedSentencesDiv.innerHTML = '<h3>Frases Salvas:</h3>';
+  if (savedSentences.length === 0) {
+    savedSentencesDiv.innerHTML += '<p>Nenhuma frase salva.</p>';
+  } else {
+    const ul = document.createElement('ul');
+    savedSentences.forEach((sentence, index) => {
+      const li = document.createElement('li');
+      li.innerHTML = marked(sentence); // Usa marked para renderizar o Markdown
+      ul.appendChild(li);
+    });
+    savedSentencesDiv.appendChild(ul);
+  }
+  
+  // Adiciona o botão para limpar o localStorage
+  const clearButton = document.createElement('button');
+  clearButton.textContent = 'Limpar Frases Salvas';
+  clearButton.addEventListener('click', () => {
+    if (confirm('Tem certeza que deseja limpar todas as frases salvas?')) {
+      clearSavedSentences();
+    }
+  });
+  savedSentencesDiv.appendChild(clearButton);
+};
+
 // Função para criar elementos de frase clicáveis
 const createSentenceElements = (sentences) => {
   const sentencasGeradasDiv = document.getElementById('sentencasGeradas');
@@ -74,14 +121,20 @@ const selectSentence = (sentence, index) => {
     <h3>Frase selecionada:</h3>
     ${marked(sentence)}
     <button id="usarFrase">Usar esta frase</button>
+    <button id="salvarFrase">Salvar esta frase</button>
   `;
   
   document.querySelectorAll('.sentence').forEach(el => el.classList.remove('selected'));
   document.querySelector(`.sentence[data-index="${index}"]`).classList.add('selected');
   
   document.getElementById('usarFrase').addEventListener('click', () => {
-    const plainSentence = sentence.replace(/\*\*/g, ''); // Remove os asteriscos
-    document.getElementById('texto').value = plainSentence;
+    document.getElementById('texto').value = sentence; // Agora usamos a frase com os asteriscos
+  });
+
+  document.getElementById('salvarFrase').addEventListener('click', () => {
+    saveSentence(sentence); // Salvamos a frase com os asteriscos
+    displaySavedSentences();
+    alert('Frase salva com sucesso!');
   });
 };
 
@@ -157,6 +210,7 @@ Remember:
       ${marked(definicao.text)}
     `;
     createSentenceElements(frasesArray);
+    displaySavedSentences();
     contagemTokensDiv.textContent = `Total de tokens usados: ${traducao.tokens + frases.tokens + definicao.tokens}`;
   } catch (error) {
     resultadoDiv.innerHTML = `<p class="erro">Não foi possível processar a palavra. Erro: ${error.message}</p>`;
@@ -167,6 +221,6 @@ Remember:
 document.addEventListener('DOMContentLoaded', () => {
   const executarBtn = document.getElementById('executar');
   const palavraInput = document.getElementById('palavra');
-
+  displaySavedSentences();
   executarBtn.addEventListener('click', () => processarPalavra(palavraInput.value.trim()));
 });
