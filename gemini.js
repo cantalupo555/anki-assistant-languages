@@ -54,13 +54,48 @@ const chamarGeminiAPI = async (promptText) => {
   }
 };
 
+// Função para criar elementos de frase clicáveis
+const createSentenceElements = (sentences) => {
+  const sentencasGeradasDiv = document.getElementById('sentencasGeradas');
+  sentencasGeradasDiv.innerHTML = '<h3>Selecione uma frase:</h3>';
+  
+  sentences.forEach((sentence, index) => {
+    const sentenceElement = createElement('div', { class: 'sentence', 'data-index': index });
+    sentenceElement.innerHTML = marked(sentence);
+    sentenceElement.addEventListener('click', () => selectSentence(sentence, index));
+    sentencasGeradasDiv.appendChild(sentenceElement);
+  });
+};
+
+// Função para lidar com a seleção de frases
+const selectSentence = (sentence, index) => {
+  const sentencaSelecionadaDiv = document.getElementById('sentencaSelecionada');
+  sentencaSelecionadaDiv.innerHTML = `
+    <h3>Frase selecionada:</h3>
+    ${marked(sentence)}
+    <button id="usarFrase">Usar esta frase</button>
+  `;
+  
+  document.querySelectorAll('.sentence').forEach(el => el.classList.remove('selected'));
+  document.querySelector(`.sentence[data-index="${index}"]`).classList.add('selected');
+  
+  document.getElementById('usarFrase').addEventListener('click', () => {
+    const plainSentence = sentence.replace(/\*\*/g, ''); // Remove os asteriscos
+    document.getElementById('texto').value = plainSentence;
+  });
+};
+
 // Função para processar a palavra
 const processarPalavra = async (word) => {
   const resultadoDiv = document.getElementById('resultado');
   const contagemTokensDiv = document.getElementById('contagemTokens');
+  const sentencasGeradasDiv = document.getElementById('sentencasGeradas');
+  const sentencaSelecionadaDiv = document.getElementById('sentencaSelecionada');
 
   resultadoDiv.innerHTML = '<p>Carregando...</p>';
   contagemTokensDiv.textContent = '';
+  sentencasGeradasDiv.innerHTML = '';
+  sentencaSelecionadaDiv.innerHTML = '';
 
   try {
     const [traducao, frases, definicao] = await Promise.all([
@@ -112,9 +147,16 @@ Remember:
     ]);
 
     // Garantir que cada frase esteja em uma nova linha
-    const frasesFormatadas = frases.text.split('\n').join('  \n');
+    const frasesArray = frases.text.split('\n').filter(sentence => sentence.trim() !== '');
 
-    resultadoDiv.innerHTML = marked(traducao.text + "\n\n" + frasesFormatadas + "\n\n" + definicao.text);
+    //resultadoDiv.innerHTML = marked(traducao.text + "\n\n" + definicao.text);
+    resultadoDiv.innerHTML = `
+      <h3>Tradução:</h3>
+      ${marked(traducao.text)}
+      <h3>Definição:</h3>
+      ${marked(definicao.text)}
+    `;
+    createSentenceElements(frasesArray);
     contagemTokensDiv.textContent = `Total de tokens usados: ${traducao.tokens + frases.tokens + definicao.tokens}`;
   } catch (error) {
     resultadoDiv.innerHTML = `<p class="erro">Não foi possível processar a palavra. Erro: ${error.message}</p>`;
