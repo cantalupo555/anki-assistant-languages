@@ -54,11 +54,22 @@ const chamarGeminiAPI = async (promptText) => {
   }
 };
 
+// Função para limpar as frases geradas
+const clearGeneratedSentences = () => {
+  const sentencasGeradasDiv = document.getElementById('sentencasGeradas');
+  const sentencaSelecionadaDiv = document.getElementById('sentencaSelecionada');
+  sentencasGeradasDiv.innerHTML = '';
+  sentencaSelecionadaDiv.innerHTML = '';
+};
+
+
 // Função para salvar a frase no localStorage
 const saveSentence = (sentence) => {
   const savedSentences = getSavedSentences();
   savedSentences.push(sentence); // Agora salvamos a frase com os asteriscos
   localStorage.setItem('savedSentences', JSON.stringify(savedSentences));
+  clearGeneratedSentences(); // Limpa as frases geradas após salvar
+  displaySavedSentences(); // Atualiza a exibição imediatamente após salvar
 };
 
 // Função para recuperar frases salvas
@@ -89,7 +100,7 @@ const displaySavedSentences = () => {
     });
     savedSentencesDiv.appendChild(ul);
   }
-  
+
   // Adiciona o botão para limpar o localStorage
   const clearButton = document.createElement('button');
   clearButton.textContent = 'Limpar Frases Salvas';
@@ -135,6 +146,7 @@ const selectSentence = (sentence, index) => {
     saveSentence(sentence); // Salvamos a frase com os asteriscos
     displaySavedSentences();
     alert('Frase salva com sucesso!');
+    clearGeneratedSentences(); // Isso já é chamado dentro de saveSentence, mas podemos manter aqui para clareza
   });
 };
 
