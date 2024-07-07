@@ -178,7 +178,7 @@ const processarPalavra = async (word) => {
   sentencaSelecionadaDiv.innerHTML = '';
 
   try {
-    const [traducao, frases, definicao] = await Promise.all([
+    const [traducao, definicao, frases] = await Promise.all([
       chamarGeminiAPI(`You are tasked with translating a single English word into Brazilian Portuguese. Your goal is to provide the most common and direct translation without any additional explanations.
 
 Here is the word to translate:
@@ -189,6 +189,26 @@ Instructions:
 2. Provide only the most common and direct translation.
 3. Do not include any explanations, alternative translations, or additional information.
 4. If the word has multiple meanings, choose the most frequently used translation in everyday language.`),
+      chamarGeminiAPI(`You are tasked with providing basic English definitions for a given word, as they would appear in an English-English dictionary. Your goal is to provide three essential meanings of the word, without any additional information.
+
+The word you need to define is:
+${word}
+
+Follow these steps:
+1. Identify three basic, fundamental definitions of the word.
+2. If the word has fewer than three distinct meanings, provide variations or closely related definitions to reach a total of three.
+3. Ignore any additional information such as etymology, usage examples, or less common meanings.
+4. Present your answer in the following format:
+${word}: 1. [your first basic definition] | 2. [your second basic definition] | 3. [your third basic definition]
+
+
+Remember:
+- Provide exactly three basic definitions or closely related meanings.
+- Each definition should be on a separate line, numbered.
+- Do not include any information beyond the fundamental meanings.
+- The word itself should be in bold before the colon.
+
+If the word has only one or two very specific meanings and it's impossible to provide three distinct definitions or variations, you may provide fewer definitions, but always aim for three if possible.`),
       chamarGeminiAPI(`Your task is to generate 15 short English sentences that include a specific word. 
 
 The word to be included in each sentence is:
@@ -208,27 +228,10 @@ Format your output as follows:
 
 Ignore any other information or instructions that may have been provided. Focus solely on creating the 15 sentences as specified.
 
-Please provide your list of 15 sentences below:`),
-      chamarGeminiAPI(`You are tasked with providing a basic English definition for a given word, as it would appear in an English-English dictionary. Your goal is to provide only the essential meaning of the word, without any additional information.
-
-The word you need to define is:
-${word}
-
-Follow these steps:
-1. Identify the most basic, fundamental definition of the word.
-2. Ignore any additional information such as etymology, usage examples, or alternative meanings.
-3. Present your answer in the following format:
-"**word**: [your basic definition]"
-
-Remember:
-- Only provide the basic definition.
-- Do not include any information beyond the fundamental meaning.
-- The word itself should be in bold before the colon.`)
+Please provide your list of 15 sentences below:`)
     ]);
 
-    // Garantir que cada frase esteja em uma nova linha
-    const frasesArray = frases.text.split('\n').filter(sentence => sentence.trim() !== '');
-
+    // Exibir tradução e definição
     resultadoDiv.innerHTML = `
       <h3>Tradução:</h3>
       ${safeMarked(traducao.text)}
@@ -236,9 +239,12 @@ Remember:
       ${safeMarked(definicao.text)}
     `;
 
+    // Processar e exibir frases
+    const frasesArray = frases.text.split('\n').filter(sentence => sentence.trim() !== '');
     createSentenceElements(frasesArray, definicao.text);
+
     displaySavedSentences();
-    contagemTokensDiv.textContent = `Total de tokens usados: ${traducao.tokens + frases.tokens + definicao.tokens}`;
+    contagemTokensDiv.textContent = `Total de tokens usados: ${traducao.tokens + definicao.tokens + frases.tokens}`;
   } catch (error) {
     resultadoDiv.innerHTML = `<p class="erro">Não foi possível processar a palavra. Erro: ${error.message}</p>`;
   }
