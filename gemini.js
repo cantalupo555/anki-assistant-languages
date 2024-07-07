@@ -54,6 +54,20 @@ const chamarGeminiAPI = async (promptText) => {
   }
 };
 
+// Função para usar marked de forma segura
+const safeMarked = (text) => {
+  if (typeof marked === 'undefined') {
+    console.warn('marked is not defined, returning plain text');
+    return text;
+  }
+  try {
+    return marked.parse(text);
+  } catch (error) {
+    console.error('Error parsing markdown:', error);
+    return text;
+  }
+};
+
 // Função para limpar as frases geradas
 const clearGeneratedSentences = () => {
   const sentencasGeradasDiv = document.getElementById('sentencasGeradas');
@@ -63,16 +77,16 @@ const clearGeneratedSentences = () => {
 };
 
 
-// Função para salvar a frase no localStorage
-const saveSentence = (sentence) => {
+// Função para salvar a frase e definição no localStorage
+const saveSentence = (sentence, definition) => {
   const savedSentences = getSavedSentences();
-  savedSentences.push(sentence); // Agora salvamos a frase com os asteriscos
+  savedSentences.push(`${sentence};${definition}`);
   localStorage.setItem('savedSentences', JSON.stringify(savedSentences));
   clearGeneratedSentences(); // Limpa as frases geradas após salvar
   displaySavedSentences(); // Atualiza a exibição imediatamente após salvar
 };
 
-// Função para recuperar frases salvas
+// Função para recuperar frases do localStorage
 const getSavedSentences = () => {
   return JSON.parse(localStorage.getItem('savedSentences') || '[]');
 };
@@ -83,7 +97,7 @@ const clearSavedSentences = () => {
   displaySavedSentences(); // Atualiza a exibição após limpar
 };
 
-// Função para exibir frases salvas
+// Função para exibir conteúdo do localStorage
 const displaySavedSentences = () => {
   const savedSentencesDiv = document.getElementById('savedSentences');
   const savedSentences = getSavedSentences();
@@ -93,9 +107,10 @@ const displaySavedSentences = () => {
     savedSentencesDiv.innerHTML += '<p>Nenhuma frase salva.</p>';
   } else {
     const ul = document.createElement('ul');
-    savedSentences.forEach((sentence, index) => {
+    savedSentences.forEach((item) => {
+      const [sentence, definition] = item.split(';');
       const li = document.createElement('li');
-      li.innerHTML = marked(sentence); // Usa marked para renderizar o Markdown
+      li.innerHTML = `${sentence};${definition}`;
       ul.appendChild(li);
     });
     savedSentencesDiv.appendChild(ul);
@@ -113,24 +128,26 @@ const displaySavedSentences = () => {
 };
 
 // Função para criar elementos de frase clicáveis
-const createSentenceElements = (sentences) => {
+const createSentenceElements = (sentences, definition) => {
   const sentencasGeradasDiv = document.getElementById('sentencasGeradas');
   sentencasGeradasDiv.innerHTML = '<h3>Selecione uma frase:</h3>';
   
   sentences.forEach((sentence, index) => {
     const sentenceElement = createElement('div', { class: 'sentence', 'data-index': index });
-    sentenceElement.innerHTML = marked(sentence);
-    sentenceElement.addEventListener('click', () => selectSentence(sentence, index));
+    sentenceElement.innerHTML = safeMarked(sentence);
+    sentenceElement.addEventListener('click', () => selectSentence(sentence, index, definition));
     sentencasGeradasDiv.appendChild(sentenceElement);
   });
 };
 
 // Função para lidar com a seleção de frases
-const selectSentence = (sentence, index) => {
+const selectSentence = (sentence, index, definition) => {
   const sentencaSelecionadaDiv = document.getElementById('sentencaSelecionada');
   sentencaSelecionadaDiv.innerHTML = `
     <h3>Frase selecionada:</h3>
-    ${marked(sentence)}
+    ${sentence}
+    <h3>Definição:</h3>
+    ${definition}
     <button id="usarFrase">Usar esta frase</button>
     <button id="salvarFrase">Salvar esta frase</button>
   `;
@@ -139,14 +156,12 @@ const selectSentence = (sentence, index) => {
   document.querySelector(`.sentence[data-index="${index}"]`).classList.add('selected');
   
   document.getElementById('usarFrase').addEventListener('click', () => {
-    document.getElementById('texto').value = sentence; // Agora usamos a frase com os asteriscos
+    document.getElementById('texto').value = sentence;
   });
 
   document.getElementById('salvarFrase').addEventListener('click', () => {
-    saveSentence(sentence); // Salvamos a frase com os asteriscos
-    displaySavedSentences();
-    alert('Frase salva com sucesso!');
-    clearGeneratedSentences(); // Isso já é chamado dentro de saveSentence, mas podemos manter aqui para clareza
+    saveSentence(sentence, definition);
+    alert('Frase e definição salvas com sucesso!');
   });
 };
 
@@ -214,14 +229,14 @@ Remember:
     // Garantir que cada frase esteja em uma nova linha
     const frasesArray = frases.text.split('\n').filter(sentence => sentence.trim() !== '');
 
-    //resultadoDiv.innerHTML = marked(traducao.text + "\n\n" + definicao.text);
     resultadoDiv.innerHTML = `
       <h3>Tradução:</h3>
-      ${marked(traducao.text)}
+      ${safeMarked(traducao.text)}
       <h3>Definição:</h3>
-      ${marked(definicao.text)}
+      ${safeMarked(definicao.text)}
     `;
-    createSentenceElements(frasesArray);
+
+    createSentenceElements(frasesArray, definicao.text);
     displaySavedSentences();
     contagemTokensDiv.textContent = `Total de tokens usados: ${traducao.tokens + frases.tokens + definicao.tokens}`;
   } catch (error) {
