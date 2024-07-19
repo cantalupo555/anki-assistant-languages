@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './App.css';
 
@@ -18,6 +18,12 @@ interface TokenCount {
   totalTokens: number;
 }
 
+// New interface for saved items
+interface SavedItem {
+  sentence: string;
+  definition: string;
+}
+
 // Backend API URL, with a default value if the environment variable is not set
 const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
 
@@ -34,6 +40,16 @@ export default function App() {
   const [selectedSentence, setSelectedSentence] = useState<string | null>(null);
   // State to store the current page number
   const [currentPage, setCurrentPage] = useState(1);
+  // New state to store saved sentences with definitions
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+
+  // Effect to load saved items from localStorage on component mount
+  useEffect(() => {
+    const savedItemsFromStorage = localStorage.getItem('savedItems');
+    if (savedItemsFromStorage) {
+      setSavedItems(JSON.parse(savedItemsFromStorage));
+    }
+  }, []);
 
   // Function to handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,6 +101,28 @@ export default function App() {
     return result.sentences.text.slice(startIndex, endIndex);
   };
 
+  // New function to save the selected sentence with definition
+  const handleSaveItem = () => {
+    if (selectedSentence && result) {
+      const newItem: SavedItem = {
+        sentence: selectedSentence,
+        definition: result.definitions.text
+      };
+      if (!savedItems.some(item => item.sentence === newItem.sentence)) {
+        const newSavedItems = [...savedItems, newItem];
+        setSavedItems(newSavedItems);
+        localStorage.setItem('savedItems', JSON.stringify(newSavedItems));
+      }
+    }
+  };
+
+  // New function to remove a saved item
+  const handleRemoveSavedItem = (itemToRemove: SavedItem) => {
+    const newSavedItems = savedItems.filter(item => item.sentence !== itemToRemove.sentence);
+    setSavedItems(newSavedItems);
+    localStorage.setItem('savedItems', JSON.stringify(newSavedItems));
+  };
+
   return (
       <div>
         {/* Form for entering the word */}
@@ -113,7 +151,7 @@ export default function App() {
               <ReactMarkdown>{result.translation.text}</ReactMarkdown>
               <h3>Definitions:</h3>
               <ReactMarkdown>{result.definitions.text}</ReactMarkdown>
-              <h3>Sentences:</h3>
+              <h3>Select 1 Sentence:</h3>
               <ul>
                 {getCurrentPageSentences().map((sentence, index) => (
                     <li
@@ -129,6 +167,7 @@ export default function App() {
                     </li>
                 ))}
               </ul>
+
               {/* Pagination controls */}
               <div>
                 <button
@@ -145,26 +184,42 @@ export default function App() {
                   Next
                 </button>
               </div>
-              <div>
-                <p>
-                  <b>Total Tokens</b>
-                  <br />
-                  Input: {result.totalTokenCount.inputTokens}
-                  <br />
-                  Output: {result.totalTokenCount.outputTokens}
-                  <br />
-                  Total: {result.totalTokenCount.totalTokens}
-                </p>
-              </div>
+
               {/* Display the selected sentence, if any */}
               {selectedSentence && (
                   <div>
                     <h3>Selected Sentence:</h3>
-                    {selectedSentence}
+                    <ReactMarkdown>{selectedSentence}</ReactMarkdown>
+                    <button onClick={handleSaveItem}>Save Sentence with Definition</button>
                   </div>
               )}
+
+              <div>
+                <p>
+                  <b>Total Tokens</b>
+                  <br/>
+                  Input: {result.totalTokenCount.inputTokens}
+                  <br/>
+                  Output: {result.totalTokenCount.outputTokens}
+                  <br/>
+                  Total: {result.totalTokenCount.totalTokens}
+                </p>
+              </div>
             </div>
         )}
+
+        {/* Display saved items */}
+        <div>
+          <h3>Saved Sentences with Definitions:</h3>
+          <ul>
+            {savedItems.map((item, index) => (
+                <li key={index}>
+                  {item.sentence};{item.definition}
+                  <button onClick={() => handleRemoveSavedItem(item)}>Remove</button>
+                </li>
+            ))}
+          </ul>
+        </div>
       </div>
   );
 }
