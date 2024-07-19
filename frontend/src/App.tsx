@@ -123,6 +123,33 @@ export default function App() {
     localStorage.setItem('savedItems', JSON.stringify(newSavedItems));
   };
 
+  // New function to clear all saved items
+  const handleClearAll = () => {
+    if (window.confirm('Are you sure you want to clear all saved items? This action cannot be undone.')) {
+      setSavedItems([]);
+      localStorage.removeItem('savedItems');
+    }
+  };
+
+  // New function to handle exporting saved items
+  const handleExport = () => {
+    if (savedItems.length === 0) {
+      alert('No items to export.');
+      return;
+    }
+
+    const exportContent = savedItems.map(item => `${item.sentence};${item.definition}`).join('\n');
+    const blob = new Blob([exportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'saved_sentences_and_definitions.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
       <div>
         {/* Form for entering the word */}
@@ -219,6 +246,10 @@ export default function App() {
                 </li>
             ))}
           </ul>
+          <div className="action-buttons">
+            <button onClick={handleExport} className="export-button">Export</button>
+            <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
+          </div>
         </div>
       </div>
   );
