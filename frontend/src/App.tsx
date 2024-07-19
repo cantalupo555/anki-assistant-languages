@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import './App.css';
 
 // Interface to define the format of the result
 interface Result {
   word: string;
   translation: { text: string; tokenCount: TokenCount };
   definitions: { text: string; tokenCount: TokenCount };
-  sentences: { text: string[]; tokenCount: TokenCount };
+  sentences: { text: string[]; tokenCount: TokenCount; totalPages: number };
   totalTokenCount: TokenCount;
 }
 
@@ -31,12 +32,15 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   // State to store the selected sentence
   const [selectedSentence, setSelectedSentence] = useState<string | null>(null);
+  // State to store the current page number
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Function to handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+    setCurrentPage(1);
     try {
       // Send the request to the API
       const response = await fetch(API_URL, {
@@ -66,6 +70,19 @@ export default function App() {
   // Function to handle clicking on a sentence
   const handleSentenceClick = (sentence: string) => {
     setSelectedSentence(sentence);
+  };
+
+  // Function to handle page change
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  // Function to get current page sentences
+  const getCurrentPageSentences = () => {
+    if (!result) return [];
+    const startIndex = (currentPage - 1) * 5;
+    const endIndex = startIndex + 5;
+    return result.sentences.text.slice(startIndex, endIndex);
   };
 
   return (
@@ -98,7 +115,7 @@ export default function App() {
               <ReactMarkdown>{result.definitions.text}</ReactMarkdown>
               <h3>Sentences:</h3>
               <ul>
-                {result.sentences.text.map((sentence, index) => (
+                {getCurrentPageSentences().map((sentence, index) => (
                     <li
                         key={index}
                         onClick={() => handleSentenceClick(sentence)}
@@ -112,6 +129,22 @@ export default function App() {
                     </li>
                 ))}
               </ul>
+              {/* Pagination controls */}
+              <div>
+                <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
+                <span>Page {currentPage} of {result.sentences.totalPages}</span>
+                <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === result.sentences.totalPages}
+                >
+                  Next
+                </button>
+              </div>
               <div>
                 <p>
                   <b>Total Tokens</b>

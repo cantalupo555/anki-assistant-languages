@@ -32,14 +32,18 @@ app.post('/generate', async (req, res) => {
             totalTokens: translationTokens.totalTokens + definitionsTokens.totalTokens + sentencesTokens.totalTokens
         };
 
+        // Split sentences into an array
+        const sentencesArray = sentences.split('\n').filter(sentence => sentence.trim() !== '');
+
         // Return the result as a JSON response
         res.json({
             word,
             translation: { text: translation, tokenCount: translationTokens },
             definitions: { text: definitions, tokenCount: definitionsTokens },
             sentences: {
-                text: sentences.split('\n').filter(sentence => sentence.trim() !== ''),
-                tokenCount: sentencesTokens
+                text: sentencesArray,
+                tokenCount: sentencesTokens,
+                totalPages: Math.ceil(sentencesArray.length / 5)
             },
             totalTokenCount
         });

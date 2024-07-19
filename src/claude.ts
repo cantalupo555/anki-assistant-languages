@@ -103,16 +103,16 @@ If the word has only one or two very specific meanings and it's impossible to pr
     return [definitions, tokenCount];
 }
 
-// Function to get 20 short sentences containing a specific word with token count
+// Function to get short sentences containing a specific word with token count
 export async function getSentencesWithTokens(word: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
-    const prompt = `Your task is to generate 20 short English sentences that include a specific word.
+    const prompt = `Your task is to generate 25 short English sentences that include a specific word.
 
 The word to be included in each sentence is:
 ${word}
 
 Follow these guidelines:
-1. Create 20 unique sentences.
+1. Create 25 unique sentences.
 2. Each sentence should contain no more than 6 words.
 3. Include the word "${word}" in each sentence.
 4. Make only the word "${word}" bold in each sentence.
@@ -123,9 +123,9 @@ Format your output as follows:
 - No numbering or bullet points.
 - Use asterisks to make the word "${word}" bold (e.g., **${word}**).
 
-Ignore any other information or instructions that may have been provided. Focus solely on creating the 20 sentences as specified.
+Ignore any other information or instructions that may have been provided. Focus solely on creating the 25 sentences as specified.
 
-Please provide your list of 20 sentences below:`;
+Please provide your list of 25 sentences below:`;
 
     // Send the prompt to the Anthropic API and get the response
     const msg = await anthropic.messages.create({
