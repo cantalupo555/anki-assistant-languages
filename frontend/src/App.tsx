@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './App.css';
 
+// Backend API URL, with a default value if the environment variable is not set
+const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
+
 // Interface to define the format of the result
 interface Result {
   word: string;
@@ -18,29 +21,19 @@ interface TokenCount {
   totalTokens: number;
 }
 
-// New interface for saved items
+// Interface for saved items
 interface SavedItem {
   sentence: string;
   definition: string;
 }
 
-// Backend API URL, with a default value if the environment variable is not set
-const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
-
 export default function App() {
-  // State to store the word entered by the user
   const [word, setWord] = useState('');
-  // State to store the result from the API
   const [result, setResult] = useState<Result | null>(null);
-  // State to store a possible error
   const [error, setError] = useState<string | null>(null);
-  // State to indicate if the request is in progress
   const [isLoading, setIsLoading] = useState(false);
-  // State to store the selected sentence
   const [selectedSentence, setSelectedSentence] = useState<string | null>(null);
-  // State to store the current page number
   const [currentPage, setCurrentPage] = useState(1);
-  // New state to store saved sentences with definitions
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
 
   // Effect to load saved items from localStorage on component mount
@@ -151,106 +144,133 @@ export default function App() {
   };
 
   return (
-      <div>
-        {/* Form for entering the word */}
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="word-input">Enter a word:</label>
-          <input
-              id="word-input"
-              type="text"
-              value={word}
-              onChange={(e) => setWord(e.target.value)}
-              placeholder="Enter a word"
-          />
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Generating...' : 'Generate'}
-          </button>
-        </form>
+      <div className="app-container">
+        <header className="app-header">
+          <h1>📚📖🔖 Anki Assistant Languages</h1>
+          <nav>
+            <ul>
+              <li><a href="#generator">Word Generator</a></li>
+              <li><a href="#saved-items">Saved Items</a></li>
+            </ul>
+          </nav>
+        </header>
 
-        {/* Display the error, if any */}
-        {error && <div role="alert">{error}</div>}
+        <main>
+          <section id="generator">
+            <h2>Word Generator</h2>
+            <form onSubmit={handleSubmit}>
+              <label htmlFor="word-input">Enter a word:</label>
+              <input
+                  id="word-input"
+                  type="text"
+                  value={word}
+                  onChange={(e) => setWord(e.target.value)}
+                  placeholder="Enter a word"
+              />
+              <button type="submit" disabled={isLoading}>
+                {isLoading ? 'Generating...' : 'Generate'}
+              </button>
+            </form>
 
-        {/* Display the results, if any */}
-        {result && (
-            <div>
-              <h2>Results for: {result.word}</h2>
-              <h3>Translation:</h3>
-              <ReactMarkdown>{result.translation.text}</ReactMarkdown>
-              <h3>Definitions:</h3>
-              <ReactMarkdown>{result.definitions.text}</ReactMarkdown>
-              <h3>Select 1 Sentence:</h3>
-              <ul>
-                {getCurrentPageSentences().map((sentence, index) => (
-                    <li
-                        key={index}
-                        onClick={() => handleSentenceClick(sentence)}
-                        style={{
-                          backgroundColor:
-                              selectedSentence === sentence ? 'lightgray' : 'transparent',
-                          cursor: 'pointer',
-                        }}
-                    >
-                      <ReactMarkdown>{sentence}</ReactMarkdown>
-                    </li>
-                ))}
-              </ul>
+            {error && <div className="error" role="alert">{error}</div>}
 
-              {/* Pagination controls */}
-              <div>
-                <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                >
-                  Previous
-                </button>
-                <span>Page {currentPage} of {result.sentences.totalPages}</span>
-                <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === result.sentences.totalPages}
-                >
-                  Next
-                </button>
-              </div>
-
-              {/* Display the selected sentence, if any */}
-              {selectedSentence && (
-                  <div>
-                    <h3>Selected Sentence:</h3>
-                    <ReactMarkdown>{selectedSentence}</ReactMarkdown>
-                    <button onClick={handleSaveItem}>Save Sentence with Definition</button>
+            {result && (
+                <div className="result-container">
+                  <h3>Results for: {result.word}</h3>
+                  <div className="result-section">
+                    <h4>Translation:</h4>
+                    <ReactMarkdown>{result.translation.text}</ReactMarkdown>
                   </div>
-              )}
+                  <div className="result-section">
+                    <h4>Definitions:</h4>
+                    <ReactMarkdown>{result.definitions.text}</ReactMarkdown>
+                  </div>
+                  <div className="result-section">
+                    <h4>Select 1 Sentence:</h4>
+                    <ul className="sentence-list">
+                      {getCurrentPageSentences().map((sentence, index) => (
+                          <li
+                              key={index}
+                              onClick={() => handleSentenceClick(sentence)}
+                              className={selectedSentence === sentence ? 'selected' : ''}
+                          >
+                            <ReactMarkdown>{sentence}</ReactMarkdown>
+                          </li>
+                      ))}
+                    </ul>
 
-              <div>
-                <p>
-                  <b>Total Tokens</b>
-                  <br/>
-                  Input: {result.totalTokenCount.inputTokens}
-                  <br/>
-                  Output: {result.totalTokenCount.outputTokens}
-                  <br/>
-                  Total: {result.totalTokenCount.totalTokens}
-                </p>
-              </div>
-            </div>
-        )}
+                    <div className="pagination">
+                      <button
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                      >
+                        Previous
+                      </button>
+                      <span>Page {currentPage} of {result.sentences.totalPages}</span>
+                      <button
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === result.sentences.totalPages}
+                      >
+                        Next
+                      </button>
+                    </div>
 
-        {/* Display saved items */}
-        <div>
-          <h3>Saved Sentences with Definitions:</h3>
-          <ul>
-            {savedItems.map((item, index) => (
-                <li key={index}>
-                  {item.sentence};{item.definition}
-                  <button onClick={() => handleRemoveSavedItem(item)}>Remove</button>
-                </li>
-            ))}
-          </ul>
-          <div className="action-buttons">
-            <button onClick={handleExport} className="export-button">Export</button>
-            <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
-          </div>
-        </div>
+                    {selectedSentence && (
+                        <div className="selected-sentence">
+                          <h4>Selected Sentence:</h4>
+                          <ReactMarkdown>{selectedSentence}</ReactMarkdown>
+                          <button onClick={handleSaveItem}>Save Sentence with Definition</button>
+                        </div>
+                    )}
+                  </div>
+
+                  <div className="token-info">
+                    <h4>Token Information:</h4>
+                    <p>
+                      Input: {result.totalTokenCount.inputTokens}<br />
+                      Output: {result.totalTokenCount.outputTokens}<br />
+                      Total: {result.totalTokenCount.totalTokens}
+                    </p>
+                  </div>
+                </div>
+            )}
+          </section>
+
+          <section id="saved-items">
+            <h2>Saved Sentences with Definitions</h2>
+            {savedItems.length > 0 ? (
+                <>
+                  <ul className="saved-items-list">
+                    {savedItems.map((item, index) => (
+                        <li key={index}>
+                          <div className="saved-item-content">
+                            <ReactMarkdown>{item.sentence}</ReactMarkdown>
+                            <ReactMarkdown>{item.definition}</ReactMarkdown>
+                          </div>
+                          <button onClick={() => handleRemoveSavedItem(item)}>Remove</button>
+                        </li>
+                    ))}
+                  </ul>
+                  <div className="action-buttons">
+                    <button onClick={handleExport} className="export-button">Export</button>
+                    <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
+                  </div>
+                </>
+            ) : (
+                <p>No saved items yet. Generate some words and save sentences to see them here!</p>
+            )}
+          </section>
+        </main>
+
+        <footer>
+          <p>
+            📚📖🔖 Anki Assistant Languages |{' '}
+            <a href="https://github.com/cantalupo555/anki-assistant-languages" target="_blank"
+               rel="noopener noreferrer">
+              GitHub Repository
+            </a>
+          </p>
+        </footer>
       </div>
   );
 }
