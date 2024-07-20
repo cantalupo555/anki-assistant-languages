@@ -225,6 +225,28 @@ footer {
   margin-bottom: 1rem;
 }
 
+/* Save Notification Styles */
+.save-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4CAF50;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  animation: fadeInOut 3s ease-in-out;
+  z-index: 1000;
+  max-width: 90%;
+  text-align: center;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  10%, 90% { opacity: 1; }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-header {

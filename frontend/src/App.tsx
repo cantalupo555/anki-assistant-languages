@@ -35,6 +35,7 @@ export default function App() {
   const [selectedSentence, setSelectedSentence] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+  const [showSaveNotification, setShowSaveNotification] = useState(false);
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
@@ -43,6 +44,17 @@ export default function App() {
       setSavedItems(JSON.parse(savedItemsFromStorage));
     }
   }, []);
+
+  // Hide the save notification after 3 seconds
+  useEffect(() => {
+    if (showSaveNotification) {
+      const timer = setTimeout(() => {
+        setShowSaveNotification(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showSaveNotification]);
 
   // Function to handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -105,6 +117,7 @@ export default function App() {
         const newSavedItems = [...savedItems, newItem];
         setSavedItems(newSavedItems);
         localStorage.setItem('savedItems', JSON.stringify(newSavedItems));
+        setShowSaveNotification(true);
       }
     }
   };
@@ -232,6 +245,12 @@ export default function App() {
                       Total: {result.totalTokenCount.totalTokens}
                     </p>
                   </div>
+                </div>
+            )}
+
+            {showSaveNotification && (
+                <div className="save-notification">
+                  Sentence and definition saved successfully!
                 </div>
             )}
           </section>
