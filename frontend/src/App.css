@@ -224,3 +224,46 @@ footer {
   padding: 0.75rem 1.25rem;
   margin-bottom: 1rem;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .app-header nav {
+    margin-top: 1rem;
+  }
+
+  .app-header nav ul {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .result-container {
+    padding: 0.5rem;
+  }
+
+  .sentence-list li {
+    padding: 0.25rem;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .saved-items-list li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .saved-items-list button {
+    margin-top: 0.5rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+}
