@@ -182,7 +182,7 @@ export default function App() {
           <h1>📚📖🔖 Anki Assistant Languages</h1>
           <nav>
             <ul>
-              <li><a href="#generator">Word Generator</a></li>
+              <li><a href="#generator">Generator</a></li>
               <li><a href="#saved-items">Saved Items</a></li>
             </ul>
           </nav>
@@ -190,7 +190,7 @@ export default function App() {
 
         <main>
           <section id="generator">
-            <h2>Word Generator</h2>
+            <h2>Generator</h2>
             <form onSubmit={handleSubmit}>
               <label htmlFor="language-select">Select Language:</label>
               <select
