@@ -8,7 +8,6 @@ const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
 // Interface to define the format of the result
 interface Result {
   word: string;
-  translation: { text: string; tokenCount: TokenCount };
   definitions: { text: string; tokenCount: TokenCount };
   sentences: { text: string[]; tokenCount: TokenCount; totalPages: number };
   totalTokenCount: TokenCount;
@@ -203,10 +202,6 @@ export default function App() {
                 <div className="result-container">
                   <h3>Results for: {result.word}</h3>
                   <div className="result-section">
-                    <h4>Translation:</h4>
-                    <ReactMarkdown>{result.translation.text}</ReactMarkdown>
-                  </div>
-                  <div className="result-section">
                     <h4>Definitions:</h4>
                     <ReactMarkdown>{result.definitions.text}</ReactMarkdown>
                   </div>
@@ -296,7 +291,6 @@ export default function App() {
           </p>
         </footer>
 
-        // Notifications
         {showSaveNotification && (
             <div className="notification save-notification">
               Sentence and definition saved successfully!

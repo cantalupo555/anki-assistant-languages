@@ -25,41 +25,6 @@ type TokenCount = {
     totalTokens: number;
 };
 
-// Function to get the translation of a word with token count
-export async function getTranslationWithTokens(word: string): Promise<[string, TokenCount]> {
-    // Construct the prompt for the Anthropic API
-    const prompt = `You are tasked with translating a single English word into Brazilian Portuguese. Your goal is to provide the most common and direct translation without any additional explanations.
-
-Here is the word to translate:
-${word}
-
-Instructions:
-1. Translate the given word into Brazilian Portuguese.
-2. Provide only the most common and direct translation.
-3. Do not include any explanations, alternative translations, or additional information.
-4. If the word has multiple meanings, choose the most frequently used translation in everyday language.`;
-
-    // Send the prompt to the Anthropic API and get the response
-    const msg = await anthropic.messages.create({
-        model: "claude-3-haiku-20240307",
-        max_tokens: 1024,
-        temperature: 0,
-        messages: [
-            {role: "user", content: prompt}
-        ]
-    });
-    // Extract the translation from the response
-    const translation = extractTextContent(msg.content);
-    // Calculate the token count
-    const tokenCount: TokenCount = {
-        inputTokens: msg.usage.input_tokens,
-        outputTokens: msg.usage.output_tokens,
-        totalTokens: msg.usage.input_tokens + msg.usage.output_tokens
-    };
-    // Return the translation and token count
-    return [translation, tokenCount];
-}
-
 // Function to get the definitions of a word with token count
 export async function getDefinitionsWithTokens(word: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API

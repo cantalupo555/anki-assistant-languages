@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { getTranslationWithTokens, getDefinitionsWithTokens, getSentencesWithTokens } from './claude';
+import { getDefinitionsWithTokens, getSentencesWithTokens } from './claude';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -20,16 +20,15 @@ app.post('/generate', async (req, res) => {
             return res.status(400).json({ error: 'Valid word is required' });
         }
 
-        // Get the translation, definitions, and sentences for the word
-        const [translation, translationTokens] = await getTranslationWithTokens(word);
+        // Get the definitions and sentences for the word
         const [definitions, definitionsTokens] = await getDefinitionsWithTokens(word);
         const [sentences, sentencesTokens] = await getSentencesWithTokens(word);
 
         // Calculate the total token count
         const totalTokenCount = {
-            inputTokens: translationTokens.inputTokens + definitionsTokens.inputTokens + sentencesTokens.inputTokens,
-            outputTokens: translationTokens.outputTokens + definitionsTokens.outputTokens + sentencesTokens.outputTokens,
-            totalTokens: translationTokens.totalTokens + definitionsTokens.totalTokens + sentencesTokens.totalTokens
+            inputTokens: definitionsTokens.inputTokens + sentencesTokens.inputTokens,
+            outputTokens: definitionsTokens.outputTokens + sentencesTokens.outputTokens,
+            totalTokens: definitionsTokens.totalTokens + sentencesTokens.totalTokens
         };
 
         // Split sentences into an array
@@ -38,7 +37,6 @@ app.post('/generate', async (req, res) => {
         // Return the result as a JSON response
         res.json({
             word,
-            translation: { text: translation, tokenCount: translationTokens },
             definitions: { text: definitions, tokenCount: definitionsTokens },
             sentences: {
                 text: sentencesArray,
