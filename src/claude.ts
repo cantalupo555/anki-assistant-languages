@@ -26,9 +26,9 @@ type TokenCount = {
 };
 
 // Function to get the definitions of a word with token count
-export async function getDefinitionsWithTokens(word: string): Promise<[string, TokenCount]> {
+export async function getDefinitionsWithTokens(word: string, language: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
-    const prompt = `You are tasked with providing basic English definitions for a given word, as they would appear in an English-English dictionary. Your goal is to provide three essential meanings of the word, without any additional information.
+    const prompt = `You are tasked with providing basic ${language} definitions for a given word, as they would appear in an ${language}-${language} dictionary. Your goal is to provide three essential meanings of the word, without any additional information.
 
 The word you need to define is:
 ${word}
@@ -69,9 +69,9 @@ If the word has only one or two very specific meanings and it's impossible to pr
 }
 
 // Function to get short sentences containing a specific word with token count
-export async function getSentencesWithTokens(word: string): Promise<[string, TokenCount]> {
+export async function getSentencesWithTokens(word: string, language: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
-    const prompt = `Your task is to generate 25 short English sentences that include a specific word.
+    const prompt = `Your task is to generate 25 short ${language} sentences that include a specific word.
 
 The word to be included in each sentence is:
 ${word}
@@ -95,8 +95,8 @@ Please provide your list of 25 sentences below:`;
     // Send the prompt to the Anthropic API and get the response
     const msg = await anthropic.messages.create({
         model: "claude-3-haiku-20240307",
-        max_tokens: 2048,
-        temperature: 1,
+        max_tokens: 4096,
+        temperature: 0,
         messages: [
             {role: "user", content: prompt}
         ]

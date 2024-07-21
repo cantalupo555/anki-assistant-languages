@@ -28,6 +28,10 @@ interface SavedItem {
 
 export default function App() {
   const [word, setWord] = useState('');
+  // Initialize language state from localStorage
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('selectedLanguage') || 'english';
+  });
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,6 +51,11 @@ export default function App() {
       setSavedItems(JSON.parse(savedItemsFromStorage));
     }
   }, []);
+
+  // Save language selection to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('selectedLanguage', language);
+  }, [language]);
 
   useEffect(() => {
     if (showSaveNotification || showExportNotification || showRemoveNotification || showClearAllNotification || showGenerateNotification) {
@@ -75,7 +84,7 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ word }),
+        body: JSON.stringify({ word, language }),
       });
 
       // Check if the request was successful
@@ -183,13 +192,30 @@ export default function App() {
           <section id="generator">
             <h2>Word Generator</h2>
             <form onSubmit={handleSubmit}>
+              <label htmlFor="language-select">Select Language:</label>
+              <select
+                  id="language-select"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+              >
+                <option value="english">English (US)</option>
+                <option value="italian">Italian (IT)</option>
+                <option value="german">Deutsch (DE)</option>
+                <option value="french">Français (FR)</option>
+                <option value="spanish">Español (ES)</option>
+                <option value="portuguese">Português (BR)</option>
+                <option value="polish">Polski (PL)</option>
+                <option value="dutch">Nederlands (NL)</option>
+                <option value="russian">Pусский (RU)</option>
+                <option value="mandarin">普通话（中国大陆)</option>
+              </select>
               <label htmlFor="word-input">Enter a word:</label>
               <input
                   id="word-input"
                   type="text"
                   value={word}
                   onChange={(e) => setWord(e.target.value)}
-                  placeholder="Enter a word"
+                  placeholder={`Enter a ${language} word`}
               />
               <button type="submit" disabled={isLoading}>
                 {isLoading ? 'Generating...' : 'Generate'}

@@ -10,19 +10,25 @@ app.use(cors());
 // Parse incoming JSON requests
 app.use(express.json());
 
+// List of supported languages
+const supportedLanguages = ['english', 'italian', 'german', 'french', 'spanish', 'portuguese', 'polish', 'dutch', 'russian', 'mandarin'];
+
 // Route to handle the word generation request
 app.post('/generate', async (req, res) => {
     try {
-        // Get the word from the request body
-        const { word } = req.body;
-        // Validate the word
+        // Get the word and language from the request body
+        const { word, language } = req.body;
+        // Validate the word and language
         if (!word || typeof word !== 'string' || word.trim() === '') {
             return res.status(400).json({ error: 'Valid word is required' });
         }
+        if (!language || typeof language !== 'string' || !supportedLanguages.includes(language)) {
+            return res.status(400).json({ error: 'Valid language is required' });
+        }
 
         // Get the definitions and sentences for the word
-        const [definitions, definitionsTokens] = await getDefinitionsWithTokens(word);
-        const [sentences, sentencesTokens] = await getSentencesWithTokens(word);
+        const [definitions, definitionsTokens] = await getDefinitionsWithTokens(word, language);
+        const [sentences, sentencesTokens] = await getSentencesWithTokens(word, language);
 
         // Calculate the total token count
         const totalTokenCount = {
