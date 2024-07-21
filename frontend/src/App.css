@@ -225,13 +225,12 @@ footer {
   margin-bottom: 1rem;
 }
 
-/* Save Notification Styles */
-.save-notification {
+/* Notification Styles */
+.notification {
   position: fixed;
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #4CAF50;
   color: white;
   padding: 15px 20px;
   border-radius: 4px;
@@ -240,6 +239,26 @@ footer {
   z-index: 1000;
   max-width: 90%;
   text-align: center;
+}
+
+.save-notification {
+  background-color: #4CAF50;
+}
+
+.export-notification {
+  background-color: #007bff;
+}
+
+.remove-notification {
+  background-color: #f44336;
+}
+
+.clear-all-notification {
+  background-color: #ff9800;
+}
+
+.generate-notification {
+  background-color: #0b7e73;
 }
 
 @keyframes fadeInOut {

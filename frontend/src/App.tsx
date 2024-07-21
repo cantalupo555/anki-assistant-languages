@@ -36,6 +36,10 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [showSaveNotification, setShowSaveNotification] = useState(false);
+  const [showExportNotification, setShowExportNotification] = useState(false);
+  const [showRemoveNotification, setShowRemoveNotification] = useState(false);
+  const [showClearAllNotification, setShowClearAllNotification] = useState(false);
+  const [showGenerateNotification, setShowGenerateNotification] = useState(false);
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
@@ -45,16 +49,19 @@ export default function App() {
     }
   }, []);
 
-  // Hide the save notification after 3 seconds
   useEffect(() => {
-    if (showSaveNotification) {
+    if (showSaveNotification || showExportNotification || showRemoveNotification || showClearAllNotification || showGenerateNotification) {
       const timer = setTimeout(() => {
         setShowSaveNotification(false);
+        setShowExportNotification(false);
+        setShowRemoveNotification(false);
+        setShowClearAllNotification(false);
+        setShowGenerateNotification(false);
       }, 3000);
 
       return () => clearTimeout(timer);
     }
-  }, [showSaveNotification]);
+  }, [showSaveNotification, showExportNotification, showRemoveNotification, showClearAllNotification, showGenerateNotification]);
 
   // Function to handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,6 +87,7 @@ export default function App() {
       // Get the data from the API response
       const data = await response.json();
       setResult(data);
+      setShowGenerateNotification(true);
     } catch (error) {
       console.error('Error:', error);
       setError('An error occurred while fetching data. Please try again.');
@@ -106,7 +114,7 @@ export default function App() {
     return result.sentences.text.slice(startIndex, endIndex);
   };
 
-  // New function to save the selected sentence with definition
+  // Function to save the selected sentence with definition
   const handleSaveItem = () => {
     if (selectedSentence && result) {
       const newItem: SavedItem = {
@@ -122,22 +130,24 @@ export default function App() {
     }
   };
 
-  // New function to remove a saved item
+  // Function to remove a saved item
   const handleRemoveSavedItem = (itemToRemove: SavedItem) => {
     const newSavedItems = savedItems.filter(item => item.sentence !== itemToRemove.sentence);
     setSavedItems(newSavedItems);
     localStorage.setItem('savedItems', JSON.stringify(newSavedItems));
+    setShowRemoveNotification(true);
   };
 
-  // New function to clear all saved items
+  // Function to clear all saved items
   const handleClearAll = () => {
     if (window.confirm('Are you sure you want to clear all saved items? This action cannot be undone.')) {
       setSavedItems([]);
       localStorage.removeItem('savedItems');
+      setShowClearAllNotification(true);
     }
   };
 
-  // New function to handle exporting saved items
+  // Function to handle exporting saved items
   const handleExport = () => {
     if (savedItems.length === 0) {
       alert('No items to export.');
@@ -154,6 +164,8 @@ export default function App() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
+    setShowExportNotification(true);
   };
 
   return (
@@ -247,12 +259,6 @@ export default function App() {
                   </div>
                 </div>
             )}
-
-            {showSaveNotification && (
-                <div className="save-notification">
-                  Sentence and definition saved successfully!
-                </div>
-            )}
           </section>
 
           <section id="saved-items">
@@ -284,12 +290,42 @@ export default function App() {
         <footer>
           <p>
             📚📖🔖 Anki Assistant Languages |{' '}
-            <a href="https://github.com/cantalupo555/anki-assistant-languages" target="_blank"
-               rel="noopener noreferrer">
+            <a href="https://github.com/cantalupo555/anki-assistant-languages" target="_blank" rel="noopener noreferrer">
               GitHub Repository
             </a>
           </p>
         </footer>
+
+        // Notifications
+        {showSaveNotification && (
+            <div className="notification save-notification">
+              Sentence and definition saved successfully!
+            </div>
+        )}
+
+        {showExportNotification && (
+            <div className="notification export-notification">
+              Items exported successfully!
+            </div>
+        )}
+
+        {showRemoveNotification && (
+            <div className="notification remove-notification">
+              Item removed successfully!
+            </div>
+        )}
+
+        {showClearAllNotification && (
+            <div className="notification clear-all-notification">
+              All items cleared successfully!
+            </div>
+        )}
+
+        {showGenerateNotification && (
+            <div className="notification generate-notification">
+              Word generated successfully!
+            </div>
+        )}
       </div>
   );
 }
