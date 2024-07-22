@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './App.css';
+import { handleExport } from './markdownConverter';
 
 // Backend API URL, with a default value if the environment variable is not set
 const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
@@ -155,24 +156,14 @@ export default function App() {
     }
   };
 
-  // Function to handle exporting saved items
-  const handleExport = () => {
+  // Updated function to handle exporting saved items
+  const handleExportClick = () => {
     if (savedItems.length === 0) {
       alert('No items to export.');
       return;
     }
 
-    const exportContent = savedItems.map(item => `${item.sentence};${item.definition}`).join('\n');
-    const blob = new Blob([exportContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'saved_sentences_and_definitions.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
+    handleExport(savedItems);
     setShowExportNotification(true);
   };
 
@@ -298,7 +289,7 @@ export default function App() {
                     ))}
                   </ul>
                   <div className="action-buttons">
-                    <button onClick={handleExport} className="export-button">Export</button>
+                    <button onClick={handleExportClick} className="export-button">Export</button>
                     <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
                   </div>
                 </>
