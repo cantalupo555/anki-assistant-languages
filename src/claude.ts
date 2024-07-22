@@ -28,22 +28,28 @@ type TokenCount = {
 // Function to get the definitions of a word with token count
 export async function getDefinitionsWithTokens(word: string, language: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
-    const prompt = `You are tasked with providing basic ${language} definitions for a given word, as they would appear in an ${language}-${language} dictionary. Your goal is to provide three essential meanings of the word, without any additional information.
+    const prompt = `You are tasked with providing basic ${language} definitions for a given word, as they would appear in a ${language}-${language} dictionary. Your goal is to provide three essential meanings of the word, without any additional information.
 
 The word you need to define is:
 ${word}
 
+The language for the definitions is:
+${language}
+
 Follow these steps:
-1. Identify three basic, fundamental definitions of the word.
+1. Identify three basic, fundamental definitions of the word in the specified language.
 2. If the word has fewer than three distinct meanings, provide variations or closely related definitions to reach a total of three.
 3. Ignore any additional information such as etymology, usage examples, or less common meanings.
-4. Present your answer in the following format:
-${word}: 1. [your first basic definition] | 2. [your second basic definition] | 3. [your third basic definition]
+4. Before using the word "${word}", remove any leading or trailing spaces. Use the trimmed version of the word in your sentences.
+5. Present your answer in the following format:
+**${word}**: 1. [your first basic definition] | 2. [your second basic definition] | 3. [your third basic definition]
 
 Remember:
 - Provide exactly three basic definitions or closely related meanings.
 - Do not include any information beyond the fundamental meanings.
 - The word itself should be in bold before the colon.
+- Do not mix languages or provide translations unless explicitly instructed to do so.
+- All definitions must be in the specified language.
 
 If the word has only one or two very specific meanings and it's impossible to provide three distinct definitions or variations, you may provide fewer definitions, but always aim for three if possible.`;
 
@@ -71,7 +77,10 @@ If the word has only one or two very specific meanings and it's impossible to pr
 // Function to get short sentences containing a specific word with token count
 export async function getSentencesWithTokens(word: string, language: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
-    const prompt = `Your task is to generate 25 short ${language} sentences that include a specific word.
+    const prompt = `Your task is to generate 25 short sentences in a specified language that include a specific word. 
+
+The language to use is:
+${language}
 
 The word to be included in each sentence is:
 ${word}
@@ -82,6 +91,10 @@ Follow these guidelines:
 3. Include the word "${word}" in each sentence.
 4. Make only the word "${word}" bold in each sentence.
 5. Do not include any explanations or additional information.
+6. Ensure that all sentences are written in the specified language (${language}).
+7. Do not switch to any other language, even if you're more familiar with creating sentences in that language.
+8. If you find yourself creating sentences in a different language, stop and refocus on using only the specified ${language}.
+9. Before using the word "${word}", remove any leading or trailing spaces. Use the trimmed version of the word in your sentences.
 
 Format your output as follows:
 - List the sentences, one per line.
@@ -96,7 +109,7 @@ Please provide your list of 25 sentences below:`;
     const msg = await anthropic.messages.create({
         model: "claude-3-haiku-20240307",
         max_tokens: 4096,
-        temperature: 0,
+        temperature: 1,
         messages: [
             {role: "user", content: prompt}
         ]
