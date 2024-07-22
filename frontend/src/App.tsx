@@ -156,7 +156,7 @@ export default function App() {
     }
   };
 
-  // Updated function to handle exporting saved items
+  // Function to handle exporting saved items
   const handleExportClick = () => {
     if (savedItems.length === 0) {
       alert('No items to export.');

@@ -21,7 +21,12 @@ export const handleExport = (savedItems: { sentence: string; definition: string 
     const exportContent = savedItems.map(item => {
         const sentenceHtml = convertMarkdownToHtml(item.sentence);
         const definitionHtml = convertMarkdownToHtml(item.definition);
-        return `${sentenceHtml};${definitionHtml}`;
+
+        // Decode HTML entities
+        const decodedSentence = decodeHtmlEntities(sentenceHtml);
+        const decodedDefinition = decodeHtmlEntities(definitionHtml);
+
+        return `${decodedSentence};${decodedDefinition}`;
     }).join('\n');
 
     // Changed the type to 'text/plain' to ensure .txt output
@@ -35,3 +40,10 @@ export const handleExport = (savedItems: { sentence: string; definition: string 
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 };
+
+// Function to decode HTML entities
+function decodeHtmlEntities(html: string): string {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = html;
+    return textarea.value;
+}
