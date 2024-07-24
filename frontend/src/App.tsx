@@ -5,6 +5,8 @@ import { handleExport } from './markdownConverter';
 
 // Backend API URL, with a default value if the environment variable is not set
 const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
+// New TTS API URL
+const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 
 // Interface to define the format of the result
 interface Result {
@@ -27,6 +29,19 @@ interface SavedItem {
   definition: string;
 }
 
+// New interface for voice options
+interface VoiceOption {
+  name: string;
+  value: string;
+}
+
+// Array of available voice options for English TTS
+const voiceOptions: VoiceOption[] = [
+  { name: 'en-US-Journey-F', value: 'en-US-Journey-F' },
+  { name: 'en-US-Journey-D', value: 'en-US-Journey-D' },
+  { name: 'en-US-Journey-O', value: 'en-US-Journey-O' },
+];
+
 export default function App() {
   const [word, setWord] = useState('');
   // Initialize language state from localStorage
@@ -44,6 +59,8 @@ export default function App() {
   const [showRemoveNotification, setShowRemoveNotification] = useState(false);
   const [showClearAllNotification, setShowClearAllNotification] = useState(false);
   const [showGenerateNotification, setShowGenerateNotification] = useState(false);
+  // New state for selected voice
+  const [selectedVoice, setSelectedVoice] = useState<string>('en-US-Journey-F');
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
@@ -167,6 +184,31 @@ export default function App() {
     setShowExportNotification(true);
   };
 
+  // New function to handle TTS request
+  const handleTTS = async (sentence: string) => {
+    try {
+      const response = await fetch(TTS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: sentence, voice: selectedVoice }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.play();
+    } catch (error) {
+      console.error('Error playing TTS:', error);
+      setError('An error occurred while playing the audio. Please try again.');
+    }
+  };
+
   return (
       <div className="app-container">
         <header className="app-header">
@@ -200,6 +242,25 @@ export default function App() {
                 <option value="russian">Pусский (RU)</option>
                 <option value="mandarin">普通话（中国大陆)</option>
               </select>
+
+              {/* New voice selection dropdown for English */}
+              {language === 'english' && (
+                  <>
+                    <label htmlFor="voice-select">Select Voice:</label>
+                    <select
+                        id="voice-select"
+                        value={selectedVoice}
+                        onChange={(e) => setSelectedVoice(e.target.value)}
+                    >
+                      {voiceOptions.map((voice) => (
+                          <option key={voice.value} value={voice.value}>
+                            {voice.name}
+                          </option>
+                      ))}
+                    </select>
+                  </>
+              )}
+
               <label htmlFor="word-input">Enter a word:</label>
               <input
                   id="word-input"
@@ -232,6 +293,12 @@ export default function App() {
                               className={selectedSentence === sentence ? 'selected' : ''}
                           >
                             <ReactMarkdown>{sentence}</ReactMarkdown>
+                            {/* New Listen button for English sentences */}
+                            {language === 'english' && (
+                                <button onClick={() => handleTTS(sentence)} className="listen-button">
+                                  Listen
+                                </button>
+                            )}
                           </li>
                       ))}
                     </ul>
