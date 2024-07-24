@@ -6,7 +6,6 @@ import { stripMarkdown } from './markdownUtils';
 
 // Backend API URL, with a default value if the environment variable is not set
 const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
-// New TTS API URL
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 
 // Interface to define the format of the result
@@ -30,17 +29,22 @@ interface SavedItem {
   definition: string;
 }
 
-// New interface for voice options
+// Interface for voice options
 interface VoiceOption {
   name: string;
   value: string;
+  language: string;
+  languageCode: string;
 }
 
-// Array of available voice options for English TTS
+// Array of available voice options for TTS
 const voiceOptions: VoiceOption[] = [
-  { name: 'en-US-Journey-F', value: 'en-US-Journey-F' },
-  { name: 'en-US-Journey-D', value: 'en-US-Journey-D' },
-  { name: 'en-US-Journey-O', value: 'en-US-Journey-O' },
+  { name: 'en-US-Journey-F', value: 'en-US-Journey-F', language: 'english', languageCode: 'en-US' },
+  { name: 'en-US-Journey-D', value: 'en-US-Journey-D', language: 'english', languageCode: 'en-US' },
+  { name: 'en-US-Journey-O', value: 'en-US-Journey-O', language: 'english', languageCode: 'en-US' },
+  { name: 'it-IT-Wavenet-A', value: 'it-IT-Wavenet-A', language: 'italian', languageCode: 'it-IT' },
+  { name: 'it-IT-Wavenet-C', value: 'it-IT-Wavenet-C', language: 'italian', languageCode: 'it-IT' },
+  { name: 'it-IT-Wavenet-D', value: 'it-IT-Wavenet-D', language: 'italian', languageCode: 'it-IT' },
 ];
 
 export default function App() {
@@ -60,8 +64,7 @@ export default function App() {
   const [showRemoveNotification, setShowRemoveNotification] = useState(false);
   const [showClearAllNotification, setShowClearAllNotification] = useState(false);
   const [showGenerateNotification, setShowGenerateNotification] = useState(false);
-  // New state for selected voice
-  const [selectedVoice, setSelectedVoice] = useState<string>('en-US-Journey-F');
+  const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0]);
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
@@ -74,6 +77,12 @@ export default function App() {
   // Save language selection to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('selectedLanguage', language);
+  }, [language]);
+
+  // Sets the default voice option based on the selected language.
+  useEffect(() => {
+    const defaultVoice = voiceOptions.find(voice => voice.language === language) || voiceOptions[0];
+    setSelectedVoice(defaultVoice);
   }, [language]);
 
   useEffect(() => {
@@ -194,7 +203,11 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: strippedSentence, voice: selectedVoice }),
+        body: JSON.stringify({
+          text: strippedSentence,
+          voice: selectedVoice.value,
+          languageCode: selectedVoice.languageCode
+        }),
       });
 
       if (!response.ok) {
@@ -234,7 +247,7 @@ export default function App() {
                   onChange={(e) => setLanguage(e.target.value)}
               >
                 <option value="english">English (US)</option>
-                <option value="italian">Italian (IT)</option>
+                <option value="italian">Italiano (IT)</option>
                 <option value="german">Deutsch (DE)</option>
                 <option value="french">Français (FR)</option>
                 <option value="spanish">Español (ES)</option>
@@ -245,20 +258,22 @@ export default function App() {
                 <option value="mandarin">普通话（中国大陆)</option>
               </select>
 
-              {/* New voice selection dropdown for English */}
-              {language === 'english' && (
+              {/* Voice selection dropdown */}
+              {(language === 'english' || language === 'italian') && (
                   <>
                     <label htmlFor="voice-select">Select Voice:</label>
                     <select
                         id="voice-select"
-                        value={selectedVoice}
-                        onChange={(e) => setSelectedVoice(e.target.value)}
+                        value={selectedVoice.value}
+                        onChange={(e) => setSelectedVoice(voiceOptions.find(voice => voice.value === e.target.value) || voiceOptions[0])}
                     >
-                      {voiceOptions.map((voice) => (
-                          <option key={voice.value} value={voice.value}>
-                            {voice.name}
-                          </option>
-                      ))}
+                      {voiceOptions
+                          .filter((voice) => voice.language === language)
+                          .map((voice) => (
+                              <option key={voice.value} value={voice.value}>
+                                {voice.name}
+                              </option>
+                          ))}
                     </select>
                   </>
               )}
@@ -295,8 +310,8 @@ export default function App() {
                               className={selectedSentence === sentence ? 'selected' : ''}
                           >
                             <ReactMarkdown>{sentence}</ReactMarkdown>
-                            {/* New Listen button for English sentences */}
-                            {language === 'english' && (
+                            {/* TTS listen button */}
+                            {(language === 'english' || language === 'italian') && (
                                 <button onClick={() => handleTTS(sentence)} className="listen-button">
                                   Listen
                                 </button>

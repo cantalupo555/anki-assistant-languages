@@ -31,7 +31,7 @@ interface TTSResponse {
 }
 
 // Function to convert text to speech using the Google Cloud Text-to-Speech API
-export async function textToSpeech(text: string, voice: string): Promise<Buffer> {
+export async function textToSpeech(text: string, voice: string, languageCode: string): Promise<Buffer> {
     // Check if the API key is available
     if (!API_KEY) {
         throw new Error('Google Cloud API key not found. Check your .env file');
@@ -51,7 +51,7 @@ export async function textToSpeech(text: string, voice: string): Promise<Buffer>
             text: text
         },
         voice: {
-            languageCode: 'en-US',
+            languageCode: languageCode, // Use the provided language code
             name: voice
         }
     };

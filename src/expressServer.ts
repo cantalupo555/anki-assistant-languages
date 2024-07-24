@@ -58,22 +58,31 @@ app.post('/generate', async (req, res) => {
     }
 });
 
-// New route to handle TTS requests
+// Route to handle TTS requests
 app.post('/tts', async (req, res) => {
     try {
-        // Get the text and voice from the request body
-        const { text, voice } = req.body;
+        // Get the text, voice, and language code from the request body
+        const { text, voice, languageCode } = req.body;
 
-        // Validate the text and voice
+        // Validate the text, voice, and language code
         if (!text || typeof text !== 'string' || text.trim() === '') {
             return res.status(400).json({ error: 'Valid text is required' });
         }
-        if (!voice || typeof voice !== 'string' || !['en-US-Journey-F', 'en-US-Journey-D', 'en-US-Journey-O'].includes(voice)) {
+        if (!voice || typeof voice !== 'string') {
             return res.status(400).json({ error: 'Valid voice is required' });
+        }
+        // Check for supported language codes
+        if (!languageCode || typeof languageCode !== 'string' || !['en-US', 'it-IT'].includes(languageCode)) {
+            return res.status(400).json({ error: 'Valid language code is required (en-US or it-IT)' });
+        }
+
+        // Check if the voice matches the language code
+        if (!voice.startsWith(languageCode)) {
+            return res.status(400).json({ error: 'Voice does not match the language code' });
         }
 
         // Generate the audio using the Google Cloud TTS API
-        const audioBuffer = await textToSpeech(text, voice);
+        const audioBuffer = await textToSpeech(text, voice, languageCode);
 
         // Set the response content type to audio/wav
         res.set('Content-Type', 'audio/wav');
