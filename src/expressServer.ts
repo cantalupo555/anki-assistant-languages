@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { getDefinitionsWithTokens, getSentencesWithTokens } from './claude';
+import { getDefinitionsWithTokens, getSentencesWithTokens } from './anthropicClaude';
 import { textToSpeech } from './googleCloudTTS'; // Import the TTS function
 
 const app = express();
