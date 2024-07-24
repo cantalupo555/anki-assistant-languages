@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './App.css';
 import { handleExport } from './markdownConverter';
+import { stripMarkdown } from './markdownUtils';
 
 // Backend API URL, with a default value if the environment variable is not set
 const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
@@ -184,15 +185,16 @@ export default function App() {
     setShowExportNotification(true);
   };
 
-  // New function to handle TTS request
+  // Function to handle TTS request
   const handleTTS = async (sentence: string) => {
     try {
+      const strippedSentence = stripMarkdown(sentence); // Strip Markdown formatting
       const response = await fetch(TTS_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: sentence, voice: selectedVoice }),
+        body: JSON.stringify({ text: strippedSentence, voice: selectedVoice }),
       });
 
       if (!response.ok) {
