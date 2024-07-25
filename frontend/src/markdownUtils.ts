@@ -5,7 +5,7 @@ export function stripMarkdown(text: string): string {
     text = text.replace(/(\*|_)(.*?)\1/g, '$2');
 
     // Remove links, keeping only the link text
-    text = text.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
+    text = text.replace(/\[([^\]]+)]\([^)]+\)/g, '$1');
 
     // Remove headers
     text = text.replace(/^#+\s+/gm, '');
