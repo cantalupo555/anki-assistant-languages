@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { getDefinitionsWithTokens, getSentencesWithTokens } from './anthropicClaude';
-import { textToSpeech } from './googleCloudTTS'; // Import the TTS function
+import { textToSpeech } from './googleCloudTTS';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // List of supported languages
-const supportedLanguages = ['english', 'italian', 'german', 'french', 'spanish', 'portuguese', 'polish', 'dutch', 'russian', 'mandarin'];
+const supportedLanguages = ['english', 'italian', 'german', 'french', 'spanish', 'portuguese', 'dutch', 'polish', 'russian', 'mandarin', 'japanese', 'korean'];
 
 // Route to handle the word generation request
 app.post('/generate', async (req, res) => {
@@ -72,8 +72,8 @@ app.post('/tts', async (req, res) => {
             return res.status(400).json({ error: 'Valid voice is required' });
         }
         // Check for supported language codes
-        if (!languageCode || typeof languageCode !== 'string' || !['en-US', 'it-IT'].includes(languageCode)) {
-            return res.status(400).json({ error: 'Valid language code is required (en-US or it-IT)' });
+        if (!languageCode || typeof languageCode !== 'string' || !['en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 'ja-JP', 'ko-KR'].includes(languageCode)) {
+            return res.status(400).json({ error: 'Valid language code is required' });
         }
 
         // Check if the voice matches the language code
