@@ -3,6 +3,18 @@ import { renderToString } from 'react-dom/server';
 import ReactMarkdown from 'react-markdown';
 import JSZip from 'jszip';
 
+// Interface for saved items, now including audioKey
+interface SavedItem {
+    sentence: string;
+    definition: string;
+    audioKey?: string;
+}
+
+// Interface for audio data storage
+interface AudioData {
+    [key: string]: string;
+}
+
 export function convertMarkdownToHtml(markdown: string): string {
     // Renders the markdown to HTML using ReactMarkdown
     const htmlString = renderToString(
@@ -13,7 +25,7 @@ export function convertMarkdownToHtml(markdown: string): string {
 }
 
 // Function to handle exporting saved items
-export const handleExport = async (savedItems: { sentence: string; definition: string; audio?: Blob }[]) => {
+export const handleExport = async (savedItems: SavedItem[], audioData: AudioData) => {
     if (savedItems.length === 0) {
         throw new Error('No items to export.');
     }
@@ -43,8 +55,10 @@ export const handleExport = async (savedItems: { sentence: string; definition: s
     let hasAudio = false;
     for (let i = 0; i < savedItems.length; i++) {
         const item = savedItems[i];
-        if (item.audio) {
-            zip.file(`audio_${i + 1}.wav`, item.audio);
+        if (item.audioKey && audioData[item.audioKey]) {
+            // Convert base64 string back to Blob
+            const audioBlob = base64ToBlob(audioData[item.audioKey]);
+            zip.file(`audio_${i + 1}.wav`, audioBlob);
             hasAudio = true;
         }
     }
@@ -94,4 +108,19 @@ function decodeHtmlEntities(html: string): string {
     const textarea = document.createElement('textarea');
     textarea.innerHTML = html;
     return textarea.value;
+}
+
+// Helper function to convert base64 to Blob
+function base64ToBlob(base64: string): Blob {
+    const parts = base64.split(';base64,');
+    const contentType = parts[0].split(':')[1];
+    const raw = window.atob(parts[1]);
+    const rawLength = raw.length;
+    const uInt8Array = new Uint8Array(rawLength);
+
+    for (let i = 0; i < rawLength; ++i) {
+        uInt8Array[i] = raw.charCodeAt(i);
+    }
+
+    return new Blob([uInt8Array], { type: contentType });
 }

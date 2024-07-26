@@ -27,7 +27,7 @@ interface TokenCount {
 interface SavedItem {
   sentence: string;
   definition: string;
-  audio?: Blob;
+  audioKey?: string;
 }
 
 // Interface for voice options
@@ -138,12 +138,17 @@ export default function App() {
   const [showGenerateNotification, setShowGenerateNotification] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0]);
   const [currentAudio, setCurrentAudio] = useState<Blob | null>(null);
+  const [audioData, setAudioData] = useState<{ [key: string]: string }>({});
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
     const savedItemsFromStorage = localStorage.getItem('savedItems');
+    const audioDataFromStorage = localStorage.getItem('audioData');
     if (savedItemsFromStorage) {
       setSavedItems(JSON.parse(savedItemsFromStorage));
+    }
+    if (audioDataFromStorage) {
+      setAudioData(JSON.parse(audioDataFromStorage));
     }
   }, []);
 
@@ -223,22 +228,33 @@ export default function App() {
     return result.sentences.text.slice(startIndex, endIndex);
   };
 
-  // Function to save the selected sentence with definition
+  // Function to save the selected sentence with its definition and the TTS
   const handleSaveItem = () => {
     if (selectedSentence && result) {
+      const audioKey = `audio_${Date.now()}`; // Generate a unique key for the audio
       const newItem: SavedItem = {
         sentence: selectedSentence,
         definition: result.definitions.text,
-        audio: currentAudio || undefined // Add this line
+        audioKey: currentAudio ? audioKey : undefined
       };
       if (!savedItems.some(item => item.sentence === newItem.sentence)) {
         const newSavedItems = [...savedItems, newItem];
         setSavedItems(newSavedItems);
-        localStorage.setItem('savedItems', JSON.stringify(newSavedItems.map(item => ({
-          sentence: item.sentence,
-          definition: item.definition
-          // We don't store audio in localStorage due to size limitations
-        }))));
+        localStorage.setItem('savedItems', JSON.stringify(newSavedItems));
+
+        if (currentAudio) {
+          // Convert Blob to base64 string
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            if (typeof reader.result === 'string') {
+              const newAudioData = { ...audioData, [audioKey]: reader.result };
+              setAudioData(newAudioData);
+              localStorage.setItem('audioData', JSON.stringify(newAudioData));
+            }
+          };
+          reader.readAsDataURL(currentAudio);
+        }
+
         setShowSaveNotification(true);
       }
     }
@@ -249,6 +265,14 @@ export default function App() {
     const newSavedItems = savedItems.filter(item => item.sentence !== itemToRemove.sentence);
     setSavedItems(newSavedItems);
     localStorage.setItem('savedItems', JSON.stringify(newSavedItems));
+
+    if (itemToRemove.audioKey) {
+      const newAudioData = { ...audioData };
+      delete newAudioData[itemToRemove.audioKey];
+      setAudioData(newAudioData);
+      localStorage.setItem('audioData', JSON.stringify(newAudioData));
+    }
+
     setShowRemoveNotification(true);
   };
 
@@ -256,10 +280,13 @@ export default function App() {
   const handleClearAll = () => {
     if (window.confirm('Are you sure you want to clear all saved items? This action cannot be undone.')) {
       setSavedItems([]);
+      setAudioData({});
       localStorage.removeItem('savedItems');
+      localStorage.removeItem('audioData');
       setShowClearAllNotification(true);
     }
   };
+
   // Function to handle exporting saved items
   const handleExportClick = () => {
     if (savedItems.length === 0) {
@@ -267,7 +294,7 @@ export default function App() {
       return;
     }
 
-    handleExport(savedItems);
+    handleExport(savedItems, audioData);
     setShowExportNotification(true);
   };
 
@@ -303,10 +330,12 @@ export default function App() {
   };
 
   // Function to play saved audio
-  const playSavedAudio = (audio: Blob) => {
-    const audioUrl = URL.createObjectURL(audio);
-    const audioElement = new Audio(audioUrl);
-    audioElement.play();
+  const playSavedAudio = (audioKey: string) => {
+    const audioDataUrl = audioData[audioKey];
+    if (audioDataUrl) {
+      const audio = new Audio(audioDataUrl);
+      audio.play();
+    }
   };
 
   return (
@@ -454,8 +483,8 @@ export default function App() {
                           <div className="saved-item-content">
                             <ReactMarkdown>{item.sentence}</ReactMarkdown>
                             <ReactMarkdown>{item.definition}</ReactMarkdown>
-                            {item.audio && (
-                                <button onClick={() => playSavedAudio(item.audio!)}>
+                            {item.audioKey && audioData[item.audioKey] && (
+                                <button onClick={() => playSavedAudio(item.audioKey!)}>
                                   Play Audio
                                 </button>
                             )}
