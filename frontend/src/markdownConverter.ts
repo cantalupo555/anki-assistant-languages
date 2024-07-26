@@ -1,6 +1,7 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import ReactMarkdown from 'react-markdown';
+import JSZip from 'jszip';
 
 export function convertMarkdownToHtml(markdown: string): string {
     // Renders the markdown to HTML using ReactMarkdown
@@ -12,13 +13,13 @@ export function convertMarkdownToHtml(markdown: string): string {
 }
 
 // Function to handle exporting saved items
-export const handleExport = (savedItems: { sentence: string; definition: string }[]) => {
+export const handleExport = async (savedItems: { sentence: string; definition: string; audio?: Blob }[]) => {
     if (savedItems.length === 0) {
-        alert('No items to export.');
-        return;
+        throw new Error('No items to export.');
     }
 
-    const exportContent = savedItems.map(item => {
+    // Generate text content from saved items
+    const textContent = savedItems.map((item, index) => {
         const sentenceHtml = convertMarkdownToHtml(item.sentence);
         const definitionHtml = convertMarkdownToHtml(item.definition);
 
@@ -29,21 +30,41 @@ export const handleExport = (savedItems: { sentence: string; definition: string 
         return `${decodedSentence};${decodedDefinition}`;
     }).join('\n');
 
-    // Changed the type to 'text/plain' to ensure .txt output
-    const blob = new Blob([exportContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-
-    // Generate a filename with the current local date and time in ISO 8601 format, including UTC offset
     const now = new Date();
     const dateString = formatDateForFilename(now);
-    a.download = `saved_${dateString}.txt`;
 
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Always create a zip file to potentially include both text and audio
+    const zip = new JSZip();
+
+    // Add text content to the zip
+    zip.file('content.txt', textContent);
+
+    // Add audio files to the zip if they exist
+    let hasAudio = false;
+    for (let i = 0; i < savedItems.length; i++) {
+        const item = savedItems[i];
+        if (item.audio) {
+            zip.file(`audio_${i + 1}.wav`, item.audio);
+            hasAudio = true;
+        }
+    }
+
+    try {
+        const content = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(content);
+
+        const a = document.createElement('a');
+        a.href = url;
+        // If there's no audio, we'll still use .zip extension but it will only contain the text file
+        a.download = `saved_${dateString}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error generating zip file:', error);
+        throw new Error('Failed to generate export file. Please try again.');
+    }
 };
 
 // Function to format date for filename

@@ -8,8 +8,9 @@ const port = process.env.PORT || 5000;
 
 // Enable CORS middleware
 app.use(cors());
-// Parse incoming JSON requests
-app.use(express.json());
+// Parse incoming JSON requests with increased size limit
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // List of supported languages
 const supportedLanguages = ['english', 'italian', 'german', 'french', 'spanish', 'portuguese', 'dutch', 'polish', 'russian', 'mandarin', 'japanese', 'korean'];

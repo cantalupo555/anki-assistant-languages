@@ -27,6 +27,7 @@ interface TokenCount {
 interface SavedItem {
   sentence: string;
   definition: string;
+  audio?: Blob;
 }
 
 // Interface for voice options
@@ -136,6 +137,7 @@ export default function App() {
   const [showClearAllNotification, setShowClearAllNotification] = useState(false);
   const [showGenerateNotification, setShowGenerateNotification] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0]);
+  const [currentAudio, setCurrentAudio] = useState<Blob | null>(null);
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
@@ -226,12 +228,17 @@ export default function App() {
     if (selectedSentence && result) {
       const newItem: SavedItem = {
         sentence: selectedSentence,
-        definition: result.definitions.text
+        definition: result.definitions.text,
+        audio: currentAudio || undefined // Add this line
       };
       if (!savedItems.some(item => item.sentence === newItem.sentence)) {
         const newSavedItems = [...savedItems, newItem];
         setSavedItems(newSavedItems);
-        localStorage.setItem('savedItems', JSON.stringify(newSavedItems));
+        localStorage.setItem('savedItems', JSON.stringify(newSavedItems.map(item => ({
+          sentence: item.sentence,
+          definition: item.definition
+          // We don't store audio in localStorage due to size limitations
+        }))));
         setShowSaveNotification(true);
       }
     }
@@ -253,7 +260,6 @@ export default function App() {
       setShowClearAllNotification(true);
     }
   };
-
   // Function to handle exporting saved items
   const handleExportClick = () => {
     if (savedItems.length === 0) {
@@ -286,6 +292,7 @@ export default function App() {
       }
 
       const audioBlob = await response.blob();
+      setCurrentAudio(audioBlob); // Store the audio blob
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       audio.play();
@@ -293,6 +300,13 @@ export default function App() {
       console.error('Error playing TTS:', error);
       setError('An error occurred while playing the audio. Please try again.');
     }
+  };
+
+  // Function to play saved audio
+  const playSavedAudio = (audio: Blob) => {
+    const audioUrl = URL.createObjectURL(audio);
+    const audioElement = new Audio(audioUrl);
+    audioElement.play();
   };
 
   return (
@@ -440,6 +454,11 @@ export default function App() {
                           <div className="saved-item-content">
                             <ReactMarkdown>{item.sentence}</ReactMarkdown>
                             <ReactMarkdown>{item.definition}</ReactMarkdown>
+                            {item.audio && (
+                                <button onClick={() => playSavedAudio(item.audio!)}>
+                                  Play Audio
+                                </button>
+                            )}
                           </div>
                           <button onClick={() => handleRemoveSavedItem(item)}>Remove</button>
                         </li>
