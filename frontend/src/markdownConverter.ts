@@ -24,6 +24,16 @@ export function convertMarkdownToHtml(markdown: string): string {
     return htmlString.replace(/<\/?p>/g, '');
 }
 
+// Function to generate a random filename
+function generateRandomFilename(): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = 'AssistantLanguages-';
+    for (let i = 0; i < 100; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result + '.wav';
+}
+
 // Function to handle exporting saved items
 export const handleExport = async (savedItems: SavedItem[], audioData: AudioData) => {
     if (savedItems.length === 0) {
@@ -52,14 +62,14 @@ export const handleExport = async (savedItems: SavedItem[], audioData: AudioData
     zip.file('content.txt', textContent);
 
     // Add audio files to the zip if they exist
-    let hasAudio = false;
     for (let i = 0; i < savedItems.length; i++) {
         const item = savedItems[i];
         if (item.audioKey && audioData[item.audioKey]) {
             // Convert base64 string back to Blob
             const audioBlob = base64ToBlob(audioData[item.audioKey]);
-            zip.file(`audio_${i + 1}.wav`, audioBlob);
-            hasAudio = true;
+            // Generate a random filename for each audio file
+            const randomFilename = generateRandomFilename();
+            zip.file(randomFilename, audioBlob);
         }
     }
 
