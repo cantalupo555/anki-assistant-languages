@@ -40,8 +40,18 @@ export const handleExport = async (savedItems: SavedItem[], audioData: AudioData
         throw new Error('No items to export.');
     }
 
+    const zip = new JSZip();
+    const audioFilenames: { [key: string]: string } = {};
+
+    // Generate audio filenames for items with audio
+    savedItems.forEach((item) => {
+        if (item.audioKey && audioData[item.audioKey]) {
+            audioFilenames[item.audioKey] = generateRandomFilename();
+        }
+    });
+
     // Generate text content from saved items
-    const textContent = savedItems.map((item, index) => {
+    const textContent = savedItems.map((item) => {
         const sentenceHtml = convertMarkdownToHtml(item.sentence);
         const definitionHtml = convertMarkdownToHtml(item.definition);
 
@@ -49,27 +59,28 @@ export const handleExport = async (savedItems: SavedItem[], audioData: AudioData
         const decodedSentence = decodeHtmlEntities(sentenceHtml);
         const decodedDefinition = decodeHtmlEntities(definitionHtml);
 
-        return `${decodedSentence};${decodedDefinition}`;
+        // Use the generated audio filename if audio exists
+        const audioFilename = item.audioKey ? audioFilenames[item.audioKey] : '';
+        const audioTag = audioFilename ? `[sound:${audioFilename}]` : '';
+
+        // Return the formatted string: Sentence;AudioTag;Definition
+        return `${decodedSentence};${audioTag};${decodedDefinition}`;
     }).join('\n');
 
     const now = new Date();
     const dateString = formatDateForFilename(now);
 
-    // Always create a zip file to potentially include both text and audio
-    const zip = new JSZip();
-
     // Add text content to the zip
     zip.file('content.txt', textContent);
 
     // Add audio files to the zip if they exist
-    for (let i = 0; i < savedItems.length; i++) {
-        const item = savedItems[i];
+    for (const item of savedItems) {
         if (item.audioKey && audioData[item.audioKey]) {
             // Convert base64 string back to Blob
             const audioBlob = base64ToBlob(audioData[item.audioKey]);
-            // Generate a random filename for each audio file
-            const randomFilename = generateRandomFilename();
-            zip.file(randomFilename, audioBlob);
+            // Use the generated filename for this audio
+            const filename = audioFilenames[item.audioKey];
+            zip.file(filename, audioBlob);
         }
     }
 
