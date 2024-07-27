@@ -137,7 +137,6 @@ export default function App() {
   const [showClearAllNotification, setShowClearAllNotification] = useState(false);
   const [showGenerateNotification, setShowGenerateNotification] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0]);
-  const [currentAudio, setCurrentAudio] = useState<Blob | null>(null);
   const [audioData, setAudioData] = useState<{ [key: string]: string }>({});
 
   // Effect to load saved items from localStorage on component mount
@@ -229,20 +228,24 @@ export default function App() {
   };
 
   // Function to save the selected sentence with its definition and the TTS
-  const handleSaveItem = () => {
+  const handleSaveItem = async () => {
     if (selectedSentence && result) {
-      const audioKey = `audio_${Date.now()}`; // Generate a unique key for the audio
-      const newItem: SavedItem = {
-        sentence: selectedSentence,
-        definition: result.definitions.text,
-        audioKey: currentAudio ? audioKey : undefined
-      };
-      if (!savedItems.some(item => item.sentence === newItem.sentence)) {
-        const newSavedItems = [...savedItems, newItem];
-        setSavedItems(newSavedItems);
-        localStorage.setItem('savedItems', JSON.stringify(newSavedItems));
+      try {
+        // Always generate new TTS for the selected sentence
+        const audioBlob = await generateTTS(selectedSentence);
 
-        if (currentAudio) {
+        const audioKey = `audio_${Date.now()}`; // Generate a unique key for the audio
+        const newItem: SavedItem = {
+          sentence: selectedSentence,
+          definition: result.definitions.text,
+          audioKey: audioKey
+        };
+
+        if (!savedItems.some(item => item.sentence === newItem.sentence)) {
+          const newSavedItems = [...savedItems, newItem];
+          setSavedItems(newSavedItems);
+          localStorage.setItem('savedItems', JSON.stringify(newSavedItems));
+
           // Convert Blob to base64 string
           const reader = new FileReader();
           reader.onloadend = () => {
@@ -252,12 +255,37 @@ export default function App() {
               localStorage.setItem('audioData', JSON.stringify(newAudioData));
             }
           };
-          reader.readAsDataURL(currentAudio);
-        }
+          reader.readAsDataURL(audioBlob);
 
-        setShowSaveNotification(true);
+          setShowSaveNotification(true);
+        }
+      } catch (error) {
+        console.error('Error generating TTS:', error);
+        setError('An error occurred while generating audio. The item will be saved without audio.');
       }
     }
+  };
+
+  // Function to generate TTS
+  const generateTTS = async (sentence: string): Promise<Blob> => {
+    const strippedSentence = stripMarkdown(sentence);
+    const response = await fetch(TTS_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: strippedSentence,
+        voice: selectedVoice.value,
+        languageCode: selectedVoice.languageCode
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.blob();
   };
 
   // Function to remove a saved item
@@ -301,25 +329,7 @@ export default function App() {
   // Function to handle TTS request
   const handleTTS = async (sentence: string) => {
     try {
-      const strippedSentence = stripMarkdown(sentence); // Strip Markdown formatting
-      const response = await fetch(TTS_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: strippedSentence,
-          voice: selectedVoice.value,
-          languageCode: selectedVoice.languageCode
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const audioBlob = await response.blob();
-      setCurrentAudio(audioBlob); // Store the audio blob
+      const audioBlob = await generateTTS(sentence);
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       audio.play();
