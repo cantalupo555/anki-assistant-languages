@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './App.css';
-import { handleExport } from './markdownConverter';
-import { stripMarkdown } from './markdownUtils';
+import { handleExport } from './languageCardExporter';
+import { stripMarkdown } from './markdownStripper';
 
 // Define the backend API URLs, using environment variables
 const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
