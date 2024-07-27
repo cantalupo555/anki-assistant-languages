@@ -26,15 +26,15 @@ type TokenCount = {
 };
 
 // Function to get the definitions of a word with token count
-export async function getDefinitionsWithTokens(word: string, language: string): Promise<[string, TokenCount]> {
+export async function getDefinitionsWithTokens(word: string, targetLanguage: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
-    const prompt = `You are tasked with providing basic ${language} definitions for a given word, as they would appear in a ${language}-${language} dictionary. Your goal is to provide three essential meanings of the word, without any additional information.
+    const prompt = `You are tasked with providing basic ${targetLanguage} definitions for a given word, as they would appear in a ${targetLanguage}-${targetLanguage} dictionary. Your goal is to provide three essential meanings of the word, without any additional information.
 
 The word you need to define is:
 ${word}
 
 The language for the definitions is:
-${language}
+${targetLanguage}
 
 Follow these steps:
 1. Identify three basic, fundamental definitions of the word in the specified language.
@@ -75,12 +75,12 @@ If the word has only one or two very specific meanings and it's impossible to pr
 }
 
 // Function to get short sentences containing a specific word with token count
-export async function getSentencesWithTokens(word: string, language: string): Promise<[string, TokenCount]> {
+export async function getSentencesWithTokens(word: string, targetLanguage: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
     const prompt = `Your task is to generate 25 short sentences in a specified language that include a specific word. 
 
 The language to use is:
-${language}
+${targetLanguage}
 
 The word to be included in each sentence is:
 ${word}
@@ -91,9 +91,9 @@ Follow these guidelines:
 3. Include the word "${word}" in each sentence.
 4. Make only the word "${word}" bold in each sentence.
 5. Do not include any explanations or additional information.
-6. Ensure that all sentences are written in the specified language (${language}).
+6. Ensure that all sentences are written in the specified language (${targetLanguage}).
 7. Do not switch to any other language, even if you're more familiar with creating sentences in that language.
-8. If you find yourself creating sentences in a different language, stop and refocus on using only the specified ${language}.
+8. If you find yourself creating sentences in a different language, stop and refocus on using only the specified ${targetLanguage}.
 9. Before using the word "${word}", remove any leading or trailing spaces. Use the trimmed version of the word in your sentences.
 
 Format your output as follows:
@@ -124,4 +124,36 @@ Please provide your list of 25 sentences below:`;
     };
     // Return the sentences and token count
     return [sentences, tokenCount];
+}
+
+// Function to translate a sentence
+export async function translateSentence(inputSentence: string, targetLanguage: string, nativeLanguage: string): Promise<string> {
+    // Construct the prompt for the Anthropic API
+    const prompt = `You are tasked with translating a sentence from ${targetLanguage} to a specified target language. Your goal is to provide the most accurate and natural translation without any additional explanations.
+
+Here is the sentence to translate:
+${inputSentence}
+
+The target language for translation is:
+${nativeLanguage}
+
+Instructions:
+1. Translate the given sentence into the specified target language.
+2. Provide only the most accurate and natural translation.
+3. Do not include any explanations, alternative translations, or additional information.
+4. Maintain the original meaning and tone of the sentence as closely as possible.
+5. If the sentence contains idiomatic expressions, translate them to equivalent expressions in the target language if possible.`;
+
+    // Send the prompt to the Anthropic API and get the response
+    const msg = await anthropic.messages.create({
+        model: "claude-3-haiku-20240307",
+        max_tokens: 1024,
+        temperature: 0,
+        messages: [
+            {role: "user", content: prompt}
+        ]
+    });
+
+    // Extract and return the translated sentence
+    return extractTextContent(msg.content).trim();
 }

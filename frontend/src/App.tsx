@@ -1,12 +1,14 @@
+// Import necessary dependencies and utility functions
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './App.css';
 import { handleExport } from './markdownConverter';
 import { stripMarkdown } from './markdownUtils';
 
-// Backend API URL, with a default value if the environment variable is not set
+// Define the backend API URLs, using environment variables
 const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
+const TRANSLATION_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/translate';
 
 // Interface to define the format of the result
 interface Result {
@@ -28,6 +30,7 @@ interface SavedItem {
   sentence: string;
   definition: string;
   audioKey?: string;
+  translation?: string;
 }
 
 // Interface for voice options
@@ -119,11 +122,14 @@ const voiceOptions: VoiceOption[] = [
   { name: 'ko-KR-Wavenet-D', value: 'ko-KR-Wavenet-D', language: 'korean', languageCode: 'ko-KR' },
 ];
 
+// Define state variables and initialize them with default or persisted values
 export default function App() {
   const [word, setWord] = useState('');
-  // Initialize language state from localStorage
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('selectedLanguage') || 'english';
+  const [nativeLanguage, setNativeLanguage] = useState(() => {
+    return localStorage.getItem('nativeLanguage') || '';
+  });
+  const [targetLanguage, setTargetLanguage] = useState(() => {
+    return localStorage.getItem('selectedLanguage') || '';
   });
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -138,6 +144,7 @@ export default function App() {
   const [showGenerateNotification, setShowGenerateNotification] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0]);
   const [audioData, setAudioData] = useState<{ [key: string]: string }>({});
+  const [translation, setTranslation] = useState<string | null>(null);
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
@@ -153,18 +160,21 @@ export default function App() {
 
   // Save language selection to localStorage when it changes
   useEffect(() => {
-    localStorage.setItem('selectedLanguage', language);
-  }, [language]);
+    localStorage.setItem('nativeLanguage', nativeLanguage);
+    localStorage.setItem('selectedLanguage', targetLanguage);
+  }, [nativeLanguage, targetLanguage]);
 
   // Sets the default voice option based on the selected language
   useEffect(() => {
-    const defaultVoice = voiceOptions.find(voice => voice.language === language) || voiceOptions[0];
+    const defaultVoice = voiceOptions.find(voice => voice.language === targetLanguage) || voiceOptions[0];
     setSelectedVoice(defaultVoice);
-  }, [language]);
+  }, [targetLanguage]);
 
+  // Set up a timer to automatically hide notification messages after 3 seconds
   useEffect(() => {
     if (showSaveNotification || showExportNotification || showRemoveNotification || showClearAllNotification || showGenerateNotification) {
       const timer = setTimeout(() => {
+        // Hide the corresponding notification messages after 3 seconds
         setShowSaveNotification(false);
         setShowExportNotification(false);
         setShowRemoveNotification(false);
@@ -179,6 +189,10 @@ export default function App() {
   // Function to handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!nativeLanguage || !targetLanguage) {
+      setError('Please select both your native language and the target language.');
+      return;
+    }
     setError(null);
     setIsLoading(true);
     setCurrentPage(1);
@@ -189,7 +203,7 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ word, language }),
+        body: JSON.stringify({ word, language: targetLanguage }),
       });
 
       // Check if the request was successful
@@ -227,18 +241,52 @@ export default function App() {
     return result.sentences.text.slice(startIndex, endIndex);
   };
 
-  // Function to save the selected sentence with its definition and the TTS
+  // Function to handle the translation of a given sentence
+  const handleTranslation = async (sentence: string): Promise<string> => {
+    try {
+      // Send a POST request to the translation API endpoint
+      const response = await fetch(TRANSLATION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: sentence,
+          nativeLanguage: nativeLanguage,
+          targetLanguage: targetLanguage
+        }),
+      });
+
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Parse the response JSON data
+      const data = await response.json();
+      setTranslation(data.translation); // Set the state
+      return data.translation; // Return the translation
+    } catch (error) {
+      console.error('Error translating sentence:', error);
+      setError('An error occurred while translating the sentence. Please try again.');
+      return ''; // Return an empty string or some default value in case of error
+    }
+  };
+
+  // Function to save the selected phrase with its definition, TTS and translation
   const handleSaveItem = async () => {
     if (selectedSentence && result) {
       try {
         // Always generate new TTS for the selected sentence
         const audioBlob = await generateTTS(selectedSentence);
+        const translation = await handleTranslation(selectedSentence);
 
         const audioKey = `audio_${Date.now()}`; // Generate a unique key for the audio
         const newItem: SavedItem = {
           sentence: selectedSentence,
           definition: result.definitions.text,
-          audioKey: audioKey
+          audioKey: audioKey,
+          translation: translation
         };
 
         if (!savedItems.some(item => item.sentence === newItem.sentence)) {
@@ -348,28 +396,54 @@ export default function App() {
     }
   };
 
+  // Render the main application components
   return (
       <div className="app-container">
         <header className="app-header">
           <h1>📚📖🔖 Anki Assistant Languages</h1>
           <nav>
             <ul>
-              <li><a href="#generator">Generator</a></li>
+              <li><a href="#card-generator">Card Generator</a></li>
               <li><a href="#saved-items">Saved Items</a></li>
             </ul>
           </nav>
         </header>
 
         <main>
-          <section id="generator">
-            <h2>Generator</h2>
+          {/* Render the card generator section */}
+          <section id="card-generator">
+            <h2>Card Generator</h2>
             <form onSubmit={handleSubmit}>
-              <label htmlFor="language-select">Select Language:</label>
+              <label htmlFor="native-language-select">Your native language:</label>
               <select
-                  id="language-select"
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
+                  id="native-language-select"
+                  value={nativeLanguage}
+                  onChange={(e) => setNativeLanguage(e.target.value)}
+                  required
               >
+                <option value="">Select your native language</option>
+                <option value="english">English (US)</option>
+                <option value="italian">Italiano (IT)</option>
+                <option value="german">Deutsch (DE)</option>
+                <option value="french">Français (FR)</option>
+                <option value="spanish">Español (ES)</option>
+                <option value="portuguese">Português (BR)</option>
+                <option value="dutch">Nederlands (NL)</option>
+                <option value="polish">Polski (PL)</option>
+                <option value="russian">Pусский (RU)</option>
+                <option value="mandarin">普通话（CN)</option>
+                <option value="japanese">日本語（JP)</option>
+                <option value="korean">한국어（KR)</option>
+              </select>
+
+              <label htmlFor="target-language-select">You are learning:</label>
+              <select
+                  id="target-language-select"
+                  value={targetLanguage}
+                  onChange={(e) => setTargetLanguage(e.target.value)}
+                  required
+              >
+                <option value="">Select target language</option>
                 <option value="english">English (US)</option>
                 <option value="italian">Italiano (IT)</option>
                 <option value="german">Deutsch (DE)</option>
@@ -385,7 +459,7 @@ export default function App() {
               </select>
 
               {/* Voice selection dropdown */}
-              {(language === 'english' || language === 'italian' || language === 'german' || language === 'french' || language === 'spanish' || language === 'portuguese' || language === 'dutch' || language === 'polish' || language === 'russian' || language === 'mandarin' || language === 'japanese' || language === 'korean') && (
+              {(targetLanguage === 'english' || targetLanguage === 'italian' || targetLanguage === 'german' || targetLanguage === 'french' || targetLanguage === 'spanish' || targetLanguage === 'portuguese' || targetLanguage === 'dutch' || targetLanguage === 'polish' || targetLanguage === 'russian' || targetLanguage === 'mandarin' || targetLanguage === 'japanese' || targetLanguage === 'korean') && (
                   <>
                     <label htmlFor="voice-select">Select Voice:</label>
                     <select
@@ -394,7 +468,7 @@ export default function App() {
                         onChange={(e) => setSelectedVoice(voiceOptions.find(voice => voice.value === e.target.value) || voiceOptions[0])}
                     >
                       {voiceOptions
-                          .filter((voice) => voice.language === language)
+                          .filter((voice) => voice.language === targetLanguage)
                           .map((voice) => (
                               <option key={voice.value} value={voice.value}>
                                 {voice.name}
@@ -410,7 +484,7 @@ export default function App() {
                   type="text"
                   value={word}
                   onChange={(e) => setWord(e.target.value)}
-                  placeholder={`Enter a ${language} word`}
+                  placeholder={`Enter a ${targetLanguage} word`}
               />
               <button type="submit" disabled={isLoading}>
                 {isLoading ? 'Generating...' : 'Generate'}
@@ -437,7 +511,7 @@ export default function App() {
                           >
                             <ReactMarkdown>{sentence}</ReactMarkdown>
                             {/* TTS listen button */}
-                            {(language === 'english' || language === 'italian' || language === 'german' || language === 'french' || language === 'spanish' || language === 'portuguese' || language === 'dutch' || language === 'polish' || language === 'russian' || language === 'mandarin' || language === 'japanese' || language === 'korean') && (
+                            {(targetLanguage === 'english' || targetLanguage === 'italian' || targetLanguage === 'german' || targetLanguage === 'french' || targetLanguage === 'spanish' || targetLanguage === 'portuguese' || targetLanguage === 'dutch' || targetLanguage === 'polish' || targetLanguage === 'russian' || targetLanguage === 'mandarin' || targetLanguage === 'japanese' || targetLanguage === 'korean') && (
                                 <button onClick={() => handleTTS(sentence)} className="listen-button">
                                   Listen
                                 </button>
@@ -466,7 +540,14 @@ export default function App() {
                         <div className="selected-sentence">
                           <h4>Selected Sentence:</h4>
                           <ReactMarkdown>{selectedSentence}</ReactMarkdown>
-                          <button onClick={handleSaveItem}>Save Sentence with Definition</button>
+                          <button onClick={handleSaveItem}>Save Sentence</button>
+                          <button onClick={() => handleTranslation(selectedSentence)}>Translate this sentence</button>
+                          {translation && (
+                              <div className="translation">
+                                <h4>Translation:</h4>
+                                <ReactMarkdown>{translation}</ReactMarkdown>
+                              </div>
+                          )}
                         </div>
                     )}
                   </div>
@@ -474,8 +555,8 @@ export default function App() {
                   <div className="token-info">
                     <h4>Token Information:</h4>
                     <p>
-                      Input: {result.totalTokenCount.inputTokens}<br />
-                      Output: {result.totalTokenCount.outputTokens}<br />
+                      Input: {result.totalTokenCount.inputTokens}<br/>
+                      Output: {result.totalTokenCount.outputTokens}<br/>
                       Total: {result.totalTokenCount.totalTokens}
                     </p>
                   </div>
@@ -483,8 +564,9 @@ export default function App() {
             )}
           </section>
 
+          {/* Render the saved items section */}
           <section id="saved-items">
-            <h2>Saved Sentences with Definitions</h2>
+            <h2>Saved Items</h2>
             {savedItems.length > 0 ? (
                 <>
                   <ul className="saved-items-list">
@@ -493,6 +575,11 @@ export default function App() {
                           <div className="saved-item-content">
                             <ReactMarkdown>{item.sentence}</ReactMarkdown>
                             <ReactMarkdown>{item.definition}</ReactMarkdown>
+                            {item.translation && (
+                                <div className="translation">
+                                  <ReactMarkdown>{item.translation}</ReactMarkdown>
+                                </div>
+                            )}
                             {item.audioKey && audioData[item.audioKey] && (
                                 <button onClick={() => playSavedAudio(item.audioKey!)}>
                                   Play Audio
@@ -514,15 +601,18 @@ export default function App() {
           </section>
         </main>
 
+        {/* Footer */}
         <footer>
           <p>
             📚📖🔖 Anki Assistant Languages |{' '}
-            <a href="https://github.com/cantalupo555/anki-assistant-languages" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/cantalupo555/anki-assistant-languages" target="_blank"
+               rel="noopener noreferrer">
               GitHub Repository
             </a>
           </p>
         </footer>
 
+        {/* Render the notification messages */}
         {showSaveNotification && (
             <div className="notification save-notification">
               Sentence and definition saved successfully!
