@@ -1,3 +1,4 @@
+// Import necessary dependencies
 import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
 
@@ -129,20 +130,18 @@ Please provide your list of 25 sentences below:`;
 // Function to translate a sentence
 export async function translateSentence(inputSentence: string, targetLanguage: string, nativeLanguage: string): Promise<string> {
     // Construct the prompt for the Anthropic API
-    const prompt = `You are tasked with translating a sentence from ${targetLanguage} to a specified target language. Your goal is to provide the most accurate and natural translation without any additional explanations.
+    const prompt = `You are tasked with translating a sentence from ${targetLanguage} to ${nativeLanguage}. Your goal is to provide the most accurate and natural translation without any additional explanations.
 
 Here is the sentence to translate:
 ${inputSentence}
 
-The target language for translation is:
-${nativeLanguage}
-
 Instructions:
-1. Translate the given sentence into the specified target language.
+1. Translate the given sentence into the specified language.
 2. Provide only the most accurate and natural translation.
 3. Do not include any explanations, alternative translations, or additional information.
 4. Maintain the original meaning and tone of the sentence as closely as possible.
-5. If the sentence contains idiomatic expressions, translate them to equivalent expressions in the target language if possible.`;
+5. If the sentence contains idiomatic expressions, translate them to equivalent expressions in the target language if possible.
+6. Preserve any formatting present in the original sentence, such as bold or italic text.`;
 
     // Send the prompt to the Anthropic API and get the response
     const msg = await anthropic.messages.create({
