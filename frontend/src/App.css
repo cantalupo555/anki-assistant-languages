@@ -277,6 +277,32 @@ footer {
   10%, 90% { opacity: 1; }
 }
 
+/* Scroll-to-Top Button Styles */
+.scroll-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 32px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 1000;
+}
+
+.scroll-to-top:hover {
+  background-color: #0056b3;
+  transform: scale(1.1);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-header {
@@ -322,5 +348,14 @@ footer {
   /* New responsive styles for language select */
   #language-select {
     max-width: 100%;
+  }
+
+  /* Responsive styles for scroll-to-top button */
+  .scroll-to-top {
+    width: 50px;
+    height: 50px;
+    font-size: 28px;
+    bottom: 10px;
+    right: 10px;
   }
 }

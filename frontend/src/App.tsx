@@ -145,6 +145,7 @@ export default function App() {
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0]);
   const [audioData, setAudioData] = useState<{ [key: string]: string }>({});
   const [translation, setTranslation] = useState<string | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
@@ -185,6 +186,16 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [showSaveNotification, showExportNotification, showRemoveNotification, showClearAllNotification, showGenerateNotification]);
+
+  // Hook to handle scroll event
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.pageYOffset > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Function to handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -394,6 +405,14 @@ export default function App() {
       const audio = new Audio(audioDataUrl);
       audio.play();
     }
+  };
+
+  // Function to handle smooth scroll to top
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   // Render the main application components
@@ -611,6 +630,13 @@ export default function App() {
             </a>
           </p>
         </footer>
+
+        {/* Scroll-to-top button */}
+        {showScrollTop && (
+            <button onClick={scrollToTop} className="scroll-to-top">
+              ↑
+            </button>
+        )}
 
         {/* Render the notification messages */}
         {showSaveNotification && (
