@@ -55,7 +55,9 @@ export const handleExport = async (savedItems: SavedItem[], audioData: AudioData
     });
 
     // Generate text content from saved items
-    const textContent = savedItems.map((item) => {
+    // Add the two new lines at the beginning of the text content, making it easier to import into Anki
+    let textContent = "#separator:semicolon\n#html:true\n";
+    textContent += savedItems.map((item) => {
 
         // Convert Markdown content to HTML for sentence, definition, and translation
         const sentenceHtml = convertMarkdownToHtml(item.sentence);
