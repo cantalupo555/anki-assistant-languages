@@ -1,13 +1,15 @@
+// Import necessary dependencies
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import ReactMarkdown from 'react-markdown';
 import JSZip from 'jszip';
 
-// Interface for saved items, now including audioKey
+// Interface for saved items
 interface SavedItem {
     sentence: string;
     definition: string;
     audioKey?: string;
+    translation?: string;
 }
 
 // Interface for audio data storage
@@ -15,6 +17,7 @@ interface AudioData {
     [key: string]: string;
 }
 
+// Function to convert Markdown to HTML using ReactMarkdown
 export function convertMarkdownToHtml(markdown: string): string {
     // Renders the markdown to HTML using ReactMarkdown
     const htmlString = renderToString(
@@ -40,6 +43,7 @@ export const handleExport = async (savedItems: SavedItem[], audioData: AudioData
         throw new Error('No items to export.');
     }
 
+    // Initialize a new JSZip instance and create an object to store audio filenames
     const zip = new JSZip();
     const audioFilenames: { [key: string]: string } = {};
 
@@ -52,21 +56,26 @@ export const handleExport = async (savedItems: SavedItem[], audioData: AudioData
 
     // Generate text content from saved items
     const textContent = savedItems.map((item) => {
+
+        // Convert Markdown content to HTML for sentence, definition, and translation
         const sentenceHtml = convertMarkdownToHtml(item.sentence);
         const definitionHtml = convertMarkdownToHtml(item.definition);
+        const translationHtml = item.translation ? convertMarkdownToHtml(item.translation) : '';
 
         // Decode HTML entities
         const decodedSentence = decodeHtmlEntities(sentenceHtml);
         const decodedDefinition = decodeHtmlEntities(definitionHtml);
+        const decodedTranslation = decodeHtmlEntities(translationHtml);
 
         // Use the generated audio filename if audio exists
         const audioFilename = item.audioKey ? audioFilenames[item.audioKey] : '';
         const audioTag = audioFilename ? `[sound:${audioFilename}]` : '';
 
-        // Return the formatted string: Sentence;AudioTag;Definition
-        return `${decodedSentence};${audioTag};${decodedDefinition}`;
+        // Return the formatted string: Sentence;AudioTag;Definition;Translation
+        return `${decodedSentence};${audioTag};${decodedDefinition};${decodedTranslation}`;
     }).join('\n');
 
+    // Get the current date and time, and format it for the filename
     const now = new Date();
     const dateString = formatDateForFilename(now);
 
@@ -85,6 +94,7 @@ export const handleExport = async (savedItems: SavedItem[], audioData: AudioData
     }
 
     try {
+        // Generate the zip file content and create a download link
         const content = await zip.generateAsync({ type: 'blob' });
         const url = URL.createObjectURL(content);
 
@@ -97,12 +107,14 @@ export const handleExport = async (savedItems: SavedItem[], audioData: AudioData
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     } catch (error) {
+        // Handle any errors that occur during the zip file generation
         console.error('Error generating zip file:', error);
         throw new Error('Failed to generate export file. Please try again.');
     }
 };
 
 // Function to format date for filename
+// Formats the current date and time in a filename-friendly format (YYYY-MM-DD_HH-MM-SSZ)
 function formatDateForFilename(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
