@@ -5,6 +5,7 @@ import './App.css';
 import { handleExport } from './utils/languageCardExporter';
 import { stripMarkdown } from './utils/markdownStripper';
 import { voiceOptions, VoiceOption } from './utils/voiceOptions';
+import LanguageSelector from './components/languageSelector';
 import Notifications from './components/Notifications';
 
 // Define the backend API URLs, using environment variables
@@ -346,49 +347,13 @@ export default function App() {
           <section id="card-generator">
             <h2>Card Generator</h2>
             <form onSubmit={handleSubmit}>
-              <label htmlFor="native-language-select">Your native language:</label>
-              <select
-                  id="native-language-select"
-                  value={nativeLanguage}
-                  onChange={(e) => setNativeLanguage(e.target.value)}
-                  required
-              >
-                <option value="">Select your native language</option>
-                <option value="english">English (US)</option>
-                <option value="italian">Italiano (IT)</option>
-                <option value="german">Deutsch (DE)</option>
-                <option value="french">Français (FR)</option>
-                <option value="spanish">Español (ES)</option>
-                <option value="portuguese">Português (BR)</option>
-                <option value="dutch">Nederlands (NL)</option>
-                <option value="polish">Polski (PL)</option>
-                <option value="russian">Pусский (RU)</option>
-                <option value="mandarin">普通话（CN)</option>
-                <option value="japanese">日本語（JP)</option>
-                <option value="korean">한국어（KR)</option>
-              </select>
-
-              <label htmlFor="target-language-select">You are learning:</label>
-              <select
-                  id="target-language-select"
-                  value={targetLanguage}
-                  onChange={(e) => setTargetLanguage(e.target.value)}
-                  required
-              >
-                <option value="">Select target language</option>
-                <option value="english">English (US)</option>
-                <option value="italian">Italiano (IT)</option>
-                <option value="german">Deutsch (DE)</option>
-                <option value="french">Français (FR)</option>
-                <option value="spanish">Español (ES)</option>
-                <option value="portuguese">Português (BR)</option>
-                <option value="dutch">Nederlands (NL)</option>
-                <option value="polish">Polski (PL)</option>
-                <option value="russian">Pусский (RU)</option>
-                <option value="mandarin">普通话（CN)</option>
-                <option value="japanese">日本語（JP)</option>
-                <option value="korean">한국어（KR)</option>
-              </select>
+              {/* Render the LanguageSelector component */}
+              <LanguageSelector
+                  nativeLanguage={nativeLanguage}
+                  setNativeLanguage={setNativeLanguage}
+                  targetLanguage={targetLanguage}
+                  setTargetLanguage={setTargetLanguage}
+              />
 
               {/* Voice selection dropdown */}
               {(targetLanguage === 'english' || targetLanguage === 'italian' || targetLanguage === 'german' || targetLanguage === 'french' || targetLanguage === 'spanish' || targetLanguage === 'portuguese' || targetLanguage === 'dutch' || targetLanguage === 'polish' || targetLanguage === 'russian' || targetLanguage === 'mandarin' || targetLanguage === 'japanese' || targetLanguage === 'korean') && (
