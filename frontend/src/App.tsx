@@ -5,6 +5,7 @@ import './App.css';
 import { handleExport } from './languageCardExporter';
 import { stripMarkdown } from './markdownStripper';
 import { voiceOptions, VoiceOption } from './voiceOptions';
+import Notifications from './components/Notifications';
 
 // Define the backend API URLs, using environment variables
 const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
@@ -551,35 +552,13 @@ export default function App() {
         )}
 
         {/* Render the notification messages */}
-        {showSaveNotification && (
-            <div className="notification save-notification">
-              Sentence and definition saved successfully!
-            </div>
-        )}
-
-        {showExportNotification && (
-            <div className="notification export-notification">
-              Items exported successfully!
-            </div>
-        )}
-
-        {showRemoveNotification && (
-            <div className="notification remove-notification">
-              Item removed successfully!
-            </div>
-        )}
-
-        {showClearAllNotification && (
-            <div className="notification clear-all-notification">
-              All items cleared successfully!
-            </div>
-        )}
-
-        {showGenerateNotification && (
-            <div className="notification generate-notification">
-              Word generated successfully!
-            </div>
-        )}
+        <Notifications
+            showSaveNotification={showSaveNotification}
+            showExportNotification={showExportNotification}
+            showRemoveNotification={showRemoveNotification}
+            showClearAllNotification={showClearAllNotification}
+            showGenerateNotification={showGenerateNotification}
+        />
       </div>
   );
 }
