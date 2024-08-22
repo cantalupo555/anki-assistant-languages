@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './App.css';
-import { handleExport } from './languageCardExporter';
-import { stripMarkdown } from './markdownStripper';
-import { voiceOptions, VoiceOption } from './voiceOptions';
+import { handleExport } from './utils/languageCardExporter';
+import { stripMarkdown } from './utils/markdownStripper';
+import { voiceOptions, VoiceOption } from './utils/voiceOptions';
 import Notifications from './components/Notifications';
 
 // Define the backend API URLs, using environment variables
