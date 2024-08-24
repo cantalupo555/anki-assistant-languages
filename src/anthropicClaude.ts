@@ -7,7 +7,7 @@ dotenv.config();
 
 // Create an Anthropic client instance with the API key from the environment
 const anthropic = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY
+    apiKey: process.env.ANTHROPIC_CLAUDE_API_KEY
 });
 
 // Function to extract the text content from the Anthropic API response

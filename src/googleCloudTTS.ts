@@ -5,7 +5,7 @@ import axios from 'axios';
 dotenv.config();
 
 // Get the Google Cloud API key from the environment variable
-const API_KEY = process.env.GOOGLE_CLOUD_API_KEY;
+const API_KEY = process.env.GOOGLE_CLOUD_TTS_API_KEY;
 const URL = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${API_KEY}`;
 
 // Interface for the Text-to-Speech request payload
