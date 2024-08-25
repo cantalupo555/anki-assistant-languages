@@ -36,6 +36,18 @@ interface SavedItem {
   translation?: string;
 }
 
+// Interface for TTS options
+interface TTSOption {
+  name: string;
+  value: string;
+}
+
+// Array of available TTS options
+const ttsOptions: TTSOption[] = [
+  { name: 'Google TTS', value: 'google' },
+  { name: 'Azure TTS', value: 'azure' },
+];
+
 // Define state variables and initialize them with default or persisted values
 export default function App() {
   const [word, setWord] = useState('');
@@ -56,10 +68,11 @@ export default function App() {
   const [showRemoveNotification, setShowRemoveNotification] = useState(false);
   const [showClearAllNotification, setShowClearAllNotification] = useState(false);
   const [showGenerateNotification, setShowGenerateNotification] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0]);
   const [audioData, setAudioData] = useState<{ [key: string]: string }>({});
   const [translation, setTranslation] = useState<string | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [selectedTTS, setSelectedTTS] = useState<TTSOption>(ttsOptions[0]);
+  const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0])
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
@@ -84,6 +97,14 @@ export default function App() {
     const defaultVoice = voiceOptions.find(voice => voice.language === targetLanguage) || voiceOptions[0];
     setSelectedVoice(defaultVoice);
   }, [targetLanguage]);
+
+  // Effect to fetch Azure voices when Azure TTS is selected
+  useEffect(() => {
+    const defaultVoice = voiceOptions.find(
+        voice => voice.language === targetLanguage && voice.ttsService === selectedTTS.value
+    ) || voiceOptions[0];
+    setSelectedVoice(defaultVoice);
+  }, [targetLanguage, selectedTTS]);
 
   // Set up a timer to automatically hide notification messages after 3 seconds
   useEffect(() => {
@@ -250,7 +271,8 @@ export default function App() {
       body: JSON.stringify({
         text: strippedSentence,
         voice: selectedVoice.value,
-        languageCode: selectedVoice.languageCode
+        languageCode: selectedVoice.languageCode,
+        ttsService: selectedTTS.value // Include the selected TTS service
       }),
     });
 
@@ -355,6 +377,20 @@ export default function App() {
                   setTargetLanguage={setTargetLanguage}
               />
 
+              {/* TTS service selection dropdown */}
+              <label htmlFor="tts-select">Select TTS Service:</label>
+              <select
+                  id="tts-select"
+                  value={selectedTTS.value}
+                  onChange={(e) => setSelectedTTS(ttsOptions.find(option => option.value === e.target.value) || ttsOptions[0])}
+              >
+                {ttsOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.name}
+                    </option>
+                ))}
+              </select>
+
               {/* Voice selection dropdown */}
               {(targetLanguage === 'english' || targetLanguage === 'italian' || targetLanguage === 'german' || targetLanguage === 'french' || targetLanguage === 'spanish' || targetLanguage === 'portuguese' || targetLanguage === 'dutch' || targetLanguage === 'polish' || targetLanguage === 'russian' || targetLanguage === 'mandarin' || targetLanguage === 'japanese' || targetLanguage === 'korean') && (
                   <>
@@ -362,10 +398,12 @@ export default function App() {
                     <select
                         id="voice-select"
                         value={selectedVoice.value}
-                        onChange={(e) => setSelectedVoice(voiceOptions.find(voice => voice.value === e.target.value) || voiceOptions[0])}
+                        onChange={(e) => setSelectedVoice(
+                            voiceOptions.find(voice => voice.value === e.target.value) || voiceOptions[0]
+                        )}
                     >
                       {voiceOptions
-                          .filter((voice) => voice.language === targetLanguage)
+                          .filter((voice) => voice.language === targetLanguage && voice.ttsService === selectedTTS.value)
                           .map((voice) => (
                               <option key={voice.value} value={voice.value}>
                                 {voice.name}

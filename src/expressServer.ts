@@ -1,7 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import { getDefinitionsWithTokens, getSentencesWithTokens, translateSentence } from './anthropicClaude';
-import { textToSpeech } from './googleCloudTTS';
+import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
+import { textToSpeech as azureTextToSpeech } from './azureTTS';
 
 // Create an Express application instance
 const app = express();
@@ -64,28 +65,48 @@ app.post('/generate', async (req, res) => {
 // Route to handle TTS requests
 app.post('/tts', async (req, res) => {
     try {
-        // Get the text, voice, and language code from the request body
-        const { text, voice, languageCode } = req.body;
+        // Get the text, voice, language code, and TTS service from the request body
+        const { text, voice, languageCode, ttsService } = req.body;
 
-        // Validate the text, voice, and language code
+        // Validate the text, voice, language code, and TTS service
         if (!text || typeof text !== 'string' || text.trim() === '') {
             return res.status(400).json({ error: 'Valid text is required' });
         }
         if (!voice || typeof voice !== 'string') {
             return res.status(400).json({ error: 'Valid voice is required' });
         }
-        // Check for supported language codes
-        if (!languageCode || typeof languageCode !== 'string' || !['en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 'ja-JP', 'ko-KR'].includes(languageCode)) {
+        if (!languageCode || typeof languageCode !== 'string') {
             return res.status(400).json({ error: 'Valid language code is required' });
         }
-
-        // Check if the voice matches the language code
-        if (!voice.startsWith(languageCode)) {
-            return res.status(400).json({ error: 'Voice does not match the language code' });
+        if (!ttsService || (ttsService !== 'google' && ttsService !== 'azure')) {
+            return res.status(400).json({ error: 'Valid TTS service (google or azure) is required' });
         }
 
-        // Generate the audio using the Google Cloud TTS API
-        const audioBuffer = await textToSpeech(text, voice, languageCode);
+        let audioBuffer;
+
+        if (ttsService === 'google') {
+            // Google Cloud TTS
+            // Check for supported language codes for Google Cloud TTS
+            if (!['en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 'ja-JP', 'ko-KR'].includes(languageCode)) {
+                return res.status(400).json({ error: 'Invalid language code for Google Cloud TTS' });
+            }
+            // Check if the voice matches the language code for Google Cloud TTS
+            if (!voice.startsWith(languageCode)) {
+                return res.status(400).json({ error: 'Voice does not match the language code for Google Cloud TTS' });
+            }
+            audioBuffer = await googleTextToSpeech(text, voice, languageCode);
+        } else {
+            // Azure TTS
+            // Check for supported language codes for Azure TTS
+            if (!['en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'zh-CN', 'ja-JP', 'ko-KR'].includes(languageCode)) {
+                return res.status(400).json({ error: 'Invalid language code for Azure TTS' });
+            }
+            // Check if the voice matches the language code for Azure TTS
+            if (!voice.startsWith(languageCode)) {
+                return res.status(400).json({ error: 'Voice does not match the language code for Azure TTS' });
+            }
+            audioBuffer = await azureTextToSpeech(text, voice, languageCode);
+        }
 
         // Set the response content type to audio/wav
         res.set('Content-Type', 'audio/wav');
