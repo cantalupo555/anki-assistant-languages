@@ -9,6 +9,7 @@ export interface VoiceOption {
 
 // Array of available voice options for TTS
 export const voiceOptions: VoiceOption[] = [
+    // Google Cloud TTS voices
     // Add English voice options
     { name: 'en-US-Journey-D', value: 'en-US-Journey-D', language: 'english', languageCode: 'en-US', ttsService: 'google' },
     { name: 'en-US-Journey-F', value: 'en-US-Journey-F', language: 'english', languageCode: 'en-US', ttsService: 'google' },
@@ -89,39 +90,71 @@ export const voiceOptions: VoiceOption[] = [
 
     // Azure TTS voices
     // Add English voice options
-    { name: 'en-US-BrianNeural', value: 'en-US-BrianNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
-    { name: 'en-US-JennyNeural', value: 'en-US-JennyNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-AvaMultilingualNeural', value: 'en-US-AvaMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-AndrewMultilingualNeural', value: 'en-US-AndrewMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-EmmaMultilingualNeural', value: 'en-US-EmmaMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-BrianMultilingualNeural', value: 'en-US-BrianMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-JennyMultilingualNeural', value: 'en-US-JennyMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-RyanMultilingualNeural', value: 'en-US-RyanMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-AdamMultilingualNeural', value: 'en-US-AdamMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-AlloyTurboMultilingualNeural', value: 'en-US-AlloyTurboMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-AmandaMultilingualNeural', value: 'en-US-AmandaMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-BrandonMultilingualNeural', value: 'en-US-BrandonMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-ChristopherMultilingualNeural', value: 'en-US-ChristopherMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-CoraMultilingualNeural', value: 'en-US-CoraMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-DavisMultilingualNeural', value: 'en-US-DavisMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-DerekMultilingualNeural', value: 'en-US-DerekMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-DustinMultilingualNeural', value: 'en-US-DustinMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-EvelynMultilingualNeural', value: 'en-US-EvelynMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-LewisMultilingualNeural', value: 'en-US-LewisMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-LolaMultilingualNeural', value: 'en-US-LolaMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-NancyMultilingualNeural', value: 'en-US-NancyMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-NovaTurboMultilingualNeural', value: 'en-US-NovaTurboMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-PhoebeMultilingualNeural', value: 'en-US-PhoebeMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-SamuelMultilingualNeural', value: 'en-US-SamuelMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-SerenaMultilingualNeural', value: 'en-US-SerenaMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
+    { name: 'en-US-SteffanMultilingualNeural', value: 'en-US-SteffanMultilingualNeural', language: 'english', languageCode: 'en-US', ttsService: 'azure' },
     // Add Italian voice options
-    { name: 'it-IT-DiegoNeural', value: 'it-IT-DiegoNeural', language: 'italian', languageCode: 'it-IT', ttsService: 'azure' },
-    { name: 'it-IT-ElsaNeural', value: 'it-IT-ElsaNeural', language: 'italian', languageCode: 'it-IT', ttsService: 'azure' },
+    { name: 'it-IT-AlessioMultilingualNeural', value: 'it-IT-AlessioMultilingualNeural', language: 'italian', languageCode: 'it-IT', ttsService: 'azure' },
+    { name: 'it-IT-IsabellaMultilingualNeural', value: 'it-IT-IsabellaMultilingualNeural', language: 'italian', languageCode: 'it-IT', ttsService: 'azure' },
+    { name: 'it-IT-GiuseppeMultilingualNeural', value: 'it-IT-GiuseppeMultilingualNeural', language: 'italian', languageCode: 'it-IT', ttsService: 'azure' },
+    { name: 'it-IT-MarcelloMultilingualNeural', value: 'it-IT-MarcelloMultilingualNeural', language: 'italian', languageCode: 'it-IT', ttsService: 'azure' },
     // Add German voice options
-    { name: 'de-DE-KatjaNeural', value: 'de-DE-KatjaNeural', language: 'german', languageCode: 'de-DE', ttsService: 'azure' },
-    { name: 'de-DE-ConradNeural', value: 'de-DE-ConradNeural', language: 'german', languageCode: 'de-DE', ttsService: 'azure' },
+    { name: 'de-DE-FlorianMultilingualNeural', value: 'de-DE-FlorianMultilingualNeural', language: 'german', languageCode: 'de-DE', ttsService: 'azure' },
+    { name: 'de-DE-SeraphinaMultilingualNeural', value: 'de-DE-SeraphinaMultilingualNeural', language: 'german', languageCode: 'de-DE', ttsService: 'azure' },
     // Add French voice options
-    { name: 'fr-FR-DeniseNeural', value: 'fr-FR-DeniseNeural', language: 'french', languageCode: 'fr-FR', ttsService: 'azure' },
-    { name: 'fr-FR-HenriNeural', value: 'fr-FR-HenriNeural', language: 'french', languageCode: 'fr-FR', ttsService: 'azure' },
+    { name: 'fr-FR-RemyMultilingualNeural', value: 'fr-FR-RemyMultilingualNeural', language: 'french', languageCode: 'fr-FR', ttsService: 'azure' },
+    { name: 'fr-FR-VivienneMultilingualNeural', value: 'fr-FR-VivienneMultilingualNeural', language: 'french', languageCode: 'fr-FR', ttsService: 'azure' },
+    { name: 'fr-FR-LucienMultilingualNeural', value: 'fr-FR-LucienMultilingualNeural', language: 'french', languageCode: 'fr-FR', ttsService: 'azure' },
     // Add Spanish voice options
-    { name: 'es-ES-ElviraNeural', value: 'es-ES-ElviraNeural', language: 'spanish', languageCode: 'es-ES', ttsService: 'azure' },
-    { name: 'es-ES-AlvaroNeural', value: 'es-ES-AlvaroNeural', language: 'spanish', languageCode: 'es-ES', ttsService: 'azure' },
+    { name: 'es-ES-ArabellaMultilingualNeural', value: 'es-ES-ArabellaMultilingualNeural', language: 'spanish', languageCode: 'es-ES', ttsService: 'azure' },
+    { name: 'es-ES-IsidoraMultilingualNeural', value: 'es-ES-IsidoraMultilingualNeural', language: 'spanish', languageCode: 'es-ES', ttsService: 'azure' },
+    { name: 'es-ES-TristanMultilingualNeural', value: 'es-ES-TristanMultilingualNeural', language: 'spanish', languageCode: 'es-ES', ttsService: 'azure' },
+    { name: 'es-ES-XimenaMultilingualNeural', value: 'es-ES-XimenaMultilingualNeural', language: 'spanish', languageCode: 'es-ES', ttsService: 'azure' },
     // Add Portuguese voice options
-    { name: 'pt-BR-FranciscaNeural', value: 'pt-BR-FranciscaNeural', language: 'portuguese', languageCode: 'pt-BR', ttsService: 'azure' },
-    { name: 'pt-BR-AntonioNeural', value: 'pt-BR-AntonioNeural', language: 'portuguese', languageCode: 'pt-BR', ttsService: 'azure' },
-    // Add Dutch voice options
-    { name: 'nl-NL-ColetteNeural', value: 'nl-NL-ColetteNeural', language: 'dutch', languageCode: 'nl-NL', ttsService: 'azure' },
+    { name: 'pt-BR-MacerioMultilingualNeural', value: 'pt-BR-MacerioMultilingualNeural', language: 'portuguese', languageCode: 'pt-BR', ttsService: 'azure' },
+    { name: 'pt-BR-ThalitaMultilingualNeural', value: 'pt-BR-ThalitaMultilingualNeural', language: 'portuguese', languageCode: 'pt-BR', ttsService: 'azure' },
+    // Add Dutch voice options - No multilingual options available
+    { name: 'nl-NL-FennaNeural', value: 'nl-NL-FennaNeural', language: 'dutch', languageCode: 'nl-NL', ttsService: 'azure' },
     { name: 'nl-NL-MaartenNeural', value: 'nl-NL-MaartenNeural', language: 'dutch', languageCode: 'nl-NL', ttsService: 'azure' },
-    // Add Polish voice options
+    { name: 'nl-NL-ColetteNeural', value: 'nl-NL-ColetteNeural', language: 'dutch', languageCode: 'nl-NL', ttsService: 'azure' },
+    // Add Polish voice options - No multilingual options available
     { name: 'pl-PL-AgnieszkaNeural', value: 'pl-PL-AgnieszkaNeural', language: 'polish', languageCode: 'pl-PL', ttsService: 'azure' },
     { name: 'pl-PL-MarekNeural', value: 'pl-PL-MarekNeural', language: 'polish', languageCode: 'pl-PL', ttsService: 'azure' },
-    // Add Russian voice options
+    { name: 'pl-PL-ZofiaNeural', value: 'pl-PL-ZofiaNeural', language: 'polish', languageCode: 'pl-PL', ttsService: 'azure' },
+    // Add Russian voice options - No multilingual options available
     { name: 'ru-RU-SvetlanaNeural', value: 'ru-RU-SvetlanaNeural', language: 'russian', languageCode: 'ru-RU', ttsService: 'azure' },
     { name: 'ru-RU-DmitryNeural', value: 'ru-RU-DmitryNeural', language: 'russian', languageCode: 'ru-RU', ttsService: 'azure' },
+    { name: 'ru-RU-DariyaNeural', value: 'ru-RU-DariyaNeural', language: 'russian', languageCode: 'ru-RU', ttsService: 'azure' },
     // Add Mandarin voice options
-    { name: 'zh-CN-XiaoxiaoNeural', value: 'zh-CN-XiaoxiaoNeural', language: 'mandarin', languageCode: 'zh-CN', ttsService: 'azure' },
-    { name: 'zh-CN-YunxiNeural', value: 'zh-CN-YunxiNeural', language: 'mandarin', languageCode: 'zh-CN', ttsService: 'azure' },
+    { name: 'zh-CN-XiaoxiaoMultilingualNeural', value: 'zh-CN-XiaoxiaoMultilingualNeural', language: 'mandarin', languageCode: 'zh-CN', ttsService: 'azure' },
+    { name: 'zh-CN-XiaochenMultilingualNeural', value: 'zh-CN-XiaochenMultilingualNeural', language: 'mandarin', languageCode: 'zh-CN', ttsService: 'azure' },
+    { name: 'zh-CN-XiaoyuMultilingualNeural', value: 'zh-CN-XiaoyuMultilingualNeural', language: 'mandarin', languageCode: 'zh-CN', ttsService: 'azure' },
+    { name: 'zh-CN-YunyiMultilingualNeural', value: 'zh-CN-YunyiMultilingualNeural', language: 'mandarin', languageCode: 'zh-CN', ttsService: 'azure' },
+    { name: 'zh-CN-YunfanMultilingualNeural', value: 'zh-CN-YunfanMultilingualNeural', language: 'mandarin', languageCode: 'zh-CN', ttsService: 'azure' },
+    { name: 'zh-CN-YunxiaoMultilingualNeural', value: 'zh-CN-YunxiaoMultilingualNeural', language: 'mandarin', languageCode: 'zh-CN', ttsService: 'azure' },
     // Add Japanese voice options
-    { name: 'ja-JP-NanamiNeural', value: 'ja-JP-NanamiNeural', language: 'japanese', languageCode: 'ja-JP', ttsService: 'azure' },
-    { name: 'ja-JP-KeitaNeural', value: 'ja-JP-KeitaNeural', language: 'japanese', languageCode: 'ja-JP', ttsService: 'azure' },
+    { name: 'ja-JP-MasaruMultilingualNeural', value: 'ja-JP-MasaruMultilingualNeural', language: 'japanese', languageCode: 'ja-JP', ttsService: 'azure' },
     // Add Korean voice options
-    { name: 'ko-KR-SunHiNeural', value: 'ko-KR-SunHiNeural', language: 'korean', languageCode: 'ko-KR', ttsService: 'azure' },
-    { name: 'ko-KR-InJoonNeural', value: 'ko-KR-InJoonNeural', language: 'korean', languageCode: 'ko-KR', ttsService: 'azure' },
+    { name: 'ko-KR-HyunsuMultilingualNeural', value: 'ko-KR-HyunsuMultilingualNeural', language: 'korean', languageCode: 'ko-KR', ttsService: 'azure' },
 ];
