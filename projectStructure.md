@@ -4,6 +4,8 @@ anki-assistant-languages/
 │
 ├── frontend/                         # Frontend
 │   ├── public/
+│   │   ├── assets/                   # Directory for downloadable assets
+│   │   │   └── AnkiAssistantLanguages.apkg # Anki note type file for importing cards
 │   ├── src/
 │   │   ├── components/               # Directory for React components
 │   │   │   ├── Notifications.tsx     # Notifications component

@@ -7,6 +7,7 @@ import { stripMarkdown } from './utils/markdownStripper';
 import { voiceOptions, VoiceOption } from './utils/voiceOptions';
 import LanguageSelector from './components/languageSelector';
 import Notifications from './components/Notifications';
+const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
 
 // Define the backend API URLs, using environment variables
 const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
@@ -543,6 +544,9 @@ export default function App() {
             <a href="https://github.com/cantalupo555/anki-assistant-languages" target="_blank"
                rel="noopener noreferrer">
               GitHub Repository
+            </a>
+            <a href={ankiNoteTypeFile} download>
+              Download Anki Note Type
             </a>
           </p>
         </footer>
