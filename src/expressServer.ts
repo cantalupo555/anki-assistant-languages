@@ -18,8 +18,8 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // List of supported languages
 const supportedLanguages = ['english', 'italian', 'german', 'french', 'spanish', 'portuguese', 'dutch', 'polish', 'russian', 'mandarin', 'japanese', 'korean'];
 
-// Route to handle the generation request
-app.post('/generate', async (req, res) => {
+// Route to handle the generation of definitions
+app.post('/generate/definitions', async (req, res) => {
     try {
         // Get the word and target language from the request body
         const { word, language: targetLanguage } = req.body;
@@ -31,30 +31,45 @@ app.post('/generate', async (req, res) => {
             return res.status(400).json({ error: 'Valid target language is required' });
         }
 
-        // Get the definitions and sentences for the word
+        // Get the definitions for the word
         const [definitions, definitionsTokens] = await getDefinitionsWithTokens(word, targetLanguage);
-        const [sentences, sentencesTokens] = await getSentencesWithTokens(word, targetLanguage);
 
-        // Calculate the total token count
-        const totalTokenCount = {
-            inputTokens: definitionsTokens.inputTokens + sentencesTokens.inputTokens,
-            outputTokens: definitionsTokens.outputTokens + sentencesTokens.outputTokens,
-            totalTokens: definitionsTokens.totalTokens + sentencesTokens.totalTokens
-        };
+        // Return the result as a JSON response
+        res.json({
+            definitions: { text: definitions, tokenCount: definitionsTokens }
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'An error occurred while processing the request' });
+    }
+});
+
+// Route to handle the generation of sentences
+app.post('/generate/sentences', async (req, res) => {
+    try {
+        // Get the word and target language from the request body
+        const { word, language: targetLanguage } = req.body;
+        // Validate the word and target language
+        if (!word || typeof word !== 'string' || word.trim() === '') {
+            return res.status(400).json({ error: 'Valid word is required' });
+        }
+        if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
+            return res.status(400).json({ error: 'Valid target language is required' });
+        }
+
+        // Get the sentences for the word
+        const [sentences, sentencesTokens] = await getSentencesWithTokens(word, targetLanguage);
 
         // Split sentences into an array
         const sentencesArray = sentences.split('\n').filter(sentence => sentence.trim() !== '');
 
         // Return the result as a JSON response
         res.json({
-            word,
-            definitions: { text: definitions, tokenCount: definitionsTokens },
             sentences: {
                 text: sentencesArray,
                 tokenCount: sentencesTokens,
                 totalPages: Math.ceil(sentencesArray.length / 5)
-            },
-            totalTokenCount
+            }
         });
     } catch (error) {
         console.error('Error:', error);

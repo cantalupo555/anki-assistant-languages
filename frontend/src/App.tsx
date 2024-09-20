@@ -11,7 +11,8 @@ import Notifications from './components/Notifications';
 const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
 
 // Define the backend API URLs, using environment variables
-const API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate';
+const API_URL_DEFINITIONS = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/definitions';
+const API_URL_SENTENCES = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/sentences';
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 const TRANSLATION_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/translate';
 
@@ -59,7 +60,9 @@ export default function App() {
   const [targetLanguage, setTargetLanguage] = useState(() => {
     return localStorage.getItem('selectedLanguage') || '';
   });
-  const [result, setResult] = useState<Result | null>(null);
+  const [definitions, setDefinitions] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
+  const [sentences, setSentences] = useState<{ text: string[]; tokenCount: TokenCount; totalPages: number } | null>(null);
+  const [totalTokenCount, setTotalTokenCount] = useState<TokenCount | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSentence, setSelectedSentence] = useState<string | null>(null);
@@ -145,9 +148,10 @@ export default function App() {
     setError(null);
     setIsLoading(true);
     setCurrentPage(1);
+
     try {
-      // Send the request to the API
-      const response = await fetch(API_URL, {
+      // Fetch definitions
+      const definitionsResponse = await fetch(API_URL_DEFINITIONS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -155,14 +159,37 @@ export default function App() {
         body: JSON.stringify({ word, language: targetLanguage }),
       });
 
-      // Check if the request was successful
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!definitionsResponse.ok) {
+        throw new Error(`HTTP error! status: ${definitionsResponse.status}`);
       }
 
-      // Get the data from the API response
-      const data = await response.json();
-      setResult(data);
+      const definitionsData = await definitionsResponse.json();
+      setDefinitions(definitionsData.definitions);
+
+      // Fetch sentences
+      const sentencesResponse = await fetch(API_URL_SENTENCES, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ word, language: targetLanguage }),
+      });
+
+      if (!sentencesResponse.ok) {
+        throw new Error(`HTTP error! status: ${sentencesResponse.status}`);
+      }
+
+      const sentencesData = await sentencesResponse.json();
+      setSentences(sentencesData.sentences);
+
+      // Calculate total token count
+      const totalTokenCount = {
+        inputTokens: definitionsData.definitions.tokenCount.inputTokens + sentencesData.sentences.tokenCount.inputTokens,
+        outputTokens: definitionsData.definitions.tokenCount.outputTokens + sentencesData.sentences.tokenCount.outputTokens,
+        totalTokens: definitionsData.definitions.tokenCount.totalTokens + sentencesData.sentences.tokenCount.totalTokens
+      };
+      setTotalTokenCount(totalTokenCount);
+
       setShowGenerateNotification(true);
     } catch (error) {
       console.error('Error:', error);
@@ -184,10 +211,10 @@ export default function App() {
 
   // Function to get current page sentences
   const getCurrentPageSentences = () => {
-    if (!result) return [];
+    if (!sentences) return [];
     const startIndex = (currentPage - 1) * 5;
     const endIndex = startIndex + 5;
-    return result.sentences.text.slice(startIndex, endIndex);
+    return sentences.text.slice(startIndex, endIndex);
   };
 
   // Function to handle the translation of a given sentence
@@ -225,7 +252,7 @@ export default function App() {
 
   // Function to save the selected phrase with its definition, TTS and translation
   const handleSaveItem = async () => {
-    if (selectedSentence && result) {
+    if (selectedSentence && definitions && sentences) {
       try {
         // Always generate new TTS for the selected sentence
         const audioBlob = await generateTTS(selectedSentence);
@@ -234,7 +261,7 @@ export default function App() {
         const audioKey = `audio_${Date.now()}`; // Generate a unique key for the audio
         const newItem: SavedItem = {
           sentence: selectedSentence,
-          definition: result.definitions.text,
+          definition: definitions.text,
           audioKey: audioKey,
           translation: translation
         };
@@ -432,12 +459,12 @@ export default function App() {
 
             {error && <div className="error" role="alert">{error}</div>}
 
-            {result && (
+            {definitions && sentences && (
                 <div className="result-container">
-                  <h3>Results for: {result.word}</h3>
+                  <h3>Results for: {word}</h3>
                   <div className="result-section">
                     <h4>Definitions:</h4>
-                    <ReactMarkdown>{result.definitions.text}</ReactMarkdown>
+                    <ReactMarkdown>{definitions.text}</ReactMarkdown>
                   </div>
                   <div className="result-section">
                     <h4>Select 1 Sentence:</h4>
@@ -466,10 +493,10 @@ export default function App() {
                       >
                         Previous
                       </button>
-                      <span>Page {currentPage} of {result.sentences.totalPages}</span>
+                      <span>Page {currentPage} of {sentences.totalPages}</span>
                       <button
                           onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === result.sentences.totalPages}
+                          disabled={currentPage === sentences.totalPages}
                       >
                         Next
                       </button>
@@ -504,9 +531,9 @@ export default function App() {
                   <div className="token-info">
                     <h4>Token Information:</h4>
                     <p>
-                      Input: {result.totalTokenCount.inputTokens}<br/>
-                      Output: {result.totalTokenCount.outputTokens}<br/>
-                      Total: {result.totalTokenCount.totalTokens}
+                      Input: {totalTokenCount?.inputTokens}<br/>
+                      Output: {totalTokenCount?.outputTokens}<br/>
+                      Total: {totalTokenCount?.totalTokens}
                     </p>
                   </div>
                 </div>
