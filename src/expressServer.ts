@@ -77,6 +77,30 @@ app.post('/generate/sentences', async (req, res) => {
     }
 });
 
+// Route to handle the translation request
+app.post('/translate', async (req, res) => {
+    try {
+        const { text: inputSentence, targetLanguage, nativeLanguage } = req.body;
+
+        // Validate input
+        if (!inputSentence || typeof inputSentence !== 'string' || inputSentence.trim() === '') {
+            return res.status(400).json({ error: 'Valid input sentence is required' });
+        }
+        if (!nativeLanguage || !targetLanguage || !supportedLanguages.includes(nativeLanguage) || !supportedLanguages.includes(targetLanguage)) {
+            return res.status(400).json({ error: 'Valid native and target languages are required' });
+        }
+
+        // Perform translation
+        const [ translation, tokenCount ] = await translateSentence(inputSentence, targetLanguage, nativeLanguage);
+
+        // Return the translated text and token count
+        res.json({ translation, tokenCount });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'An error occurred while processing the translation request' });
+    }
+});
+
 // Route to handle TTS requests
 app.post('/tts', async (req, res) => {
     try {
@@ -131,30 +155,6 @@ app.post('/tts', async (req, res) => {
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'An error occurred while processing the TTS request' });
-    }
-});
-
-// Route to handle the translation request
-app.post('/translate', async (req, res) => {
-    try {
-        const { text: inputSentence, targetLanguage, nativeLanguage } = req.body;
-
-        // Validate input
-        if (!inputSentence || typeof inputSentence !== 'string' || inputSentence.trim() === '') {
-            return res.status(400).json({ error: 'Valid input sentence is required' });
-        }
-        if (!nativeLanguage || !targetLanguage || !supportedLanguages.includes(nativeLanguage) || !supportedLanguages.includes(targetLanguage)) {
-            return res.status(400).json({ error: 'Valid native and target languages are required' });
-        }
-
-        // Perform translation
-        const [ translation, tokenCount ] = await translateSentence(inputSentence, targetLanguage, nativeLanguage);
-
-        // Return the translated text and token count
-        res.json({ translation, tokenCount });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'An error occurred while processing the translation request' });
     }
 });
 
