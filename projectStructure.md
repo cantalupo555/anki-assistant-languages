@@ -29,5 +29,7 @@ anki-assistant-languages/
 ├── tsconfig.json                     # TypeScript configuration
 ├── ...
 ├── README.md                         # README
-└── .env                              # Environment variables file (API key)
+├── .env                              # Environment variables file (API key)
+├── todoList.md                       # Project task tracking list
+└── ...
 ```
