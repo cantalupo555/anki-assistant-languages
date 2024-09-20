@@ -128,7 +128,7 @@ Please provide your list of 25 sentences below:`;
 }
 
 // Function to translate a sentence
-export async function translateSentence(inputSentence: string, targetLanguage: string, nativeLanguage: string): Promise<string> {
+export async function translateSentence(inputSentence: string, targetLanguage: string, nativeLanguage: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
     const prompt = `You are tasked with translating a sentence from ${targetLanguage} to ${nativeLanguage}. Your goal is to provide the most accurate and natural translation without any additional explanations.
 
@@ -153,6 +153,14 @@ Instructions:
         ]
     });
 
-    // Extract and return the translated sentence
-    return extractTextContent(msg.content).trim();
+    // Extract the translated sentence and token count
+    const translation = extractTextContent(msg.content).trim();
+    const tokenCount: TokenCount = {
+        inputTokens: msg.usage.input_tokens,
+        outputTokens: msg.usage.output_tokens,
+        totalTokens: msg.usage.input_tokens + msg.usage.output_tokens
+    };
+
+    // Return the translation and token count as an array
+    return [translation, tokenCount];
 }

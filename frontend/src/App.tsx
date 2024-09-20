@@ -72,9 +72,10 @@ export default function App() {
   const [showGenerateNotification, setShowGenerateNotification] = useState(false);
   const [audioData, setAudioData] = useState<{ [key: string]: string }>({});
   const [translation, setTranslation] = useState<string | null>(null);
+  const [translationTokenCount, setTranslationTokenCount] = useState<TokenCount | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [selectedTTS, setSelectedTTS] = useState<TTSOption>(ttsOptions[0]);
-  const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0])
+  const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0]);
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
@@ -213,6 +214,7 @@ export default function App() {
       // Parse the response JSON data
       const data = await response.json();
       setTranslation(data.translation); // Set the state
+      setTranslationTokenCount(data.tokenCount); // Set the token count state
       return data.translation; // Return the translation
     } catch (error) {
       console.error('Error translating sentence:', error);
@@ -483,6 +485,16 @@ export default function App() {
                               <div className="translation">
                                 <h4>Translation:</h4>
                                 <ReactMarkdown>{translation}</ReactMarkdown>
+                                {translationTokenCount && (
+                                    <div className="token-info">
+                                      <h4>Token Information:</h4>
+                                      <p>
+                                        Input: {translationTokenCount.inputTokens}<br/>
+                                        Output: {translationTokenCount.outputTokens}<br/>
+                                        Total: {translationTokenCount.totalTokens}
+                                      </p>
+                                    </div>
+                                )}
                               </div>
                           )}
                         </div>
@@ -554,10 +566,9 @@ export default function App() {
               </ul>
             </div>
             <div className="footer-section">
-            <h3>Connect</h3>
+              <h3>Connect</h3>
               <ul>
-                <li><a href="https://github.com/cantalupo555/anki-assistant-languages" target="_blank"
-                       rel="noopener noreferrer">GitHub Repository</a></li>
+                <li><a href="https://github.com/cantalupo555/anki-assistant-languages" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
                 <li><a href="https://ankiweb.net/" target="_blank" rel="noopener noreferrer">Anki Website</a></li>
               </ul>
             </div>

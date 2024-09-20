@@ -133,10 +133,10 @@ app.post('/translate', async (req, res) => {
         }
 
         // Perform translation
-        const translation = await translateSentence(inputSentence, targetLanguage, nativeLanguage);
+        const [ translation, tokenCount ] = await translateSentence(inputSentence, targetLanguage, nativeLanguage);
 
-        // Return the translated text
-        res.json({ translation });
+        // Return the translated text and token count
+        res.json({ translation, tokenCount });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'An error occurred while processing the translation request' });
