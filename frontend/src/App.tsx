@@ -8,6 +8,7 @@ import { voiceOptions, VoiceOption } from './utils/voiceOptions';
 import LanguageSelector from './components/languageSelector';
 import Notifications from './components/Notifications';
 
+// Path to the Anki note type file
 const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
 
 // Define the backend API URLs, using environment variables
@@ -56,7 +57,6 @@ export default function App() {
   const [definitions, setDefinitions] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
   const [sentences, setSentences] = useState<{ text: string[]; tokenCount: TokenCount; totalPages: number } | null>(null);
   const [totalTokenCount, setTotalTokenCount] = useState<TokenCount | null>(null);
-  const [translationTokenCount, setTranslationTokenCount] = useState<TokenCount | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSentence, setSelectedSentence] = useState<string | null>(null);
@@ -246,7 +246,6 @@ export default function App() {
       // Parse the response JSON data
       const data = await response.json();
       setTranslation(data.translation); // Set the state
-      setTranslationTokenCount(data.tokenCount); // Set the translation token count
 
       // Update the total token count to be cumulative
       updateTotalTokenCount(data.tokenCount);

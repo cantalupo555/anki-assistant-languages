@@ -11,25 +11,27 @@
 - [ ] Adicionar suporte para registro de novos usuários
 - [ ] Adicionar funcionalidades de gerenciamento de usuários, como edição de perfil e logout
 - [ ] Adicionar feedback visual para ações de login e registro
-- [x] Dividir a rota `/generate` para separar a geração de definições e sentenças, garantindo que ao clicar no botão "Generate" faça chamadas ao mesmo tempo na geração de definições e sentenças:
-  - [x] Criar uma função separada para fazer a chamada à rota /generate/definitions
-  - [x] Criar uma função separada para fazer a chamada à rota /generate/sentences
-  - [x] Chamar as duas funções simultaneamente ao clicar no botão "Generate"
-  - [x] Combinar os resultados das duas chamadas em um único objeto de resultado
+- [x] Dividir a rota `/generate` para separar a geração de definições e sentenças, garantindo que ao clicar no botão `Generate` faça chamadas ao mesmo tempo na geração de definições e sentenças:
+  - [x] Criar uma função separada para fazer a chamada à rota `/generate/definitions`
+  - [x] Criar uma função separada para fazer a chamada à rota `/generate/sentences`
+  - [x] Chamar as duas funções simultaneamente ao clicar no botão `Generate`
 - [x] Implementar a soma dos tokens das rotas `/translate`, `/generate/sentences` e `/generate/definitions`:
   - [x] Atualizar o state para incluir a soma dos tokens
   - [x] Exibir a soma dos tokens no frontend
-  - [x] Chamar endpoint /token/sum ao clicar no botão 'Translate this sentence'
-  - [x] Ao clicar no botão 'Translate this sentence', somar os tokens da tradução atual aos tokens já somados anteriormente, tornando o totalTokenCount dinâmico
-  - [x] Sempre que clicar no botão 'Translate this sentence' fazer a soma de tokens junto com tokens somados anteriores, garantindo que a soma seja cumulativa
-  - [x] Remover 'translationTokenCount' em App.tsx
+  - [x] Chamar endpoint `/token/sum` ao clicar no botão `Translate this sentence`
+  - [x] Ao clicar no botão `Translate this sentence`, somar os tokens da tradução atual aos tokens já somados anteriormente, tornando o totalTokenCount dinâmico
+  - [x] Sempre que clicar no botão `Translate this sentence` fazer a soma de tokens junto com tokens somados anteriores, garantindo que a soma seja cumulativa
+  - [x] Remover `translationTokenCount` em `App.tsx`
 - [ ] Reformular o header do frontend
 - [ ] Criar uma página de configurações, na qual o usuário poderá personalizar:
   - [ ] Modelo LLM (Language Model) de sua preferência
   - [ ] Número de sentenças geradas
   - [ ] Voz TTS preferida para o idioma selecionado
-- [ ] Implementar um `useEffect` para atualizar o `totalTokenCount` sempre que o `translationTokenCount` mudar
-- [ ] Adicionar `translationTokenCount` ao state e utilizá-lo para atualizar o `totalTokenCount`
+- [x] Implementar um `useEffect` para atualizar o `totalTokenCount` sempre que o `translationTokenCount` mudar
+- [x] Adicionar `translationTokenCount` ao state e utilizá-lo para atualizar o `totalTokenCount`
+- [x] Corrigir 'translationTokenCount' is assigned a value but never used
+- [ ] Renomear as constantes `API_URL_DEFINITIONS` e `API_URL_SENTENCES` para `DEFINITIONS_API_URL` e `SENTENCES_API_URL` respectivamente
+- [ ] Atualizar todas as referências às constantes renomeadas no código
 
 ## Backend
 - [ ] Adicionar testes unitários e de integração para as rotas do Express
@@ -40,27 +42,27 @@
   - [ ] Implementar a geração de um código de 6 dígitos
   - [ ] Enviar o código de 6 dígitos para o e-mail do usuário
   - [ ] Validar o código de 6 dígitos fornecido pelo frontend
-- [x] Dividir a rota `/generate` para separar a geração de definições e sentenças, garantindo que ao clicar no botão "Generate" faça chamadas ao mesmo tempo na geração de definições e sentenças
-  - [x] Criar uma nova rota /generate/definitions para a geração de definições
-  - [x] Criar uma nova rota /generate/sentences para a geração de sentenças
-  - [x] Implementar a lógica para gerar definições na rota /generate/definitions
-  - [x] Implementar a lógica para gerar sentenças na rota /generate/sentences
+- [x] Dividir a rota `/generate` para separar a geração de definições e sentenças, garantindo que ao clicar no botão `Generate` faça chamadas ao mesmo tempo na geração de definições e sentenças:
+  - [x] Criar uma nova rota `/generate/definitions` para a geração de definições
+  - [x] Criar uma nova rota `/generate/sentences` para a geração de sentenças
+  - [x] Implementar a lógica para gerar definições na rota `/generate/definitions`
+  - [x] Implementar a lógica para gerar sentenças na rota `/generate/sentences`
 - [x] Implementar a soma dos tokens das rotas `/translate`, `/generate/sentences` e `/generate/definitions`:
   - [x] Atualizar a lógica de cálculo dos tokens para incluir a soma dos tokens de todas as rotas
-  - [x] Implementar novo endpoint /token/sum
+  - [x] Implementar novo endpoint `/token/sum`
 - [ ] Implementar suporte para modelos LLM personalizados e número de sentenças geradas
 - [ ] Implementar suporte para selecionar a voz TTS preferida no backend
 
 ## Integração de APIs
-- [x] ~~Implementar a integração com Google Gemini~~ [Descontinuado, Gemini não apresentou um resultado satisfatório]
-- [x] Implementar a integração com Anthropic Claude
-- [x] Implementar a integração com Google Cloud TTS
-- [x] Implementar a integração com Azure Speech
-- [ ] Implementar a integração com OpenRouter
+- [x] ~~Implementar a integração com `Google Gemini`~~ [Descontinuado - Gemini não apresentou um resultado satisfatório]
+- [x] Implementar a integração com `Anthropic Claude`
+- [x] Implementar a integração com `Google Cloud TTS`
+- [x] Implementar a integração com `Azure Speech`
+- [ ] Implementar a integração com `OpenRouter`
 - [ ] Implementar fallbacks para APIs em caso de falhas
 
 ## Documentação
-- [x] Adicionar informações sobre o projeto no README.md
+- [x] Adicionar informações sobre o projeto no `README.md`
 - [ ] Escrever a documentação detalhada para o uso do frontend e do backend
 - [ ] Criar guias de instalação e configuração
 - [ ] Criar guia detalhado para importação de flashcards no Anki
