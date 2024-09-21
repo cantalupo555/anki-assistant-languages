@@ -101,6 +101,24 @@ app.post('/translate', async (req, res) => {
     }
 });
 
+// Route to handle token sum
+app.post('/token/sum', (req, res) => {
+    try {
+        const { definitionsTokens, sentencesTokens, translationTokens } = req.body;
+
+        const totalTokenCount = {
+            inputTokens: (definitionsTokens?.inputTokens || 0) + (sentencesTokens?.inputTokens || 0) + (translationTokens?.inputTokens || 0),
+            outputTokens: (definitionsTokens?.outputTokens || 0) + (sentencesTokens?.outputTokens || 0) + (translationTokens?.outputTokens || 0),
+            totalTokens: (definitionsTokens?.totalTokens || 0) + (sentencesTokens?.totalTokens || 0) + (translationTokens?.totalTokens || 0)
+        };
+
+        res.json(totalTokenCount);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'An error occurred while processing the request' });
+    }
+});
+
 // Route to handle TTS requests
 app.post('/tts', async (req, res) => {
     try {

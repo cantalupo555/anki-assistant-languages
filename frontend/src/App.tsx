@@ -15,14 +15,7 @@ const API_URL_DEFINITIONS = process.env.BACKEND_API_URL || 'http://localhost:500
 const API_URL_SENTENCES = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/sentences';
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 const TRANSLATION_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/translate';
-
-// Interface to define the format of the result
-interface Result {
-  word: string;
-  definitions: { text: string; tokenCount: TokenCount };
-  sentences: { text: string[]; tokenCount: TokenCount; totalPages: number };
-  totalTokenCount: TokenCount;
-}
+const TOKEN_SUM_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/token/sum';
 
 // Interface to define the format of the TokenCount
 interface TokenCount {
@@ -63,6 +56,7 @@ export default function App() {
   const [definitions, setDefinitions] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
   const [sentences, setSentences] = useState<{ text: string[]; tokenCount: TokenCount; totalPages: number } | null>(null);
   const [totalTokenCount, setTotalTokenCount] = useState<TokenCount | null>(null);
+  const [translationTokenCount, setTranslationTokenCount] = useState<TokenCount | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSentence, setSelectedSentence] = useState<string | null>(null);
@@ -75,7 +69,6 @@ export default function App() {
   const [showGenerateNotification, setShowGenerateNotification] = useState(false);
   const [audioData, setAudioData] = useState<{ [key: string]: string }>({});
   const [translation, setTranslation] = useState<string | null>(null);
-  const [translationTokenCount, setTranslationTokenCount] = useState<TokenCount | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [selectedTTS, setSelectedTTS] = useState<TTSOption>(ttsOptions[0]);
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0]);
@@ -183,12 +176,24 @@ export default function App() {
       setSentences(sentencesData.sentences);
 
       // Calculate total token count
-      const totalTokenCount = {
-        inputTokens: definitionsData.definitions.tokenCount.inputTokens + sentencesData.sentences.tokenCount.inputTokens,
-        outputTokens: definitionsData.definitions.tokenCount.outputTokens + sentencesData.sentences.tokenCount.outputTokens,
-        totalTokens: definitionsData.definitions.tokenCount.totalTokens + sentencesData.sentences.tokenCount.totalTokens
-      };
-      setTotalTokenCount(totalTokenCount);
+      const totalTokenCountResponse = await fetch(TOKEN_SUM_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          definitionsTokens: definitionsData.definitions.tokenCount,
+          sentencesTokens: sentencesData.sentences.tokenCount,
+          translationTokens: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
+        }),
+      });
+
+      if (!totalTokenCountResponse.ok) {
+        throw new Error(`HTTP error! status: ${totalTokenCountResponse.status}`);
+      }
+
+      const totalTokenCountData = await totalTokenCountResponse.json();
+      setTotalTokenCount(totalTokenCountData);
 
       setShowGenerateNotification(true);
     } catch (error) {
@@ -241,13 +246,30 @@ export default function App() {
       // Parse the response JSON data
       const data = await response.json();
       setTranslation(data.translation); // Set the state
-      setTranslationTokenCount(data.tokenCount); // Set the token count state
+      setTranslationTokenCount(data.tokenCount); // Set the translation token count
+
+      // Update the total token count to be cumulative
+      updateTotalTokenCount(data.tokenCount);
+
       return data.translation; // Return the translation
     } catch (error) {
       console.error('Error translating sentence:', error);
       setError('An error occurred while translating the sentence. Please try again.');
       return ''; // Return an empty string or some default value in case of error
     }
+  };
+
+  // Function to update the total token count to be cumulative
+  const updateTotalTokenCount = (tokenCount: TokenCount) => {
+    const currentTotalTokenCount = totalTokenCount || { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
+
+    const newTotalTokenCount = {
+      inputTokens: currentTotalTokenCount.inputTokens + tokenCount.inputTokens,
+      outputTokens: currentTotalTokenCount.outputTokens + tokenCount.outputTokens,
+      totalTokens: currentTotalTokenCount.totalTokens + tokenCount.totalTokens
+    };
+
+    setTotalTokenCount(newTotalTokenCount);
   };
 
   // Function to save the selected phrase with its definition, TTS and translation
@@ -512,16 +534,6 @@ export default function App() {
                               <div className="translation">
                                 <h4>Translation:</h4>
                                 <ReactMarkdown>{translation}</ReactMarkdown>
-                                {translationTokenCount && (
-                                    <div className="token-info">
-                                      <h4>Token Information:</h4>
-                                      <p>
-                                        Input: {translationTokenCount.inputTokens}<br/>
-                                        Output: {translationTokenCount.outputTokens}<br/>
-                                        Total: {translationTokenCount.totalTokens}
-                                      </p>
-                                    </div>
-                                )}
                               </div>
                           )}
                         </div>
@@ -529,10 +541,10 @@ export default function App() {
                   </div>
 
                   <div className="token-info">
-                    <h4>Token Information:</h4>
+                    <h4>Total Tokens:</h4>
                     <p>
-                      Input: {totalTokenCount?.inputTokens}<br/>
-                      Output: {totalTokenCount?.outputTokens}<br/>
+                      Input: {totalTokenCount?.inputTokens}<br />
+                      Output: {totalTokenCount?.outputTokens}<br />
                       Total: {totalTokenCount?.totalTokens}
                     </p>
                   </div>
