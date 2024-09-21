@@ -27,11 +27,11 @@
   - [ ] Modelo LLM (Language Model) de sua preferência
   - [ ] Número de sentenças geradas
   - [ ] Voz TTS preferida para o idioma selecionado
-- [x] Implementar um `useEffect` para atualizar o `totalTokenCount` sempre que o `translationTokenCount` mudar
-- [x] Adicionar `translationTokenCount` ao state e utilizá-lo para atualizar o `totalTokenCount`
 - [x] Corrigir 'translationTokenCount' is assigned a value but never used
 - [ ] Renomear as constantes `API_URL_DEFINITIONS` e `API_URL_SENTENCES` para `DEFINITIONS_API_URL` e `SENTENCES_API_URL` respectivamente
 - [ ] Atualizar todas as referências às constantes renomeadas no código
+- [ ] Implementar a integração com `OpenRouter`:
+  - [ ] Atualizar a interface do usuário para permitir a seleção do modelo de linguagem do OpenRouter
 
 ## Backend
 - [ ] Adicionar testes unitários e de integração para as rotas do Express
@@ -52,6 +52,20 @@
   - [x] Implementar novo endpoint `/token/sum`
 - [ ] Implementar suporte para modelos LLM personalizados e número de sentenças geradas
 - [ ] Implementar suporte para selecionar a voz TTS preferida no backend
+- [ ] Implementar a integração com `OpenRouter`:
+  - [x] Inserir as chaves de API e URLs necessárias dentro do .env
+  - [ ] Testar a integração com a API do OpenRouter
+  - [ ] Implementar a lógica para gerar definições e sentenças usando o OpenRouter
+  - [ ] Implementar a lógica para traduzir sentenças usando o OpenRouter
+  - [ ] Atualizar as rotas e endpoints para suportar a integração com o OpenRouter
+  - [ ] Atualizar as chamadas de API para chamar o arquivo correto `./anthropicClaude` ou `./openRouter.ts` de acordo com a seleção do usuário
+- [ ] Adicionar suporte para fallbacks para APIs em caso de falhas:
+  - [ ] Implementar a lógica de fallback para a API de geração de definições
+  - [ ] Implementar a lógica de fallback para a API de geração de sentenças
+  - [ ] Implementar a lógica de fallback para a API de tradução
+  - [ ] Implementar a lógica de fallback para a API de TTS (Text-to-Speech)
+  - [ ] Implementar a recuperação automática de chamadas de APIs em caso de falhas
+- [ ] Adicionar logs de falhas nas chamadas de APIs
 
 ## Integração de APIs
 - [x] ~~Implementar a integração com `Google Gemini`~~ [Descontinuado - Gemini não apresentou um resultado satisfatório]
