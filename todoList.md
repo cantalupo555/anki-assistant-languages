@@ -33,7 +33,12 @@
 - [x] Implementar a integração com `OpenRouter`:
   - [x] Atualizar a interface do usuário para permitir a seleção do modelo de linguagem do OpenRouter
   - [x] Adicionar lógica para chamar a API correta dentro do `expressServer.ts` usando `apiService`
-  - [ ] Garantir que a seleção no campo `Select API Service` fique salvo 
+  - [x] Garantir que a seleção no campo `Select API Service` fique salvo
+- [x] Implementar a persistência dos campos selecionados pelo usuário usando context e localStorage:
+  - [x] Salvar a seleção de idioma nativo, idioma de aprendizado, serviço de API, serviço de TTS e voz preferida no localStorage
+  - [x] Carregar as seleções salvas do localStorage ao iniciar a aplicação
+  - [x] Atualizar o contexto do aplicativo para refletir as seleções salvas
+  - [ ] Corrigir o campo `Select Voice:` para que a opção selecionada seja persistida corretamente no localStorage
 
 ## Backend
 - [ ] Adicionar testes unitários e de integração para as rotas do Express
@@ -56,7 +61,7 @@
 - [ ] Implementar suporte para selecionar a voz TTS preferida no backend
 - [x] Implementar a integração com `OpenRouter`:
   - [x] Inserir as chaves de API e URLs necessárias dentro do .env
-  - [x] Criar `./openRouter.ts` para realizar intereção com API do OpenRouter
+  - [x] Criar `./openRouter.ts` para realizar interação com API do OpenRouter
   - [x] Testar a integração com a API do OpenRouter
   - [x] Implementar a lógica para gerar definições usando o OpenRouter
   - [x] Implementar a lógica para gerar sentenças usando o OpenRouter
@@ -76,7 +81,7 @@
 - [x] Implementar a integração com `Anthropic Claude`
 - [x] Implementar a integração com `Google Cloud TTS`
 - [x] Implementar a integração com `Azure Speech`
-- [ ] Implementar a integração com `OpenRouter`
+- [x] Implementar a integração com `OpenRouter`
 - [ ] Implementar fallbacks para APIs em caso de falhas
 
 ## Documentação

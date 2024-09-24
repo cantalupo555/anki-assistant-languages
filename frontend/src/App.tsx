@@ -10,6 +10,8 @@ import { stripMarkdown } from './utils/markdownStripper';
 import { voiceOptions, VoiceOption } from './utils/voiceOptions';
 import LanguageSelector from './components/languageSelector';
 import Notifications from './components/Notifications';
+import { AppProvider, useAppContext } from './context/selectionContext';
+import { APIServiceOption, TTSOption, TokenCount, SavedItem } from './utils/Types';
 
 // Path to the Anki note type file
 const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
@@ -21,38 +23,11 @@ const TRANSLATION_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tr
 const TOKEN_SUM_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/token/sum';
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 
-// Interface to define the format of the TokenCount
-interface TokenCount {
-  inputTokens: number;
-  outputTokens: number;
-  totalTokens: number;
-}
-
-// Interface for saved items
-interface SavedItem {
-  sentence: string;
-  definition: string;
-  audioKey?: string;
-  translation?: string;
-}
-
-// Interface for TTS options
-interface TTSOption {
-  name: string;
-  value: string;
-}
-
 // Array of available TTS options
 const ttsOptions: TTSOption[] = [
   { name: 'Google TTS', value: 'google' },
   { name: 'Azure TTS', value: 'azure' },
 ];
-
-// Interface for API service options
-interface APIServiceOption {
-  name: string;
-  value: string;
-}
 
 // Array of available API service options
 const apiServiceOptions: APIServiceOption[] = [
@@ -60,15 +35,9 @@ const apiServiceOptions: APIServiceOption[] = [
   { name: 'OpenRouter', value: 'openrouter' },
 ];
 
-// Define state variables and initialize them with default or persisted values
-export default function App() {
+const AppInner: React.FC = () => {
+  const { nativeLanguage, setNativeLanguage, targetLanguage, setTargetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice } = useAppContext();
   const [word, setWord] = useState('');
-  const [nativeLanguage, setNativeLanguage] = useState(() => {
-    return localStorage.getItem('nativeLanguage') || '';
-  });
-  const [targetLanguage, setTargetLanguage] = useState(() => {
-    return localStorage.getItem('selectedLanguage') || '';
-  });
   const [definitions, setDefinitions] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
   const [sentences, setSentences] = useState<{ text: string[]; tokenCount: TokenCount; totalPages: number } | null>(null);
   const [totalTokenCount, setTotalTokenCount] = useState<TokenCount | null>(null);
@@ -85,9 +54,6 @@ export default function App() {
   const [audioData, setAudioData] = useState<{ [key: string]: string }>({});
   const [translation, setTranslation] = useState<string | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [selectedTTS, setSelectedTTS] = useState<TTSOption>(ttsOptions[0]);
-  const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0]);
-  const [selectedAPIService, setSelectedAPIService] = useState<APIServiceOption>(apiServiceOptions[0]);
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
@@ -101,13 +67,7 @@ export default function App() {
     }
   }, []);
 
-  // Save language selection to localStorage when it changes
-  useEffect(() => {
-    localStorage.setItem('nativeLanguage', nativeLanguage);
-    localStorage.setItem('selectedLanguage', targetLanguage);
-  }, [nativeLanguage, targetLanguage]);
-
-  // Sets the default voice option based on the selected language
+  // Effect to set the default voice option based on the selected language
   useEffect(() => {
     const defaultVoice = voiceOptions.find(voice => voice.language === targetLanguage) || voiceOptions[0];
     setSelectedVoice(defaultVoice);
@@ -453,12 +413,7 @@ export default function App() {
               </select>
 
               {/* Render the LanguageSelector component */}
-              <LanguageSelector
-                  nativeLanguage={nativeLanguage}
-                  setNativeLanguage={setNativeLanguage}
-                  targetLanguage={targetLanguage}
-                  setTargetLanguage={setTargetLanguage}
-              />
+              <LanguageSelector />
 
               {/* TTS service selection dropdown */}
               <label htmlFor="tts-select">Select TTS Service:</label>
@@ -664,4 +619,16 @@ export default function App() {
         />
       </div>
   );
-}
+};
+
+// Main App component
+const App: React.FC = () => {
+  // Wrap the AppInner component with the AppProvider to provide the context
+  return (
+      <AppProvider>
+        <AppInner />
+      </AppProvider>
+  );
+};
+
+export default App;
