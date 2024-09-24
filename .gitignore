@@ -1,7 +1,10 @@
-# IDE files
+# Development and configuration files and folders
 .idea/
 .vscode/
+.aider*
 
-# Node.js
+# Node.js dependencies
 node_modules/
 
+# Environment configuration files
+.env
