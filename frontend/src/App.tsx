@@ -1,4 +1,7 @@
 // Import necessary dependencies and utility functions
+// React: Core library for building user interfaces
+// useState, useEffect: React hooks for managing state and side effects
+// ReactMarkdown: Component to render Markdown as React components
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './App.css';
@@ -14,9 +17,9 @@ const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguage
 // Define the backend API URLs, using environment variables
 const API_URL_DEFINITIONS = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/definitions';
 const API_URL_SENTENCES = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/sentences';
-const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 const TRANSLATION_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/translate';
 const TOKEN_SUM_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/token/sum';
+const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 
 // Interface to define the format of the TokenCount
 interface TokenCount {
@@ -43,6 +46,18 @@ interface TTSOption {
 const ttsOptions: TTSOption[] = [
   { name: 'Google TTS', value: 'google' },
   { name: 'Azure TTS', value: 'azure' },
+];
+
+// Interface for API service options
+interface APIServiceOption {
+  name: string;
+  value: string;
+}
+
+// Array of available API service options
+const apiServiceOptions: APIServiceOption[] = [
+  { name: 'Anthropic Claude', value: 'anthropic' },
+  { name: 'OpenRouter', value: 'openrouter' },
 ];
 
 // Define state variables and initialize them with default or persisted values
@@ -72,6 +87,7 @@ export default function App() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [selectedTTS, setSelectedTTS] = useState<TTSOption>(ttsOptions[0]);
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(voiceOptions[0]);
+  const [selectedAPIService, setSelectedAPIService] = useState<APIServiceOption>(apiServiceOptions[0]);
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
@@ -149,7 +165,7 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ word, language: targetLanguage }),
+        body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value }),
       });
 
       if (!definitionsResponse.ok) {
@@ -165,7 +181,7 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ word, language: targetLanguage }),
+        body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value }),
       });
 
       if (!sentencesResponse.ok) {
@@ -234,7 +250,8 @@ export default function App() {
         body: JSON.stringify({
           text: sentence,
           nativeLanguage: nativeLanguage,
-          targetLanguage: targetLanguage
+          targetLanguage: targetLanguage,
+          apiService: selectedAPIService.value
         }),
       });
 
@@ -421,6 +438,20 @@ export default function App() {
           <section id="card-generator">
             <h2>Card Generator</h2>
             <form onSubmit={handleSubmit}>
+              {/* API service selection dropdown */}
+              <label htmlFor="api-service-select">Select API Service:</label>
+              <select
+                  id="api-service-select"
+                  value={selectedAPIService.value}
+                  onChange={(e) => setSelectedAPIService(apiServiceOptions.find(option => option.value === e.target.value) || apiServiceOptions[0])}
+              >
+                {apiServiceOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.name}
+                    </option>
+                ))}
+              </select>
+
               {/* Render the LanguageSelector component */}
               <LanguageSelector
                   nativeLanguage={nativeLanguage}
@@ -612,7 +643,7 @@ export default function App() {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2024 Anki Assistant Languages. This project is open source under the MIT License.</p>
+            <p>© 2024 Anki Assistant Languages. This project is open source under the MIT License.</p>
           </div>
         </footer>
 

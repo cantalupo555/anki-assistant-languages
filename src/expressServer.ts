@@ -1,6 +1,10 @@
+// Import necessary dependencies and utility functions
+// express: Web framework for handling HTTP requests and responses
+// cors: Middleware to enable Cross-Origin Resource Sharing (CORS)
 import express from 'express';
 import cors from 'cors';
 import { getDefinitionsWithTokens, getSentencesWithTokens, translateSentence } from './anthropicClaude';
+import { getDefinitionsOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter } from './openRouter';
 import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
 import { textToSpeech as azureTextToSpeech } from './azureTTS';
 
@@ -21,18 +25,32 @@ const supportedLanguages = ['english', 'italian', 'german', 'french', 'spanish',
 // Route to handle the generation of definitions
 app.post('/generate/definitions', async (req, res) => {
     try {
-        // Get the word and target language from the request body
-        const { word, language: targetLanguage } = req.body;
-        // Validate the word and target language
+        // Get the word, target language, and API service from the request body
+        const { word, language: targetLanguage, apiService } = req.body;
+        // Validate the word, target language, and API service
         if (!word || typeof word !== 'string' || word.trim() === '') {
             return res.status(400).json({ error: 'Valid word is required' });
         }
         if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
             return res.status(400).json({ error: 'Valid target language is required' });
         }
+        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
+            return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+        }
 
-        // Get the definitions for the word
-        const [definitions, definitionsTokens] = await getDefinitionsWithTokens(word, targetLanguage);
+        let definitions = '';
+        let definitionsTokens: { inputTokens: number; outputTokens: number; totalTokens: number } = {
+            inputTokens: 0,
+            outputTokens: 0,
+            totalTokens: 0
+        };
+
+        // Get the definitions for the word using the selected API service
+        if (apiService === 'anthropic') {
+            [definitions, definitionsTokens] = await getDefinitionsWithTokens(word, targetLanguage);
+        } else if (apiService === 'openrouter') {
+            [definitions, definitionsTokens] = await getDefinitionsOpenRouter(word, targetLanguage);
+        }
 
         // Return the result as a JSON response
         res.json({
@@ -47,18 +65,32 @@ app.post('/generate/definitions', async (req, res) => {
 // Route to handle the generation of sentences
 app.post('/generate/sentences', async (req, res) => {
     try {
-        // Get the word and target language from the request body
-        const { word, language: targetLanguage } = req.body;
-        // Validate the word and target language
+        // Get the word, target language, and API service from the request body
+        const { word, language: targetLanguage, apiService } = req.body;
+        // Validate the word, target language, and API service
         if (!word || typeof word !== 'string' || word.trim() === '') {
             return res.status(400).json({ error: 'Valid word is required' });
         }
         if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
             return res.status(400).json({ error: 'Valid target language is required' });
         }
+        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
+            return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+        }
 
-        // Get the sentences for the word
-        const [sentences, sentencesTokens] = await getSentencesWithTokens(word, targetLanguage);
+        let sentences = '';
+        let sentencesTokens: { inputTokens: number; outputTokens: number; totalTokens: number } = {
+            inputTokens: 0,
+            outputTokens: 0,
+            totalTokens: 0
+        };
+
+        // Get the sentences for the word using the selected API service
+        if (apiService === 'anthropic') {
+            [sentences, sentencesTokens] = await getSentencesWithTokens(word, targetLanguage);
+        } else if (apiService === 'openrouter') {
+            [sentences, sentencesTokens] = await getSentencesOpenRouter(word, targetLanguage);
+        }
 
         // Split sentences into an array
         const sentencesArray = sentences.split('\n').filter(sentence => sentence.trim() !== '');
@@ -80,7 +112,7 @@ app.post('/generate/sentences', async (req, res) => {
 // Route to handle the translation request
 app.post('/translate', async (req, res) => {
     try {
-        const { text: inputSentence, targetLanguage, nativeLanguage } = req.body;
+        const { text: inputSentence, targetLanguage, nativeLanguage, apiService } = req.body;
 
         // Validate input
         if (!inputSentence || typeof inputSentence !== 'string' || inputSentence.trim() === '') {
@@ -89,9 +121,23 @@ app.post('/translate', async (req, res) => {
         if (!nativeLanguage || !targetLanguage || !supportedLanguages.includes(nativeLanguage) || !supportedLanguages.includes(targetLanguage)) {
             return res.status(400).json({ error: 'Valid native and target languages are required' });
         }
+        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
+            return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+        }
 
-        // Perform translation
-        const [ translation, tokenCount ] = await translateSentence(inputSentence, targetLanguage, nativeLanguage);
+        let translation = '';
+        let tokenCount: { inputTokens: number; outputTokens: number; totalTokens: number } = {
+            inputTokens: 0,
+            outputTokens: 0,
+            totalTokens: 0
+        };
+
+        // Perform translation using the selected API service
+        if (apiService === 'anthropic') {
+            [translation, tokenCount] = await translateSentence(inputSentence, targetLanguage, nativeLanguage);
+        } else if (apiService === 'openrouter') {
+            [translation, tokenCount] = await translateSentenceOpenRouter(inputSentence, targetLanguage, nativeLanguage);
+        }
 
         // Return the translated text and token count
         res.json({ translation, tokenCount });

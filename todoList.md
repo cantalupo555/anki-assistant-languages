@@ -30,8 +30,10 @@
 - [x] Corrigir 'translationTokenCount' is assigned a value but never used
 - [ ] Renomear as constantes `API_URL_DEFINITIONS` e `API_URL_SENTENCES` para `DEFINITIONS_API_URL` e `SENTENCES_API_URL` respectivamente
 - [ ] Atualizar todas as referências às constantes renomeadas no código
-- [ ] Implementar a integração com `OpenRouter`:
-  - [ ] Atualizar a interface do usuário para permitir a seleção do modelo de linguagem do OpenRouter
+- [x] Implementar a integração com `OpenRouter`:
+  - [x] Atualizar a interface do usuário para permitir a seleção do modelo de linguagem do OpenRouter
+  - [x] Adicionar lógica para chamar a API correta dentro do `expressServer.ts` usando `apiService`
+  - [ ] Garantir que a seleção no campo `Select API Service` fique salvo 
 
 ## Backend
 - [ ] Adicionar testes unitários e de integração para as rotas do Express
@@ -52,13 +54,15 @@
   - [x] Implementar novo endpoint `/token/sum`
 - [ ] Implementar suporte para modelos LLM personalizados e número de sentenças geradas
 - [ ] Implementar suporte para selecionar a voz TTS preferida no backend
-- [ ] Implementar a integração com `OpenRouter`:
+- [x] Implementar a integração com `OpenRouter`:
   - [x] Inserir as chaves de API e URLs necessárias dentro do .env
-  - [ ] Testar a integração com a API do OpenRouter
-  - [ ] Implementar a lógica para gerar definições e sentenças usando o OpenRouter
-  - [ ] Implementar a lógica para traduzir sentenças usando o OpenRouter
-  - [ ] Atualizar as rotas e endpoints para suportar a integração com o OpenRouter
-  - [ ] Atualizar as chamadas de API para chamar o arquivo correto `./anthropicClaude` ou `./openRouter.ts` de acordo com a seleção do usuário
+  - [x] Criar `./openRouter.ts` para realizar intereção com API do OpenRouter
+  - [x] Testar a integração com a API do OpenRouter
+  - [x] Implementar a lógica para gerar definições usando o OpenRouter
+  - [x] Implementar a lógica para gerar sentenças usando o OpenRouter
+  - [x] Implementar a lógica para traduzir sentenças usando o OpenRouter
+  - [x] Atualizar as rotas e endpoints para suportar a integração com o OpenRouter
+  - [x] Atualizar as chamadas de API para chamar o arquivo correto `./anthropicClaude` ou `./openRouter.ts` de acordo com a seleção do usuário
 - [ ] Adicionar suporte para fallbacks para APIs em caso de falhas:
   - [ ] Implementar a lógica de fallback para a API de geração de definições
   - [ ] Implementar a lógica de fallback para a API de geração de sentenças

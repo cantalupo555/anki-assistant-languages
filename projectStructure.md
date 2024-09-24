@@ -8,8 +8,8 @@ anki-assistant-languages/
 │   │   │   └── AnkiAssistantLanguages.apkg # Anki note type file for importing cards
 │   ├── src/
 │   │   ├── components/               # Directory for React components
-│   │   │   ├── Notifications.tsx     # Notifications component
-│   │   │   └── languageSelector.tsx  # New LanguageSelector component
+│   │   │   ├── languageSelector.tsx  # LanguageSelector component
+│   │   │   └── Notifications.tsx     # Notifications component
 │   │   ├── utils/                    # Directory for utility modules
 │   │   │   ├── languageCardExporter.ts # Module for exporting data to Anki
 │   │   │   ├── markdownStripper.ts     # Module for removing Markdown formatting for TTS
@@ -23,13 +23,15 @@ anki-assistant-languages/
 ├── src/                              # Backend
 │   ├── anthropicClaude.ts            # Interaction with Claude
 │   ├── azureTTS.ts                   # Interaction with Azure Speech
+│   ├── expressServer.ts              # Express server
 │   ├── googleCloudTTS.ts             # Interaction with Google Cloud TTS
-│   └── expressServer.ts              # Express server
+│   └── openRouter.ts                 # Interaction with OpenRouter
+├── .env                              # Environment variables file (API key)
 ├── package.json                      # Backend dependencies
 ├── tsconfig.json                     # TypeScript configuration
 ├── ...
+├── projectStructure.md               # Project structure documentation
 ├── README.md                         # README
-├── .env                              # Environment variables file (API key)
 ├── todoList.md                       # Project task tracking list
 └── ...
 ```
