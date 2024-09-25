@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import './App.css';
 import { handleExport } from './utils/languageCardExporter';
 import { stripMarkdown } from './utils/markdownStripper';
-import { voiceOptions, VoiceOption } from './utils/voiceOptions';
+import { voiceOptions } from './utils/voiceOptions';
 import LanguageSelector from './components/languageSelector';
 import Notifications from './components/Notifications';
 import { AppProvider, useAppContext } from './context/selectionContext';
@@ -36,7 +36,7 @@ const apiServiceOptions: APIServiceOption[] = [
 ];
 
 const AppInner: React.FC = () => {
-  const { nativeLanguage, setNativeLanguage, targetLanguage, setTargetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice } = useAppContext();
+  const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice } = useAppContext();
   const [word, setWord] = useState('');
   const [definitions, setDefinitions] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
   const [sentences, setSentences] = useState<{ text: string[]; tokenCount: TokenCount; totalPages: number } | null>(null);
@@ -71,7 +71,7 @@ const AppInner: React.FC = () => {
   useEffect(() => {
     const defaultVoice = voiceOptions.find(voice => voice.language === targetLanguage) || voiceOptions[0];
     setSelectedVoice(defaultVoice);
-  }, [targetLanguage]);
+  }, [targetLanguage, setSelectedVoice]);
 
   // Effect to fetch Azure voices when Azure TTS is selected
   useEffect(() => {
@@ -79,7 +79,7 @@ const AppInner: React.FC = () => {
         voice => voice.language === targetLanguage && voice.ttsService === selectedTTS.value
     ) || voiceOptions[0];
     setSelectedVoice(defaultVoice);
-  }, [targetLanguage, selectedTTS]);
+  }, [targetLanguage, selectedTTS, setSelectedVoice]);
 
   // Set up a timer to automatically hide notification messages after 3 seconds
   useEffect(() => {
