@@ -1,16 +1,27 @@
 # Todo List for Anki Assistant Languages
 
 ## Frontend
-- [ ] Adicionar validação de entrada de dados no formulário
-- [ ] Criar uma página de login
+- [ ] Adicionar validação de entrada de dados no formulário:
+  - [ ] Campo word-input
+  - [ ] Verificar se os dados inseridos são válidos (por exemplo, e-mail no formato correto)
+- [x] Tornar todos os campos obrigatórios
+- [ ] Criar uma página de login:
+  - [ ] Adicionar rotas para a página de login
+  - [ ] Criar um formulário de login
 - [ ] Implementar a autenticação no frontend:
   - [ ] Adicionar campo de e-mail no formulário de login
   - [ ] Exibir um formulário para o usuário inserir o código de 6 dígitos
   - [ ] Enviar o código de 6 dígitos fornecido pelo usuário para o backend
   - [ ] Permitir o login após a validação bem-sucedida do código
-- [ ] Adicionar suporte para registro de novos usuários
-- [ ] Adicionar funcionalidades de gerenciamento de usuários, como edição de perfil e logout
-- [ ] Adicionar feedback visual para ações de login e registro
+- [ ] Adicionar suporte para registro de novos usuários:
+  - [ ] Criar uma página de registro
+  - [ ] Adicionar rotas para a página de registro
+  - [ ] Adicionar um formulário de registro
+- [ ] Adicionar funcionalidades de gerenciamento de usuários:
+  - [ ] Adicionar opções para edição de perfil
+  - [ ] Adicionar opção de logout
+- [ ] Adicionar feedback visual para ações de login e registro:
+  - [ ] Exibir feedback visual quando o usuário realiza ações de login ou registro
 - [x] Dividir a rota `/generate` para separar a geração de definições e sentenças, garantindo que ao clicar no botão `Generate` faça chamadas ao mesmo tempo na geração de definições e sentenças:
   - [x] Criar uma função separada para fazer a chamada à rota `/generate/definitions`
   - [x] Criar uma função separada para fazer a chamada à rota `/generate/sentences`
@@ -22,7 +33,8 @@
   - [x] Ao clicar no botão `Translate this sentence`, somar os tokens da tradução atual aos tokens já somados anteriormente, tornando o totalTokenCount dinâmico
   - [x] Sempre que clicar no botão `Translate this sentence` fazer a soma de tokens junto com tokens somados anteriores, garantindo que a soma seja cumulativa
   - [x] Remover `translationTokenCount` em `App.tsx`
-- [ ] Reformular o header do frontend
+- [ ] Reformular o header do frontend:
+  - [ ] Melhorar a aparência e a usabilidade do header
 - [ ] Criar uma página de configurações, na qual o usuário poderá personalizar:
   - [ ] Modelo LLM (Language Model) de sua preferência
   - [ ] Número de sentenças geradas
@@ -39,9 +51,24 @@
   - [x] Carregar as seleções salvas do localStorage ao iniciar a aplicação
   - [x] Atualizar o contexto do aplicativo para refletir as seleções salvas
   - [x] Corrigir o campo `Select Voice:` para que a opção selecionada seja persistida corretamente no localStorage
+- [ ] Otimizar o carregamento de assets:
+  - [ ] Minimizar o tamanho dos assets
+  - [ ] Utilizar lazy loading para imagens e outros assets
+- [ ] Melhorar a experiência do usuário com animações e transições suaves:
+  - [ ] Adicionar transições suaves para mudanças de estado
+  - [ ] Adicionar animações para feedback visual
+- [ ] Implementar um dark mode:
+  - [ ] Adicionar suporte para dark mode
+  - [ ] Permitir a alternância entre light e dark mode
+- [ ] Adicionar mais feedback visual para ações do usuário:
+  - [ ] Exibir feedback visual quando o usuário salva itens, remove itens, e outras ações
+- [ ] Implementar a personalização de temas:
+  - [ ] Permitir que os usuários escolham entre diferentes temas
+- [ ] Melhorar a acessibilidade da aplicação:
+  - [ ] Adicionar atributos ARIA para elementos interativos
+  - [ ] Garantir que a aplicação seja navegável via teclado
 
 ## Backend
-- [ ] Adicionar testes unitários e de integração para as rotas do Express
 - [ ] Implementar a funcionalidade de salvar itens no banco de dados
 - [ ] Adicionar suporte para múltiplos usuários, incluindo registro, login, e gerenciamento de perfis
 - [ ] Implementar a gestão de sessões de usuário

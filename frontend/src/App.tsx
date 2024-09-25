@@ -23,16 +23,18 @@ const TRANSLATION_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tr
 const TOKEN_SUM_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/token/sum';
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 
-// Array of available TTS options
-const ttsOptions: TTSOption[] = [
-  { name: 'Google TTS', value: 'google' },
-  { name: 'Azure TTS', value: 'azure' },
-];
-
 // Array of available API service options
 const apiServiceOptions: APIServiceOption[] = [
+  { name: 'Select your AI Provider', value: '' },
   { name: 'Anthropic Claude', value: 'anthropic' },
   { name: 'OpenRouter', value: 'openrouter' },
+];
+
+// Array of available TTS options
+const ttsOptions: TTSOption[] = [
+  { name: 'Select your TTS Service', value: '' },
+  { name: 'Google TTS', value: 'google' },
+  { name: 'Azure TTS', value: 'azure' },
 ];
 
 const AppInner: React.FC = () => {
@@ -110,8 +112,8 @@ const AppInner: React.FC = () => {
   // Function to handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nativeLanguage || !targetLanguage) {
-      setError('Please select both your native language and the target language.');
+    if (!nativeLanguage || !targetLanguage || !selectedAPIService || !selectedTTS || !word) {
+      setError('Please fill in all required fields.');
       return;
     }
     setError(null);
@@ -406,11 +408,12 @@ const AppInner: React.FC = () => {
             <h2>Card Generator</h2>
             <form onSubmit={handleSubmit}>
               {/* API service selection dropdown */}
-              <label htmlFor="api-service-select">Select API Service:</label>
+              <label htmlFor="api-service-select">AI Provider:</label>
               <select
                   id="api-service-select"
                   value={selectedAPIService.value}
                   onChange={(e) => setSelectedAPIService(apiServiceOptions.find(option => option.value === e.target.value) || apiServiceOptions[0])}
+                  required
               >
                 {apiServiceOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -423,11 +426,12 @@ const AppInner: React.FC = () => {
               <LanguageSelector />
 
               {/* TTS service selection dropdown */}
-              <label htmlFor="tts-select">Select TTS Service:</label>
+              <label htmlFor="tts-select">TTS Service:</label>
               <select
                   id="tts-select"
                   value={selectedTTS.value}
                   onChange={(e) => setSelectedTTS(ttsOptions.find(option => option.value === e.target.value) || ttsOptions[0])}
+                  required
               >
                 {ttsOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -463,6 +467,7 @@ const AppInner: React.FC = () => {
                   value={word}
                   onChange={(e) => setWord(e.target.value)}
                   placeholder={`Enter a ${targetLanguage} word`}
+                  required
               />
               <button type="submit" disabled={isLoading}>
                 {isLoading ? 'Generating...' : 'Generate'}
