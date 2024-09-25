@@ -380,6 +380,13 @@ const AppInner: React.FC = () => {
     });
   };
 
+  // Function to handle voice change
+  const handleVoiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newVoice = voiceOptions.find(voice => voice.value === e.target.value) || voiceOptions[0];
+    setSelectedVoice(newVoice);
+    localStorage.setItem('selectedVoice', JSON.stringify(newVoice));
+  };
+
   // Render the main application components
   return (
       <div className="app-container">
@@ -436,9 +443,7 @@ const AppInner: React.FC = () => {
                     <select
                         id="voice-select"
                         value={selectedVoice.value}
-                        onChange={(e) => setSelectedVoice(
-                            voiceOptions.find(voice => voice.value === e.target.value) || voiceOptions[0]
-                        )}
+                        onChange={handleVoiceChange}
                     >
                       {voiceOptions
                           .filter((voice) => voice.language === targetLanguage && voice.ttsService === selectedTTS.value)

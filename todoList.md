@@ -38,7 +38,7 @@
   - [x] Salvar a seleção de idioma nativo, idioma de aprendizado, serviço de API, serviço de TTS e voz preferida no localStorage
   - [x] Carregar as seleções salvas do localStorage ao iniciar a aplicação
   - [x] Atualizar o contexto do aplicativo para refletir as seleções salvas
-  - [ ] Corrigir o campo `Select Voice:` para que a opção selecionada seja persistida corretamente no localStorage
+  - [x] Corrigir o campo `Select Voice:` para que a opção selecionada seja persistida corretamente no localStorage
 
 ## Backend
 - [ ] Adicionar testes unitários e de integração para as rotas do Express
