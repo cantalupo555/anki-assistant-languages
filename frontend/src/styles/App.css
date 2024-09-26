@@ -142,6 +142,35 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* Button Container Styles */
+.button-container {
+  display: flex;
+  justify-content: flex-start; /* Changed from space-between to flex-start */
+  align-items: center;
+  margin-top: 1rem;
+  gap: 1rem; /* Added gap for consistent spacing */
+}
+
+/* Generate Button Styles */
+.generate-button {
+  background-color: var(--primary-color);
+  flex: 0 0 auto; /* Prevent button from stretching */
+}
+
+.generate-button:hover {
+  background-color: #0056b3;
+}
+
+/* Analyze Frequency Button Styles */
+.analyze-button {
+  background-color: var(--secondary-color);
+  flex: 0 0 auto; /* Prevent button from stretching */
+}
+
+.analyze-button:hover {
+  background-color: #5a6268;
+}
+
 /* Result Container Styles */
 .result-container {
   background-color: white;
@@ -448,6 +477,18 @@ footer {
     font-size: 20px;
     bottom: 20px;
     right: 20px;
+  }
+
+  /* Responsive design for buttons */
+  .button-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .generate-button,
+  .analyze-button {
+    width: 100%;
+    margin-bottom: 0.5rem;
   }
 }
 

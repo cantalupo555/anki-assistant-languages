@@ -544,12 +544,14 @@ const AppInner: React.FC = () => {
                   placeholder={`Enter a ${targetLanguage} word`}
                   required
               />
-              <button type="submit" disabled={isLoading}>
-                {isLoading ? 'Generating...' : 'Generate'}
-              </button>
-              <button type="button" onClick={handleAnalyzeFrequency} disabled={isLoading}>
-                {isLoading ? 'Analyzing...' : 'Analyze Frequency'}
-              </button>
+              <div className="button-container">
+                <button type="submit" className="generate-button" disabled={isLoading}>
+                  {isLoading ? 'Generating...' : 'Generate'}
+                </button>
+                <button type="button" className="analyze-button" onClick={handleAnalyzeFrequency} disabled={isLoading}>
+                  {isLoading ? 'Analyzing...' : 'Analyze Frequency'}
+                </button>
+              </div>
             </form>
 
             {error && <div className="error" role="alert">{error}</div>}

@@ -71,7 +71,7 @@
   - [x] Adicionar um botão para acionar a análise de frequência na interface do usuário
   - [x] Criar uma modal para exibir o resultado da análise de frequência detalhadamente
   - [x] Aprimorar o estilo `Modal.css`
-  - [ ] Aprimorar o estilo `App.css` para aumentar a separação entre esses botões
+  - [x] Aprimorar o estilo `App.css` para aumentar a separação entre esses botões
 
 ## Backend
 - [ ] Implementar a funcionalidade de salvar itens no banco de dados
