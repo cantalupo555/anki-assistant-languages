@@ -57,16 +57,21 @@
 - [ ] Melhorar a experiência do usuário com animações e transições suaves:
   - [ ] Adicionar transições suaves para mudanças de estado
   - [ ] Adicionar animações para feedback visual
+- [ ] Adicionar mais feedback visual para ações do usuário:
+  - [ ] Exibir feedback visual quando o usuário salva itens, remove itens, e outras ações
+  - [ ] Apriomar feedback visual durante o carregamento do `handleAnalyzeFrequency`
+  - [ ] Apriomar feedback visual durante o carregamento do `handleSubmit`
 - [ ] Implementar um dark mode:
   - [ ] Adicionar suporte para dark mode
   - [ ] Permitir a alternância entre light e dark mode
-- [ ] Adicionar mais feedback visual para ações do usuário:
-  - [ ] Exibir feedback visual quando o usuário salva itens, remove itens, e outras ações
-- [ ] Implementar a personalização de temas:
-  - [ ] Permitir que os usuários escolham entre diferentes temas
 - [ ] Melhorar a acessibilidade da aplicação:
-  - [ ] Adicionar atributos ARIA para elementos interativos
   - [ ] Garantir que a aplicação seja navegável via teclado
+- [x] Adicionar suporte ao prompt `analyzeFrequency`
+  - [x] Criar uma função para tratar a requisição de análise de frequência no `App.tsx`
+  - [x] Adicionar um botão para acionar a análise de frequência na interface do usuário
+  - [x] Criar uma modal para exibir o resultado da análise de frequência detalhadamente
+  - [x] Aprimorar o estilo `Modal.css`
+  - [ ] Aprimorar o estilo `App.css` para aumentar a separação entre esses botões
 
 ## Backend
 - [ ] Implementar a funcionalidade de salvar itens no banco de dados
@@ -102,6 +107,14 @@
   - [ ] Implementar a lógica de fallback para a API de TTS (Text-to-Speech)
   - [ ] Implementar a recuperação automática de chamadas de APIs em caso de falhas
 - [ ] Adicionar logs de falhas nas chamadas de APIs
+- [x] Adicionar suporte ao prompt `analyzeFrequency`
+  - [x] Implementar a rota `/analyze/frequency` no `expressServer.ts`
+  - [x] Adicionar a lógica para processar a análise de frequência usando o `anthropicClaude`
+  - [x] Adicionar a lógica para processar a análise de frequência usando o `openRouter`
+  - [x] Testar a integração da rota `/analyze/frequency` com as APIs Anthropic Claude e OpenRouter
+  - [x] Adicionar a lógica de cálculo dos tokens na rota `/analyze/frequency`
+  - [x] Implementar a soma dos tokens da rota `/analyze/frequency` com os tokens de outras rotas
+  - [x] Atualizar a lógica de cálculo dos tokens para incluir a soma dos tokens da rota `/analyze/frequency`
 
 ## Integração de APIs
 - [x] ~~Implementar a integração com `Google Gemini`~~ [Descontinuado - Gemini não apresentou um resultado satisfatório]

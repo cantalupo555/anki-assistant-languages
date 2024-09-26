@@ -3,8 +3,8 @@
 // cors: Middleware to enable Cross-Origin Resource Sharing (CORS)
 import express from 'express';
 import cors from 'cors';
-import { getDefinitionsWithTokens, getSentencesWithTokens, translateSentence } from './anthropicClaude';
-import { getDefinitionsOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter } from './openRouter';
+import { getDefinitionsWithTokens, getSentencesWithTokens, translateSentence, analyzeWordFrequency } from './anthropicClaude';
+import { getDefinitionsOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter, analyzeWordFrequencyOpenRouter } from './openRouter';
 import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
 import { textToSpeech as azureTextToSpeech } from './azureTTS';
 
@@ -144,6 +144,43 @@ app.post('/translate', async (req, res) => {
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'An error occurred while processing the translation request' });
+    }
+});
+
+// Route to handle the word frequency analysis request
+app.post('/analyze/frequency', async (req, res) => {
+    try {
+        const { word, targetLanguage, nativeLanguage, apiService } = req.body;
+
+        if (!word || typeof word !== 'string' || word.trim() === '') {
+            return res.status(400).json({ error: 'Valid word is required' });
+        }
+        if (!nativeLanguage || !targetLanguage || !supportedLanguages.includes(nativeLanguage) || !supportedLanguages.includes(targetLanguage)) {
+            return res.status(400).json({ error: 'Valid native and target languages are required' });
+        }
+        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
+            return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+        }
+
+        let analysis = '';
+        let tokenCount: { inputTokens: number; outputTokens: number; totalTokens: number } = {
+            inputTokens: 0,
+            outputTokens: 0,
+            totalTokens: 0
+        };
+
+        if (apiService === 'anthropic') {
+            [analysis, tokenCount] = await analyzeWordFrequency(word, targetLanguage, nativeLanguage);
+        } else if (apiService === 'openrouter') {
+            [analysis, tokenCount] = await analyzeWordFrequencyOpenRouter(word, targetLanguage, nativeLanguage);
+        }
+
+        console.log('Frequency analysis result:', analysis, tokenCount);
+
+        res.json({ analysis, tokenCount });
+    } catch (error) {
+        console.error('Error in /analyze/frequency:', error);
+        res.status(500).json({ error: 'An error occurred while processing the frequency analysis request' });
     }
 });
 

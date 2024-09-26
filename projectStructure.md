@@ -4,21 +4,24 @@ anki-assistant-languages/
 │
 ├── frontend/                         # Frontend
 │   ├── public/
-│   │   ├── assets/                   # Directory for downloadable assets
-│   │   │   └── AnkiAssistantLanguages.apkg # Anki note type file for importing cards
+│   │   └── assets/                         # Directory for downloadable assets
+│   │       └── AnkiAssistantLanguages.apkg # Anki note type file for importing cards
 │   ├── src/
 │   │   ├── components/               # Directory for React components
 │   │   │   ├── languageSelector.tsx  # LanguageSelector component
+│   │   │   ├── Modal.tsx             # Modal component
 │   │   │   └── Notifications.tsx     # Notifications component
 │   │   ├── context/
 │   │   │   └── selectionContext.tsx  # Manages the context for language and service selections
+│   │   ├── styles/                   # Directory for global CSS styles
+│   │   │   ├── App.css               # CSS styles for the App.tsx component
+│   │   │   └── Modal.css             # CSS styles for the Modal component
 │   │   ├── utils/                    # Directory for utility modules
 │   │   │   ├── languageCardExporter.ts # Module for exporting data to Anki
 │   │   │   ├── markdownStripper.ts     # Module for removing Markdown formatting for TTS
 │   │   │   ├── Types.ts                # Contains type definitions for the project
 │   │   │   └── voiceOptions.ts         # Module for voice options for Google Cloud TTS and Azure Speech
-│   │   ├── App.tsx                   # Main React component
-│   │   └── App.css                   # CSS styles for the App.tsx component
+│   │   └── App.tsx                   # Main React component
 │   ├── package.json                  # Frontend dependencies
 │   ├── tsconfig.json                 # TypeScript configuration
 │   └── ...

@@ -33,3 +33,17 @@ export interface APIServiceOption {
     name: string;
     value: string;
 }
+
+// Define the props for the Modal component
+export interface ModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    title: string;
+    children: React.ReactNode;
+}
+
+// Define a type for frequency analysis, which includes the text and its associated token counts
+export interface FrequencyAnalysis {
+    text: string;
+    tokenCount: TokenCount;
+}

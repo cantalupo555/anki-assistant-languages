@@ -4,14 +4,15 @@
 // ReactMarkdown: Component to render Markdown as React components
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import './App.css';
-import { handleExport } from './utils/languageCardExporter';
-import { stripMarkdown } from './utils/markdownStripper';
-import { voiceOptions } from './utils/voiceOptions';
+import './styles/App.css';
 import LanguageSelector from './components/languageSelector';
+import Modal from './components/Modal';
 import Notifications from './components/Notifications';
 import { AppProvider, useAppContext } from './context/selectionContext';
-import { APIServiceOption, TTSOption, TokenCount, SavedItem } from './utils/Types';
+import { handleExport } from './utils/languageCardExporter';
+import { stripMarkdown } from './utils/markdownStripper';
+import { TokenCount, SavedItem, TTSOption, APIServiceOption, FrequencyAnalysis } from './utils/Types';
+import { voiceOptions } from './utils/voiceOptions';
 
 // Path to the Anki note type file
 const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
@@ -22,6 +23,7 @@ const API_URL_SENTENCES = process.env.BACKEND_API_URL || 'http://localhost:5000/
 const TRANSLATION_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/translate';
 const TOKEN_SUM_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/token/sum';
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
+const ANALYZE_FREQUENCY_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/analyze/frequency';
 
 // Array of available API service options
 const apiServiceOptions: APIServiceOption[] = [
@@ -56,6 +58,8 @@ const AppInner: React.FC = () => {
   const [audioData, setAudioData] = useState<{ [key: string]: string }>({});
   const [translation, setTranslation] = useState<string | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [frequencyAnalysis, setFrequencyAnalysis] = useState<FrequencyAnalysis | null>(null);
+  const [isFrequencyModalOpen, setIsFrequencyModalOpen] = useState(false); // State to control the frequency analysis modal
 
   // Effect to load saved items from localStorage on component mount
   useEffect(() => {
@@ -181,6 +185,77 @@ const AppInner: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  // Function to handle word frequency analysis
+  const handleAnalyzeFrequency = async () => {
+    // Validate required fields
+    if (!nativeLanguage || !targetLanguage || !selectedAPIService || !word) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+
+    setError(null); // Clear any previous errors
+    setIsLoading(true); // Set loading state
+
+    try {
+      // Log request details for debugging
+      console.log('Sending frequency analysis request...');
+      console.log('Request payload:', { word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value });
+
+      // Send POST request to the frequency analysis endpoint
+      const analysisResponse = await fetch(ANALYZE_FREQUENCY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value }),
+      });
+
+      // Log response status for debugging
+      console.log('Response status:', analysisResponse.status);
+
+      // Check if response is successful
+      if (!analysisResponse.ok) {
+        const errorText = await analysisResponse.text();
+        console.error('Error response:', errorText);
+        throw new Error(`HTTP error! status: ${analysisResponse.status}, message: ${errorText}`);
+      }
+
+      // Parse response JSON
+      const analysisData = await analysisResponse.json();
+      console.log('Received analysis data:', analysisData);
+
+      // Validate response data structure
+      if (
+          analysisData.analysis && typeof analysisData.analysis === 'string' &&
+          analysisData.tokenCount && typeof analysisData.tokenCount === 'object' &&
+          'inputTokens' in analysisData.tokenCount &&
+          'outputTokens' in analysisData.tokenCount &&
+          'totalTokens' in analysisData.tokenCount
+      ) {
+        // Create and set frequency analysis object
+        const analysis: FrequencyAnalysis = {
+          text: analysisData.analysis,
+          tokenCount: analysisData.tokenCount
+        };
+        setFrequencyAnalysis(analysis);
+        updateTotalTokenCount(analysisData.tokenCount);
+        console.log('Set frequency analysis:', analysis);
+        setIsFrequencyModalOpen(true); // Open frequency analysis modal
+      } else {
+        console.error('Invalid analysis data structure:', analysisData);
+        throw new Error('Received invalid analysis data from the server.');
+      }
+    } catch (error: unknown) {
+      console.error('Error in handleAnalyzeFrequency:', error);
+      if (error instanceof Error) {
+        setError(`An error occurred while fetching frequency analysis: ${error.message}`);
+      } else {
+        setError('An unknown error occurred while fetching frequency analysis.');
+      }
+    } finally {
+      setIsLoading(false); // Reset loading state
+    }
+  };
+
 
   // Function to handle clicking on a sentence
   const handleSentenceClick = (sentence: string) => {
@@ -472,6 +547,9 @@ const AppInner: React.FC = () => {
               <button type="submit" disabled={isLoading}>
                 {isLoading ? 'Generating...' : 'Generate'}
               </button>
+              <button type="button" onClick={handleAnalyzeFrequency} disabled={isLoading}>
+                {isLoading ? 'Analyzing...' : 'Analyze Frequency'}
+              </button>
             </form>
 
             {error && <div className="error" role="alert">{error}</div>}
@@ -627,6 +705,21 @@ const AppInner: React.FC = () => {
             showClearAllNotification={showClearAllNotification}
             showGenerateNotification={showGenerateNotification}
         />
+
+        {/* Render the modal for frequency analysis */}
+        <Modal
+            isOpen={isFrequencyModalOpen}
+            onClose={() => setIsFrequencyModalOpen(false)}
+            title="Word Frequency Analysis"
+        >
+          {frequencyAnalysis ? (
+              <div className="frequency-analysis">
+                <ReactMarkdown>{frequencyAnalysis.text}</ReactMarkdown>
+              </div>
+          ) : (
+              <p>No analysis data available.</p>
+          )}
+        </Modal>
       </div>
   );
 };
@@ -641,4 +734,5 @@ const App: React.FC = () => {
   );
 };
 
+// Export the main App component
 export default App;

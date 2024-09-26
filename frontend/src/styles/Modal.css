@@ -1,0 +1,163 @@
+/* Modal Overlay Styles */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+    transition: opacity 0.3s ease;
+}
+
+/* Fade-in animation for the modal overlay */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Modal Container Styles */
+.modal-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Slide-in animation for the modal container */
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Modal Header Styles */
+.modal-header {
+    background: #2196F3;
+    color: white;
+    padding: 20px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+}
+
+/* Modal Title Styles */
+.modal-title {
+    font-size: 1.4em;
+    font-weight: 600;
+    margin: 0;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    flex-grow: 1;
+}
+
+/* Modal Close Icon Styles */
+.modal-close-icon {
+    cursor: pointer;
+    font-size: 1.5em;
+    transition: color 0.3s ease;
+}
+
+/* Hover effect for the close icon */
+.modal-close-icon:hover {
+    color: #e0e0e0;
+}
+
+/* Modal Content Styles */
+.modal-content {
+    padding: 30px;
+    overflow-y: auto;
+    flex-grow: 1;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* Heading styles within the modal content */
+.modal-content h2 {
+    color: #333;
+    border-bottom: 2px solid #2196F3;
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* Paragraph styles within the modal content */
+.modal-content p {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+/* Ordered list styles within the modal content */
+.modal-content ol {
+    padding-left: 20px;
+}
+
+/* List item styles within the modal content */
+.modal-content li {
+    margin-bottom: 10px;
+}
+
+/* Strong text styles within the modal content */
+.modal-content strong {
+    color: #2196F3;
+}
+
+/* Modal Close Button Styles */
+.modal-close-button {
+    padding: 15px;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 0 0 12px 12px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for the close button */
+.modal-close-button:hover {
+    background: #d32f2f;
+}
+
+/* Custom Scrollbar Styles for Modal Content */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Responsive Design for Modal on Smaller Screens */
+@media (max-width: 768px) {
+    .modal-container {
+        width: 95%;
+        margin: 10px;
+    }
+
+    .modal-header {
+        padding: 15px;
+    }
+
+    .modal-content {
+        padding: 20px;
+        font-size: 14px;
+    }
+}

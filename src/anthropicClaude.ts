@@ -1,4 +1,6 @@
-// Import necessary dependencies
+// Import necessary libraries
+// Import the Anthropic SDK to interact with the Anthropic API
+// dotenv: Used to load environment variables from a .env file
 import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
 
@@ -63,6 +65,10 @@ If the word has only one or two very specific meanings and it's impossible to pr
             {role: "user", content: prompt}
         ]
     });
+
+    // Uncomment the line below to log the full API response to the console (useful for debugging)
+    // console.log('API Response:', msg);
+
     // Extract the definitions from the response
     const definitions = extractTextContent(msg.content);
     // Calculate the token count
@@ -115,6 +121,10 @@ Please provide your list of 25 sentences below:`;
             {role: "user", content: prompt}
         ]
     });
+
+    // Uncomment the line below to log the full API response to the console (useful for debugging)
+    // console.log('API Response:', msg);
+
     // Extract the sentences from the response
     const sentences = extractTextContent(msg.content);
     // Calculate the token count
@@ -153,6 +163,9 @@ Instructions:
         ]
     });
 
+    // Uncomment the line below to log the full API response to the console (useful for debugging)
+    // console.log('API Response:', msg);
+
     // Extract the translated sentence and token count
     const translation = extractTextContent(msg.content).trim();
     const tokenCount: TokenCount = {
@@ -163,4 +176,67 @@ Instructions:
 
     // Return the translation and token count as an array
     return [translation, tokenCount];
+}
+
+// Function to analyze the frequency of use of a word in the target language and translate the response
+export async function analyzeWordFrequency(word: string, targetLanguage: string, nativeLanguage: string): Promise<[string, TokenCount]> {
+    // Construct the prompt for the Anthropic API
+    const prompt = `You are a language expert tasked with providing information about word usage frequency in different languages. Your goal is to analyze a given word in a target language and generate content about its frequency of use. Follow these instructions carefully:
+
+1. You will be given the following inputs:
+- Word: ${word}
+- Target language: ${targetLanguage}
+- Native language: ${nativeLanguage}
+
+2. Analyze the frequency of use for the word in the target language. Consider factors such as:
+- How common the word is in everyday speech
+- Its usage in formal vs. informal contexts
+- Any regional variations in usage
+- Frequency in written vs. spoken language
+
+3. Generate a brief content (2-3 paragraphs) about the word's usage frequency in the target language. Include information such as:
+- General frequency of use
+- Contexts where it's commonly used
+- Any interesting facts about its usage
+- Comparisons to synonyms or related words, if relevant
+- Idiomatic expressions and contexts of use
+- Interesting facts and curiosities related to the word
+
+4. Provide your response in the native language. Ensure that all content is translated and culturally appropriate for speakers of the native language.
+
+5. Structure your output as follows:
+- Start with an introduction about the word and its general usage
+- Follow with 5-15 numbered bullet points highlighting key aspects of its frequency and usage
+
+6. Additional guidelines:
+- Maintain a neutral, informative tone throughout your analysis
+- If unsure about specific details, indicate that certain information is based on general language trends rather than precise data
+- Ensure all examples and explanations are clear and relevant to speakers of the native language
+- If appropriate, include any cultural nuances or differences in usage between the target language and native language
+
+Remember to tailor your response to the specific word, target language, and native language provided in the input variables. Your goal is to provide a thorough and insightful analysis that is easily understood by speakers of the native language.`;
+
+    // Send the prompt to the Anthropic API and get the response
+    const msg = await anthropic.messages.create({
+        model: "claude-3-haiku-20240307",
+        max_tokens: 4096,
+        temperature: 0,
+        messages: [
+            {role: "user", content: prompt}
+        ]
+    });
+
+    // Uncomment the line below to log the full API response to the console (useful for debugging)
+    // console.log('API Response:', msg);
+
+    // Extract the analysis from the response
+    const analysis = extractTextContent(msg.content);
+    // Calculate the token count
+    const tokenCount: TokenCount = {
+        inputTokens: msg.usage.input_tokens,
+        outputTokens: msg.usage.output_tokens,
+        totalTokens: msg.usage.input_tokens + msg.usage.output_tokens
+    };
+    // Return the analysis and token count
+    return [analysis, tokenCount];
 }
