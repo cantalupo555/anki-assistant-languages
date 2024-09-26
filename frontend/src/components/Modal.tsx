@@ -1,7 +1,6 @@
 // Import necessary libraries
 // React: Core library for building user interfaces
-// ReactNode: Type for children props in React
-import React, { ReactNode } from 'react';
+import React from 'react';
 import '../styles/Modal.css';
 import { ModalProps } from '../utils/Types';
 
