@@ -3,7 +3,7 @@
 // cors: Middleware to enable Cross-Origin Resource Sharing (CORS)
 import express from 'express';
 import cors from 'cors';
-import { getDefinitionsWithTokens, getSentencesWithTokens, translateSentence, analyzeWordFrequency } from './anthropicClaude';
+import { getDefinitionsAnthropicClaude, getSentencesAnthropicClaude, translateSentenceAnthropicClaude, analyzeWordFrequencyAnthropicClaude } from './anthropicClaude';
 import { getDefinitionsOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter, analyzeWordFrequencyOpenRouter } from './openRouter';
 import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
 import { textToSpeech as azureTextToSpeech } from './azureTTS';
@@ -47,7 +47,7 @@ app.post('/generate/definitions', async (req, res) => {
 
         // Get the definitions for the word using the selected API service
         if (apiService === 'anthropic') {
-            [definitions, definitionsTokens] = await getDefinitionsWithTokens(word, targetLanguage);
+            [definitions, definitionsTokens] = await getDefinitionsAnthropicClaude(word, targetLanguage);
         } else if (apiService === 'openrouter') {
             [definitions, definitionsTokens] = await getDefinitionsOpenRouter(word, targetLanguage);
         }
@@ -90,7 +90,7 @@ app.post('/generate/sentences', async (req, res) => {
 
         // Get the sentences for the word using the selected API service
         if (apiService === 'anthropic') {
-            [sentences, sentencesTokens] = await getSentencesWithTokens(word, targetLanguage);
+            [sentences, sentencesTokens] = await getSentencesAnthropicClaude(word, targetLanguage);
         } else if (apiService === 'openrouter') {
             [sentences, sentencesTokens] = await getSentencesOpenRouter(word, targetLanguage);
         }
@@ -140,7 +140,7 @@ app.post('/translate', async (req, res) => {
 
         // Perform translation using the selected API service
         if (apiService === 'anthropic') {
-            [translation, tokenCount] = await translateSentence(inputSentence, targetLanguage, nativeLanguage);
+            [translation, tokenCount] = await translateSentenceAnthropicClaude(inputSentence, targetLanguage, nativeLanguage);
         } else if (apiService === 'openrouter') {
             [translation, tokenCount] = await translateSentenceOpenRouter(inputSentence, targetLanguage, nativeLanguage);
         }
@@ -178,9 +178,9 @@ app.post('/analyze/frequency', async (req, res) => {
             totalTokens: 0
         };
 
-        // Perform translation using the selected API service
+        // Perform analysis using the selected API service
         if (apiService === 'anthropic') {
-            [analysis, tokenCount] = await analyzeWordFrequency(word, targetLanguage, nativeLanguage);
+            [analysis, tokenCount] = await analyzeWordFrequencyAnthropicClaude(word, targetLanguage, nativeLanguage);
         } else if (apiService === 'openrouter') {
             [analysis, tokenCount] = await analyzeWordFrequencyOpenRouter(word, targetLanguage, nativeLanguage);
         }

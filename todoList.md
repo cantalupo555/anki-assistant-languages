@@ -41,7 +41,6 @@
   - [ ] Voz TTS preferida para o idioma selecionado
 - [x] Corrigir 'translationTokenCount' is assigned a value but never used
 - [ ] Renomear as constantes `API_URL_DEFINITIONS` e `API_URL_SENTENCES` para `DEFINITIONS_API_URL` e `SENTENCES_API_URL` respectivamente
-- [ ] Atualizar todas as referências às constantes renomeadas no código
 - [x] Implementar a integração com `OpenRouter`:
   - [x] Atualizar a interface do usuário para permitir a seleção do modelo de linguagem do OpenRouter
   - [x] Adicionar lógica para chamar a API correta dentro do `expressServer.ts` usando `apiService`
@@ -57,10 +56,11 @@
 - [ ] Melhorar a experiência do usuário com animações e transições suaves:
   - [ ] Adicionar transições suaves para mudanças de estado
   - [ ] Adicionar animações para feedback visual
-- [ ] Adicionar mais feedback visual para ações do usuário:
+- [ ] Feedback visual para ações do usuário:
   - [ ] Exibir feedback visual quando o usuário salva itens, remove itens, e outras ações
-  - [ ] Apriomar feedback visual durante o carregamento do `handleAnalyzeFrequency`
   - [ ] Apriomar feedback visual durante o carregamento do `handleSubmit`
+  - [ ] Apriomar feedback visual durante o carregamento do `handleAnalyzeFrequency`
+  - [ ] Apriomar feedback visual durante o carregamento do `handleTranslation`
 - [ ] Implementar um dark mode:
   - [ ] Adicionar suporte para dark mode
   - [ ] Permitir a alternância entre light e dark mode
@@ -121,6 +121,7 @@
   - [x] Resultados em `/generate/sentences`
   - [x] Resultados em `/translate`
   - [x] Resultados em `/analyze/frequency`
+- [x] Renomear as funções do `anthropicClaude`
 
 ## Integração de APIs
 - [x] ~~Implementar a integração com `Google Gemini`~~ [Descontinuado - Gemini não apresentou um resultado satisfatório]
