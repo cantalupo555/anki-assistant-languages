@@ -52,6 +52,9 @@ app.post('/generate/definitions', async (req, res) => {
             [definitions, definitionsTokens] = await getDefinitionsOpenRouter(word, targetLanguage);
         }
 
+        // Log the definitions result
+        console.log('Definitions result:', definitions, definitionsTokens);
+
         // Return the result as a JSON response
         res.json({
             definitions: { text: definitions, tokenCount: definitionsTokens }
@@ -94,6 +97,9 @@ app.post('/generate/sentences', async (req, res) => {
 
         // Split sentences into an array
         const sentencesArray = sentences.split('\n').filter(sentence => sentence.trim() !== '');
+
+        // Log the sentences result
+        console.log('Sentences result:', sentencesArray, sentencesTokens);
 
         // Return the result as a JSON response
         res.json({
@@ -139,6 +145,9 @@ app.post('/translate', async (req, res) => {
             [translation, tokenCount] = await translateSentenceOpenRouter(inputSentence, targetLanguage, nativeLanguage);
         }
 
+        // Log the translation result
+        console.log('Translation result:', translation, tokenCount);
+
         // Return the translated text and token count
         res.json({ translation, tokenCount });
     } catch (error) {
@@ -169,12 +178,14 @@ app.post('/analyze/frequency', async (req, res) => {
             totalTokens: 0
         };
 
+        // Perform translation using the selected API service
         if (apiService === 'anthropic') {
             [analysis, tokenCount] = await analyzeWordFrequency(word, targetLanguage, nativeLanguage);
         } else if (apiService === 'openrouter') {
             [analysis, tokenCount] = await analyzeWordFrequencyOpenRouter(word, targetLanguage, nativeLanguage);
         }
 
+        // Log the frequency analysis result
         console.log('Frequency analysis result:', analysis, tokenCount);
 
         res.json({ analysis, tokenCount });

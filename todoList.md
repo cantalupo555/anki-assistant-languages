@@ -71,7 +71,7 @@
   - [x] Adicionar um botão para acionar a análise de frequência na interface do usuário
   - [x] Criar uma modal para exibir o resultado da análise de frequência detalhadamente
   - [x] Aprimorar o estilo `Modal.css`
-  - [x] Aprimorar o estilo `App.css` para aumentar a separação entre esses botões
+  - [x] Aprimorar o estilo `App.css` para aumentar a separação entre botões
 
 ## Backend
 - [ ] Implementar a funcionalidade de salvar itens no banco de dados
@@ -115,6 +115,11 @@
   - [x] Adicionar a lógica de cálculo dos tokens na rota `/analyze/frequency`
   - [x] Implementar a soma dos tokens da rota `/analyze/frequency` com os tokens de outras rotas
   - [x] Atualizar a lógica de cálculo dos tokens para incluir a soma dos tokens da rota `/analyze/frequency`
+- [x] Registro de resultados das respostas da API endpoints:
+  - [x] Resultados em `/generate/definitions`
+  - [x] Resultados em `/generate/sentences`
+  - [x] Resultados em `/translate`
+  - [x] Resultados em `/analyze/frequency`
 
 ## Integração de APIs
 - [x] ~~Implementar a integração com `Google Gemini`~~ [Descontinuado - Gemini não apresentou um resultado satisfatório]
