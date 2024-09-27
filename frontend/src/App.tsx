@@ -125,6 +125,10 @@ const AppInner: React.FC = () => {
     setCurrentPage(1);
 
     try {
+      // Log request details for debugging
+      console.log('Submitting form...');
+      console.log('Request payload for definitions:', { word, language: targetLanguage, apiService: selectedAPIService.value });
+
       // Fetch definitions
       const definitionsResponse = await fetch(API_URL_DEFINITIONS, {
         method: 'POST',
@@ -134,12 +138,22 @@ const AppInner: React.FC = () => {
         body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value }),
       });
 
+      // Log response status for debugging
+      console.log('Response status for definitions:', definitionsResponse.status);
+
+      // Check if response is successful
       if (!definitionsResponse.ok) {
-        throw new Error(`HTTP error! status: ${definitionsResponse.status}`);
+        const errorText = await definitionsResponse.text();
+        console.error('Error response for definitions:', errorText);
+        throw new Error(`HTTP error! status: ${definitionsResponse.status}, message: ${errorText}`);
       }
 
       const definitionsData = await definitionsResponse.json();
       setDefinitions(definitionsData.definitions);
+      console.log('Received definitions data:', definitionsData);
+
+      // Log request details for debugging
+      console.log('Request payload for sentences:', { word, language: targetLanguage, apiService: selectedAPIService.value });
 
       // Fetch sentences
       const sentencesResponse = await fetch(API_URL_SENTENCES, {
@@ -150,12 +164,26 @@ const AppInner: React.FC = () => {
         body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value }),
       });
 
+      // Log response status for debugging
+      console.log('Response status for sentences:', sentencesResponse.status);
+
+      // Check if response is successful
       if (!sentencesResponse.ok) {
-        throw new Error(`HTTP error! status: ${sentencesResponse.status}`);
+        const errorText = await sentencesResponse.text();
+        console.error('Error response for sentences:', errorText);
+        throw new Error(`HTTP error! status: ${sentencesResponse.status}, message: ${errorText}`);
       }
 
       const sentencesData = await sentencesResponse.json();
       setSentences(sentencesData.sentences);
+      console.log('Received sentences data:', sentencesData);
+
+      // Log request details for debugging
+      console.log('Request payload for total token count:', {
+        definitionsTokens: definitionsData.definitions.tokenCount,
+        sentencesTokens: sentencesData.sentences.tokenCount,
+        translationTokens: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
+      });
 
       // Calculate total token count
       const totalTokenCountResponse = await fetch(TOKEN_SUM_URL, {
@@ -170,17 +198,28 @@ const AppInner: React.FC = () => {
         }),
       });
 
+      // Log response status for debugging
+      console.log('Response status for total token count:', totalTokenCountResponse.status);
+
+      // Check if response is successful
       if (!totalTokenCountResponse.ok) {
-        throw new Error(`HTTP error! status: ${totalTokenCountResponse.status}`);
+        const errorText = await totalTokenCountResponse.text();
+        console.error('Error response for total token count:', errorText);
+        throw new Error(`HTTP error! status: ${totalTokenCountResponse.status}, message: ${errorText}`);
       }
 
       const totalTokenCountData = await totalTokenCountResponse.json();
       setTotalTokenCount(totalTokenCountData);
+      console.log('Received total token count data:', totalTokenCountData);
 
       setShowGenerateNotification(true);
     } catch (error) {
-      console.error('Error:', error);
-      setError('An error occurred while fetching data. Please try again.');
+      console.error('Error in handleSubmit:', error);
+      if (error instanceof Error) {
+        setError(`An error occurred while fetching data: ${error.message}`);
+      } else {
+        setError('An unknown error occurred while fetching data.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -210,7 +249,7 @@ const AppInner: React.FC = () => {
       });
 
       // Log response status for debugging
-      console.log('Response status:', analysisResponse.status);
+      console.log('Response status for analysis:', analysisResponse.status);
 
       // Check if response is successful
       if (!analysisResponse.ok) {
@@ -256,7 +295,6 @@ const AppInner: React.FC = () => {
     }
   };
 
-
   // Function to handle clicking on a sentence
   const handleSentenceClick = (sentence: string) => {
     setSelectedSentence(sentence);
@@ -278,7 +316,16 @@ const AppInner: React.FC = () => {
   // Function to handle the translation of a given sentence
   const handleTranslation = async (sentence: string): Promise<string> => {
     try {
-      // Send a POST request to the translation API endpoint
+      // Log request details for debugging
+      console.log('Sending translation request...');
+      console.log('Request payload:', {
+        text: sentence,
+        nativeLanguage: nativeLanguage,
+        targetLanguage: targetLanguage,
+        apiService: selectedAPIService.value
+      });
+
+      // Send POST request to the translation API endpoint
       const response = await fetch(TRANSLATION_URL, {
         method: 'POST',
         headers: {
@@ -292,23 +339,37 @@ const AppInner: React.FC = () => {
         }),
       });
 
-      // Check if the response is successful
+      // Log response status for debugging
+      console.log('Response status for translation:', response.status);
+
+      // Check if response is successful
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
-      // Parse the response JSON data
+      // Parse response JSON
       const data = await response.json();
-      setTranslation(data.translation); // Set the state
+      console.log('Received translation data:', data);
+
+      // Set the state for the translation
+      setTranslation(data.translation);
 
       // Update the total token count to be cumulative
       updateTotalTokenCount(data.tokenCount);
 
       return data.translation; // Return the translation
     } catch (error) {
-      console.error('Error translating sentence:', error);
-      setError('An error occurred while translating the sentence. Please try again.');
+      console.error('Error in handleTranslation:', error);
+      if (error instanceof Error) {
+        setError(`An error occurred while translating the sentence: ${error.message}`);
+      } else {
+        setError('An unknown error occurred while translating the sentence. Please try again.');
+      }
       return ''; // Return an empty string or some default value in case of error
+    } finally {
+      setIsLoading(false); // Reset loading state
     }
   };
 

@@ -72,6 +72,7 @@
   - [x] Criar uma modal para exibir o resultado da análise de frequência detalhadamente
   - [x] Aprimorar o estilo `Modal.css`
   - [x] Aprimorar o estilo `App.css` para aumentar a separação entre botões
+- [x] Adicionar console.log em `handleSubmit`, `handleAnalyzeFrequency` e `handleTranslation` para debugging
 
 ## Backend
 - [ ] Implementar a funcionalidade de salvar itens no banco de dados
