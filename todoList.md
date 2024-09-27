@@ -40,7 +40,7 @@
   - [ ] Número de sentenças geradas
   - [ ] Voz TTS preferida para o idioma selecionado
 - [x] Corrigir 'translationTokenCount' is assigned a value but never used
-- [ ] Renomear as constantes `API_URL_DEFINITIONS` e `API_URL_SENTENCES` para `DEFINITIONS_API_URL` e `SENTENCES_API_URL` respectivamente
+- [x] Renomear as constantes `API_URL_DEFINITIONS` e `API_URL_SENTENCES` para `DEFINITIONS_URL` e `SENTENCES_URL` respectivamente
 - [x] Implementar a integração com `OpenRouter`:
   - [x] Atualizar a interface do usuário para permitir a seleção do modelo de linguagem do OpenRouter
   - [x] Adicionar lógica para chamar a API correta dentro do `expressServer.ts` usando `apiService`

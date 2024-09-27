@@ -18,12 +18,12 @@ import { voiceOptions } from './utils/voiceOptions';
 const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
 
 // Define the backend API URLs, using environment variables
-const API_URL_DEFINITIONS = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/definitions';
-const API_URL_SENTENCES = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/sentences';
+const ANALYZE_FREQUENCY_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/analyze/frequency';
+const DEFINITIONS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/definitions';
+const SENTENCES_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/sentences';
 const TRANSLATION_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/translate';
 const TOKEN_SUM_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/token/sum';
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
-const ANALYZE_FREQUENCY_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/analyze/frequency';
 
 // Array of available API service options
 const apiServiceOptions: APIServiceOption[] = [
@@ -130,7 +130,7 @@ const AppInner: React.FC = () => {
       console.log('Request payload for definitions:', { word, language: targetLanguage, apiService: selectedAPIService.value });
 
       // Fetch definitions
-      const definitionsResponse = await fetch(API_URL_DEFINITIONS, {
+      const definitionsResponse = await fetch(DEFINITIONS_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ const AppInner: React.FC = () => {
       console.log('Request payload for sentences:', { word, language: targetLanguage, apiService: selectedAPIService.value });
 
       // Fetch sentences
-      const sentencesResponse = await fetch(API_URL_SENTENCES, {
+      const sentencesResponse = await fetch(SENTENCES_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
