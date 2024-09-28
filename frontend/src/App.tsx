@@ -46,7 +46,9 @@ const AppInner: React.FC = () => {
   const [sentences, setSentences] = useState<{ text: string[]; tokenCount: TokenCount; totalPages: number } | null>(null);
   const [totalTokenCount, setTotalTokenCount] = useState<TokenCount | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isGenerateLoading, setIsGenerateLoading] = useState(false);
+  const [isAnalyzeLoading, setIsAnalyzeLoading] = useState(false);
+  const [isTranslateLoading, setIsTranslateLoading] = useState(false); // State for translation loading
   const [selectedSentence, setSelectedSentence] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
@@ -121,7 +123,7 @@ const AppInner: React.FC = () => {
       return;
     }
     setError(null);
-    setIsLoading(true);
+    setIsGenerateLoading(true);
     setCurrentPage(1);
 
     try {
@@ -221,7 +223,7 @@ const AppInner: React.FC = () => {
         setError('An unknown error occurred while fetching data.');
       }
     } finally {
-      setIsLoading(false);
+      setIsGenerateLoading(false);
     }
   };
 
@@ -234,7 +236,7 @@ const AppInner: React.FC = () => {
     }
 
     setError(null); // Clear any previous errors
-    setIsLoading(true); // Set loading state
+    setIsAnalyzeLoading(true); // Set loading state
 
     try {
       // Log request details for debugging
@@ -291,7 +293,7 @@ const AppInner: React.FC = () => {
         setError('An unknown error occurred while fetching frequency analysis.');
       }
     } finally {
-      setIsLoading(false); // Reset loading state
+      setIsAnalyzeLoading(false); // Reset loading state
     }
   };
 
@@ -316,6 +318,8 @@ const AppInner: React.FC = () => {
   // Function to handle the translation of a given sentence
   const handleTranslation = async (sentence: string): Promise<string> => {
     try {
+      setIsTranslateLoading(true); // Set loading state
+
       // Log request details for debugging
       console.log('Sending translation request...');
       console.log('Request payload:', {
@@ -369,7 +373,7 @@ const AppInner: React.FC = () => {
       }
       return ''; // Return an empty string or some default value in case of error
     } finally {
-      setIsLoading(false); // Reset loading state
+      setIsTranslateLoading(false); // Reset loading state
     }
   };
 
@@ -606,11 +610,11 @@ const AppInner: React.FC = () => {
                   required
               />
               <div className="button-container">
-                <button type="submit" className="generate-button" disabled={isLoading}>
-                  {isLoading ? 'Generating...' : 'Generate'}
+                <button type="submit" className="generate-button" disabled={isGenerateLoading}>
+                  {isGenerateLoading ? 'Generating...' : 'Generate'}
                 </button>
-                <button type="button" className="analyze-button" onClick={handleAnalyzeFrequency} disabled={isLoading}>
-                  {isLoading ? 'Analyzing...' : 'Analyze Frequency'}
+                <button type="button" className="analyze-button" onClick={handleAnalyzeFrequency} disabled={isAnalyzeLoading}>
+                  {isAnalyzeLoading ? 'Analyzing...' : 'Analyze Frequency'}
                 </button>
               </div>
             </form>

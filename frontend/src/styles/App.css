@@ -163,12 +163,12 @@ button:disabled {
 
 /* Analyze Frequency Button Styles */
 .analyze-button {
-  background-color: var(--secondary-color);
+  background-color: var(--primary-color); /* Use the new color for Analyze Frequency button */
   flex: 0 0 auto; /* Prevent button from stretching */
 }
 
 .analyze-button:hover {
-  background-color: #5a6268;
+  background-color: #0056b3;
 }
 
 /* Result Container Styles */
