@@ -316,7 +316,9 @@ const AppInner: React.FC = () => {
   };
 
   // Function to handle the translation of a given sentence
-  const handleTranslation = async (sentence: string): Promise<string> => {
+  const handleTranslation = async (sentence: string) => {
+    if (isTranslateLoading) return; // Prevent multiple clicks while translating
+
     try {
       setIsTranslateLoading(true); // Set loading state
 
@@ -669,7 +671,13 @@ const AppInner: React.FC = () => {
                           <h4>Selected Sentence:</h4>
                           <ReactMarkdown>{selectedSentence}</ReactMarkdown>
                           <button onClick={handleSaveItem}>Save Sentence</button>
-                          <button onClick={() => handleTranslation(selectedSentence)}>Translate this sentence</button>
+                          <button
+                              className={`translate-button ${isTranslateLoading ? 'loading' : ''}`}
+                              disabled={isTranslateLoading}
+                              onClick={() => handleTranslation(selectedSentence)}
+                          >
+                            {isTranslateLoading ? 'Translating...' : 'Translate this sentence'}
+                          </button>
                           {translation && (
                               <div className="translation">
                                 <h4>Translation:</h4>
