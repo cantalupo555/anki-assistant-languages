@@ -28,22 +28,23 @@ const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 // Array of available API service options
 const apiServiceOptions: APIServiceOption[] = [
   { name: 'Select your AI Provider', value: '' },
-  { name: 'Anthropic Claude', value: 'anthropic' },
   { name: 'OpenRouter', value: 'openrouter' },
+  { name: 'Anthropic', value: 'anthropic' },
 ];
 
 // Array of available LLM options for each API service
 const llmOptions: { [key: string]: LLMOption[] } = {
+  openrouter: [
+    { name: 'Select AI', value: '' },
+    { name: 'Llama-3.1 70B Instruct (Free)', value: 'meta-llama/llama-3.1-70b-instruct:free' },
+    { name: 'Llama-3.1 405B Instruct (Free)', value: 'meta-llama/llama-3.1-405b-instruct:free' },
+    { name: 'Qwen-2.5 72B Instruct', value: 'qwen/qwen-2.5-72b-instruct' },
+    { name: 'Claude-3 Haiku', value: 'anthropic/claude-3-haiku' },
+    { name: 'Gemini-1.5 Flash', value: 'google/gemini-flash-1.5' },
+  ],
   anthropic: [
     { name: 'Select AI', value: '' },
     { name: 'Claude-3 Haiku', value: 'claude-3-haiku-20240307' },
-  ],
-  openrouter: [
-    { name: 'Select AI', value: '' },
-    { name: 'Qwen-2.5 72B Instruct', value: 'qwen/qwen-2.5-72b-instruct' },
-    { name: 'Llama-3.1 70B Instruct', value: 'meta-llama/llama-3.1-70b-instruct' },
-    { name: 'Claude-3 Haiku', value: 'anthropic/claude-3-haiku' },
-    { name: 'Gemini-1.5 Flash', value: 'google/gemini-flash-1.5' }
   ]
 };
 
