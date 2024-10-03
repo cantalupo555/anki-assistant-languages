@@ -29,7 +29,7 @@ type TokenCount = {
 };
 
 // Function to get the definitions of a word with token count
-export async function getDefinitionsAnthropicClaude(word: string, targetLanguage: string): Promise<[string, TokenCount]> {
+export async function getDefinitionsAnthropicClaude(word: string, targetLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
     const prompt = `You are tasked with providing basic ${targetLanguage} definitions for a given word, as they would appear in a ${targetLanguage}-${targetLanguage} dictionary. Your goal is to provide three essential meanings of the word, without any additional information.
 
@@ -59,7 +59,7 @@ If the word has only one or two very specific meanings and it's impossible to pr
 
     // Send the prompt to the Anthropic API and get the response
     const msg = await anthropic.messages.create({
-        model: "claude-3-haiku-20240307",
+        model: llm,
         max_tokens: 1024,
         temperature: 0,
         messages: [
@@ -83,7 +83,7 @@ If the word has only one or two very specific meanings and it's impossible to pr
 }
 
 // Function to get short sentences containing a specific word with token count
-export async function getSentencesAnthropicClaude(word: string, targetLanguage: string): Promise<[string, TokenCount]> {
+export async function getSentencesAnthropicClaude(word: string, targetLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
     const prompt = `Your task is to generate 50 short sentences in a specified language that include a specific word. 
 
@@ -120,7 +120,7 @@ Please provide your list of 50 sentences below:`;
 
     // Send the prompt to the Anthropic API and get the response
     const msg = await anthropic.messages.create({
-        model: "claude-3-haiku-20240307",
+        model: llm,
         max_tokens: 4096,
         temperature: 1,
         messages: [
@@ -144,7 +144,7 @@ Please provide your list of 50 sentences below:`;
 }
 
 // Function to translate a sentence
-export async function translateSentenceAnthropicClaude(inputSentence: string, targetLanguage: string, nativeLanguage: string): Promise<[string, TokenCount]> {
+export async function translateSentenceAnthropicClaude(inputSentence: string, targetLanguage: string, nativeLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
     const prompt = `You are tasked with translating a sentence from ${targetLanguage} to ${nativeLanguage}. Your goal is to provide the most accurate and natural translation without any additional explanations.
 
@@ -162,7 +162,7 @@ Instructions:
 
     // Send the prompt to the Anthropic API and get the response
     const msg = await anthropic.messages.create({
-        model: "claude-3-haiku-20240307",
+        model: llm,
         max_tokens: 1024,
         temperature: 0,
         messages: [
@@ -186,7 +186,7 @@ Instructions:
 }
 
 // Function to analyze the frequency of use of a word in the target language and translate the response
-export async function analyzeWordFrequencyAnthropicClaude(word: string, targetLanguage: string, nativeLanguage: string): Promise<[string, TokenCount]> {
+export async function analyzeWordFrequencyAnthropicClaude(word: string, targetLanguage: string, nativeLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
     const prompt = `You are a language expert tasked with providing information about word usage frequency in different languages. Your goal is to analyze a given word in a target language and generate content about its frequency of use. Follow these instructions carefully:
 
@@ -231,7 +231,7 @@ Remember to tailor your response to the specific word, target language, and nati
 
     // Send the prompt to the Anthropic API and get the response
     const msg = await anthropic.messages.create({
-        model: "claude-3-haiku-20240307",
+        model: llm,
         max_tokens: 4096,
         temperature: 0,
         messages: [

@@ -30,7 +30,7 @@ type TokenCount = {
 };
 
 // Function to get the definitions of a word with token count using OpenRouter
-export async function getDefinitionsOpenRouter(word: string, targetLanguage: string): Promise<[string, TokenCount]> {
+export async function getDefinitionsOpenRouter(word: string, targetLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the OpenRouter API
     const prompt = `You are tasked with providing basic ${targetLanguage} definitions for a given word, as they would appear in a ${targetLanguage}-${targetLanguage} dictionary. Your goal is to provide three essential meanings of the word, without any additional information.
 
@@ -62,7 +62,7 @@ If the word has only one or two very specific meanings and it's impossible to pr
     const response = await axios.post(
         OPENROUTER_API_URL,
         {
-            model: 'qwen/qwen-2.5-72b-instruct',
+            model: llm,
             messages: [
                 { role: 'user', content: prompt }
             ]
@@ -93,7 +93,7 @@ If the word has only one or two very specific meanings and it's impossible to pr
 }
 
 // Function to get short sentences containing a specific word with token count using OpenRouter
-export async function getSentencesOpenRouter(word: string, targetLanguage: string): Promise<[string, TokenCount]> {
+export async function getSentencesOpenRouter(word: string, targetLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the OpenRouter API
     const prompt = `Your task is to generate 50 short sentences in a specified language that include a specific word. 
 
@@ -132,7 +132,7 @@ Please provide your list of 50 sentences below:`;
     const response = await axios.post(
         OPENROUTER_API_URL,
         {
-            model: 'qwen/qwen-2.5-72b-instruct',
+            model: llm,
             messages: [
                 { role: 'user', content: prompt }
             ]
@@ -163,7 +163,7 @@ Please provide your list of 50 sentences below:`;
 }
 
 // Function to translate a sentence using OpenRouter
-export async function translateSentenceOpenRouter(inputSentence: string, targetLanguage: string, nativeLanguage: string): Promise<[string, TokenCount]> {
+export async function translateSentenceOpenRouter(inputSentence: string, targetLanguage: string, nativeLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the OpenRouter API
     const prompt = `You are tasked with translating a sentence from ${targetLanguage} to ${nativeLanguage}. Your goal is to provide the most accurate and natural translation without any additional explanations.
 
@@ -183,7 +183,7 @@ Instructions:
     const response = await axios.post(
         OPENROUTER_API_URL,
         {
-            model: 'qwen/qwen-2.5-72b-instruct',
+            model: llm,
             messages: [
                 { role: 'user', content: prompt }
             ]
@@ -214,7 +214,7 @@ Instructions:
 }
 
 // Function to analyze the frequency of use of a word in the target language and translate the response
-export async function analyzeWordFrequencyOpenRouter(word: string, targetLanguage: string, nativeLanguage: string): Promise<[string, TokenCount]> {
+export async function analyzeWordFrequencyOpenRouter(word: string, targetLanguage: string, nativeLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the OpenRouter API
     const prompt = `You are a language expert tasked with providing information about word usage frequency in different languages. Your goal is to analyze a given word in a target language and generate content about its frequency of use. Follow these instructions carefully:
 
@@ -261,7 +261,7 @@ Remember to tailor your response to the specific word, target language, and nati
     const response = await axios.post(
         OPENROUTER_API_URL,
         {
-            model: 'qwen/qwen-2.5-72b-instruct',
+            model: llm,
             messages: [
                 { role: 'user', content: prompt }
             ]

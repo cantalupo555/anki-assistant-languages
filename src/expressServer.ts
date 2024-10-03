@@ -25,9 +25,9 @@ const supportedLanguages = ['english', 'italian', 'german', 'french', 'spanish',
 // Route to handle the generation of definitions
 app.post('/generate/definitions', async (req, res) => {
     try {
-        // Get the word, target language, and API service from the request body
-        const { word, language: targetLanguage, apiService } = req.body;
-        // Validate the word, target language, and API service
+        // Get the word, target language, API service, and llm from the request body
+        const { word, language: targetLanguage, apiService, llm } = req.body;
+        // Validate the word, target language, API service, and llm
         if (!word || typeof word !== 'string' || word.trim() === '') {
             return res.status(400).json({ error: 'Valid word is required' });
         }
@@ -37,6 +37,9 @@ app.post('/generate/definitions', async (req, res) => {
         if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
             return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
         }
+        if (!llm || typeof llm !== 'string') {
+            return res.status(400).json({ error: 'Valid llm is required' });
+        }
 
         let definitions = '';
         let definitionsTokens: { inputTokens: number; outputTokens: number; totalTokens: number } = {
@@ -45,11 +48,11 @@ app.post('/generate/definitions', async (req, res) => {
             totalTokens: 0
         };
 
-        // Get the definitions for the word using the selected API service
+        // Get the definitions for the word using the selected API service and llm
         if (apiService === 'anthropic') {
-            [definitions, definitionsTokens] = await getDefinitionsAnthropicClaude(word, targetLanguage);
+            [definitions, definitionsTokens] = await getDefinitionsAnthropicClaude(word, targetLanguage, llm);
         } else if (apiService === 'openrouter') {
-            [definitions, definitionsTokens] = await getDefinitionsOpenRouter(word, targetLanguage);
+            [definitions, definitionsTokens] = await getDefinitionsOpenRouter(word, targetLanguage, llm);
         }
 
         // Log the definitions result
@@ -68,9 +71,9 @@ app.post('/generate/definitions', async (req, res) => {
 // Route to handle the generation of sentences
 app.post('/generate/sentences', async (req, res) => {
     try {
-        // Get the word, target language, and API service from the request body
-        const { word, language: targetLanguage, apiService } = req.body;
-        // Validate the word, target language, and API service
+        // Get the word, target language, API service, and llm from the request body
+        const { word, language: targetLanguage, apiService, llm } = req.body;
+        // Validate the word, target language, API service, and llm
         if (!word || typeof word !== 'string' || word.trim() === '') {
             return res.status(400).json({ error: 'Valid word is required' });
         }
@@ -80,6 +83,9 @@ app.post('/generate/sentences', async (req, res) => {
         if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
             return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
         }
+        if (!llm || typeof llm !== 'string') {
+            return res.status(400).json({ error: 'Valid llm is required' });
+        }
 
         let sentences = '';
         let sentencesTokens: { inputTokens: number; outputTokens: number; totalTokens: number } = {
@@ -88,11 +94,11 @@ app.post('/generate/sentences', async (req, res) => {
             totalTokens: 0
         };
 
-        // Get the sentences for the word using the selected API service
+        // Get the sentences for the word using the selected API service and llm
         if (apiService === 'anthropic') {
-            [sentences, sentencesTokens] = await getSentencesAnthropicClaude(word, targetLanguage);
+            [sentences, sentencesTokens] = await getSentencesAnthropicClaude(word, targetLanguage, llm);
         } else if (apiService === 'openrouter') {
-            [sentences, sentencesTokens] = await getSentencesOpenRouter(word, targetLanguage);
+            [sentences, sentencesTokens] = await getSentencesOpenRouter(word, targetLanguage, llm);
         }
 
         // Split sentences into an array
@@ -118,7 +124,7 @@ app.post('/generate/sentences', async (req, res) => {
 // Route to handle the translation request
 app.post('/translate', async (req, res) => {
     try {
-        const { text: inputSentence, targetLanguage, nativeLanguage, apiService } = req.body;
+        const { text: inputSentence, targetLanguage, nativeLanguage, apiService, llm } = req.body;
 
         // Validate input
         if (!inputSentence || typeof inputSentence !== 'string' || inputSentence.trim() === '') {
@@ -130,6 +136,9 @@ app.post('/translate', async (req, res) => {
         if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
             return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
         }
+        if (!llm || typeof llm !== 'string') {
+            return res.status(400).json({ error: 'Valid llm is required' });
+        }
 
         let translation = '';
         let tokenCount: { inputTokens: number; outputTokens: number; totalTokens: number } = {
@@ -138,11 +147,11 @@ app.post('/translate', async (req, res) => {
             totalTokens: 0
         };
 
-        // Perform translation using the selected API service
+        // Perform translation using the selected API service and llm
         if (apiService === 'anthropic') {
-            [translation, tokenCount] = await translateSentenceAnthropicClaude(inputSentence, targetLanguage, nativeLanguage);
+            [translation, tokenCount] = await translateSentenceAnthropicClaude(inputSentence, targetLanguage, nativeLanguage, llm);
         } else if (apiService === 'openrouter') {
-            [translation, tokenCount] = await translateSentenceOpenRouter(inputSentence, targetLanguage, nativeLanguage);
+            [translation, tokenCount] = await translateSentenceOpenRouter(inputSentence, targetLanguage, nativeLanguage, llm);
         }
 
         // Log the translation result
@@ -159,7 +168,7 @@ app.post('/translate', async (req, res) => {
 // Route to handle the word frequency analysis request
 app.post('/analyze/frequency', async (req, res) => {
     try {
-        const { word, targetLanguage, nativeLanguage, apiService } = req.body;
+        const { word, targetLanguage, nativeLanguage, apiService, llm } = req.body;
 
         if (!word || typeof word !== 'string' || word.trim() === '') {
             return res.status(400).json({ error: 'Valid word is required' });
@@ -170,6 +179,9 @@ app.post('/analyze/frequency', async (req, res) => {
         if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
             return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
         }
+        if (!llm || typeof llm !== 'string') {
+            return res.status(400).json({ error: 'Valid llm is required' });
+        }
 
         let analysis = '';
         let tokenCount: { inputTokens: number; outputTokens: number; totalTokens: number } = {
@@ -178,11 +190,11 @@ app.post('/analyze/frequency', async (req, res) => {
             totalTokens: 0
         };
 
-        // Perform analysis using the selected API service
+        // Perform analysis using the selected API service and llm
         if (apiService === 'anthropic') {
-            [analysis, tokenCount] = await analyzeWordFrequencyAnthropicClaude(word, targetLanguage, nativeLanguage);
+            [analysis, tokenCount] = await analyzeWordFrequencyAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
         } else if (apiService === 'openrouter') {
-            [analysis, tokenCount] = await analyzeWordFrequencyOpenRouter(word, targetLanguage, nativeLanguage);
+            [analysis, tokenCount] = await analyzeWordFrequencyOpenRouter(word, targetLanguage, nativeLanguage, llm);
         }
 
         // Log the frequency analysis result
