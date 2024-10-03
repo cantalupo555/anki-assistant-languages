@@ -11,7 +11,7 @@ import Notifications from './components/Notifications';
 import { AppProvider, useAppContext } from './context/selectionContext';
 import { handleExport } from './utils/languageCardExporter';
 import { stripMarkdown } from './utils/markdownStripper';
-import { TokenCount, SavedItem, TTSOption, APIServiceOption, FrequencyAnalysis } from './utils/Types';
+import { TokenCount, SavedItem, TTSOption, APIServiceOption, FrequencyAnalysis, LLMOption } from './utils/Types';
 import { voiceOptions } from './utils/voiceOptions';
 
 // Path to the Anki note type file
@@ -39,8 +39,23 @@ const ttsOptions: TTSOption[] = [
   { name: 'Azure TTS', value: 'azure' },
 ];
 
+// Array of available LLM options for each API service
+const llmOptions: { [key: string]: LLMOption[] } = {
+  anthropic: [
+    { name: 'Select AI', value: '' },
+    { name: 'Claude-3 Haiku', value: 'claude-3-haiku-20240307' },
+  ],
+  openrouter: [
+    { name: 'Select AI', value: '' },
+    { name: 'Qwen-2.5 72B Instruct', value: 'qwen/qwen-2.5-72b-instruct' },
+    { name: 'Llama-3.1 70B Instruct', value: 'meta-llama/llama-3.1-70b-instruct' },
+    { name: 'Claude-3 Haiku', value: 'anthropic/claude-3-haiku' },
+    { name: 'Gemini-1.5 Flash', value: 'google/gemini-flash-1.5' }
+  ]
+};
+
 const AppInner: React.FC = () => {
-  const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice } = useAppContext();
+  const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice, selectedLLM, setSelectedLLM } = useAppContext();
   const [word, setWord] = useState('');
   const [definitions, setDefinitions] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
   const [sentences, setSentences] = useState<{ text: string[]; tokenCount: TokenCount; totalPages: number } | null>(null);
@@ -89,6 +104,12 @@ const AppInner: React.FC = () => {
     setSelectedVoice(defaultVoice);
   }, [targetLanguage, selectedTTS, setSelectedVoice]);
 
+  // Effect to set the default LLM option based on the selected API service
+  useEffect(() => {
+    const defaultLLM = llmOptions[selectedAPIService.value]?.[0] || { name: 'Select AI', value: '' };
+    setSelectedLLM(defaultLLM);
+  }, [selectedAPIService, setSelectedLLM]);
+
   // Set up a timer to automatically hide notification messages after 3 seconds
   useEffect(() => {
     if (showSaveNotification || showExportNotification || showRemoveNotification || showClearAllNotification || showGenerateNotification) {
@@ -118,7 +139,7 @@ const AppInner: React.FC = () => {
   // Function to handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nativeLanguage || !targetLanguage || !selectedAPIService || !selectedTTS || !word) {
+    if (!nativeLanguage || !targetLanguage || !selectedAPIService || !selectedTTS || !word || !selectedLLM) {
       setError('Please fill in all required fields.');
       return;
     }
@@ -129,7 +150,7 @@ const AppInner: React.FC = () => {
     try {
       // Log request details for debugging
       console.log('Submitting form...');
-      console.log('Request payload for definitions:', { word, language: targetLanguage, apiService: selectedAPIService.value });
+      console.log('Request payload for definitions:', { word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
       // Fetch definitions
       const definitionsResponse = await fetch(DEFINITIONS_URL, {
@@ -137,7 +158,7 @@ const AppInner: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value }),
+        body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
       });
 
       // Log response status for debugging
@@ -155,7 +176,7 @@ const AppInner: React.FC = () => {
       console.log('Received definitions data:', definitionsData);
 
       // Log request details for debugging
-      console.log('Request payload for sentences:', { word, language: targetLanguage, apiService: selectedAPIService.value });
+      console.log('Request payload for sentences:', { word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
       // Fetch sentences
       const sentencesResponse = await fetch(SENTENCES_URL, {
@@ -163,7 +184,7 @@ const AppInner: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value }),
+        body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
       });
 
       // Log response status for debugging
@@ -230,7 +251,7 @@ const AppInner: React.FC = () => {
   // Function to handle word frequency analysis
   const handleAnalyzeFrequency = async () => {
     // Validate required fields
-    if (!nativeLanguage || !targetLanguage || !selectedAPIService || !word) {
+    if (!nativeLanguage || !targetLanguage || !selectedAPIService || !word || !selectedLLM) {
       setError('Please fill in all required fields.');
       return;
     }
@@ -241,13 +262,13 @@ const AppInner: React.FC = () => {
     try {
       // Log request details for debugging
       console.log('Sending frequency analysis request...');
-      console.log('Request payload:', { word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value });
+      console.log('Request payload:', { word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
       // Send POST request to the frequency analysis endpoint
       const analysisResponse = await fetch(ANALYZE_FREQUENCY_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value }),
+        body: JSON.stringify({ word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
       });
 
       // Log response status for debugging
@@ -328,7 +349,8 @@ const AppInner: React.FC = () => {
         text: sentence,
         nativeLanguage: nativeLanguage,
         targetLanguage: targetLanguage,
-        apiService: selectedAPIService.value
+        apiService: selectedAPIService.value,
+        llm: selectedLLM.value
       });
 
       // Send POST request to the translation API endpoint
@@ -341,7 +363,8 @@ const AppInner: React.FC = () => {
           text: sentence,
           nativeLanguage: nativeLanguage,
           targetLanguage: targetLanguage,
-          apiService: selectedAPIService.value
+          apiService: selectedAPIService.value,
+          llm: selectedLLM.value
         }),
       });
 
@@ -531,6 +554,13 @@ const AppInner: React.FC = () => {
     localStorage.setItem('selectedVoice', JSON.stringify(newVoice));
   };
 
+  // Function to handle LLM change
+  const handleLLMChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newLLM = llmOptions[selectedAPIService.value]?.find(llm => llm.value === e.target.value) || llmOptions[selectedAPIService.value][0];
+    setSelectedLLM(newLLM);
+    localStorage.setItem('selectedLLM', JSON.stringify(newLLM));
+  };
+
   // Render the main application components
   return (
       <div className="app-container">
@@ -558,6 +588,21 @@ const AppInner: React.FC = () => {
                   required
               >
                 {apiServiceOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.name}
+                    </option>
+                ))}
+              </select>
+
+              {/* LLM selection dropdown */}
+              <label htmlFor="llm-select">AI Model:</label>
+              <select
+                  id="llm-select"
+                  value={selectedLLM.value}
+                  onChange={handleLLMChange}
+                  required
+              >
+                {llmOptions[selectedAPIService.value]?.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.name}
                     </option>

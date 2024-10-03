@@ -5,7 +5,7 @@
 // useEffect: Hook to perform side effects in functional components
 // useContext: Hook to consume a context within a functional component
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { APIServiceOption, TTSOption, VoiceOption } from '../utils/Types';
+import { APIServiceOption, TTSOption, VoiceOption, LLMOption } from '../utils/Types';
 import { voiceOptions } from '../utils/voiceOptions'; // Import the voiceOptions array
 
 // Define the shape of the context
@@ -20,6 +20,8 @@ interface AppContextType {
     setSelectedTTS: React.Dispatch<React.SetStateAction<TTSOption>>;
     selectedVoice: VoiceOption;
     setSelectedVoice: React.Dispatch<React.SetStateAction<VoiceOption>>;
+    selectedLLM: LLMOption;
+    setSelectedLLM: React.Dispatch<React.SetStateAction<LLMOption>>;
 }
 
 // Create the context with an initial value of undefined
@@ -56,6 +58,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return voiceOptions[0]; // Default to first voice if nothing is saved
     });
 
+    // State to manage the selected LLM model
+    const [selectedLLM, setSelectedLLM] = useState<LLMOption>(() => {
+        const savedLLM = localStorage.getItem('selectedLLM');
+        if (savedLLM) {
+            return JSON.parse(savedLLM);
+        }
+        return { name: 'Select AI', value: '' }; // Default to first option if nothing is saved
+    });
+
     // Effect to save the state to localStorage whenever it changes
     useEffect(() => {
         localStorage.setItem('nativeLanguage', nativeLanguage);
@@ -63,7 +74,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('selectedAPIService', JSON.stringify(selectedAPIService));
         localStorage.setItem('selectedTTS', JSON.stringify(selectedTTS));
         localStorage.setItem('selectedVoice', JSON.stringify(selectedVoice));
-    }, [nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, selectedVoice]);
+        localStorage.setItem('selectedLLM', JSON.stringify(selectedLLM));
+    }, [nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, selectedVoice, selectedLLM]);
 
     // Effect to set the default voice option based on the selected language and TTS service
     useEffect(() => {
@@ -105,7 +117,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             selectedTTS,
             setSelectedTTS,
             selectedVoice,
-            setSelectedVoice
+            setSelectedVoice,
+            selectedLLM,
+            setSelectedLLM
         }}>
             {children}
         </AppContext.Provider>

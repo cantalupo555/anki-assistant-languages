@@ -34,6 +34,12 @@ export interface APIServiceOption {
     value: string;
 }
 
+// Define a type for LLM model options, which are used to select the LLM model
+export interface LLMOption {
+    name: string;
+    value: string;
+}
+
 // Define the props for the Modal component
 export interface ModalProps {
     isOpen: boolean;
