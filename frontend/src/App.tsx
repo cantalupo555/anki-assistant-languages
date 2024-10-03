@@ -32,13 +32,6 @@ const apiServiceOptions: APIServiceOption[] = [
   { name: 'OpenRouter', value: 'openrouter' },
 ];
 
-// Array of available TTS options
-const ttsOptions: TTSOption[] = [
-  { name: 'Select your TTS Service', value: '' },
-  { name: 'Google TTS', value: 'google' },
-  { name: 'Azure TTS', value: 'azure' },
-];
-
 // Array of available LLM options for each API service
 const llmOptions: { [key: string]: LLMOption[] } = {
   anthropic: [
@@ -53,6 +46,13 @@ const llmOptions: { [key: string]: LLMOption[] } = {
     { name: 'Gemini-1.5 Flash', value: 'google/gemini-flash-1.5' }
   ]
 };
+
+// Array of available TTS options
+const ttsOptions: TTSOption[] = [
+  { name: 'Select your TTS Service', value: '' },
+  { name: 'Google TTS', value: 'google' },
+  { name: 'Azure TTS', value: 'azure' },
+];
 
 const AppInner: React.FC = () => {
   const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice, selectedLLM, setSelectedLLM } = useAppContext();
@@ -318,25 +318,7 @@ const AppInner: React.FC = () => {
     }
   };
 
-  // Function to handle clicking on a sentence
-  const handleSentenceClick = (sentence: string) => {
-    setSelectedSentence(sentence);
-  };
-
-  // Function to handle page change
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-
-  // Function to get current page sentences
-  const getCurrentPageSentences = () => {
-    if (!sentences) return [];
-    const startIndex = (currentPage - 1) * 5;
-    const endIndex = startIndex + 5;
-    return sentences.text.slice(startIndex, endIndex);
-  };
-
-  // Function to handle the translation of a given sentence
+// Function to handle the translation of a given sentence
   const handleTranslation = async (sentence: string) => {
     if (isTranslateLoading) return; // Prevent multiple clicks while translating
 
@@ -400,6 +382,24 @@ const AppInner: React.FC = () => {
     } finally {
       setIsTranslateLoading(false); // Reset loading state
     }
+  };
+
+  // Function to handle clicking on a sentence
+  const handleSentenceClick = (sentence: string) => {
+    setSelectedSentence(sentence);
+  };
+
+  // Function to handle page change
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  // Function to get current page sentences
+  const getCurrentPageSentences = () => {
+    if (!sentences) return [];
+    const startIndex = (currentPage - 1) * 5;
+    const endIndex = startIndex + 5;
+    return sentences.text.slice(startIndex, endIndex);
   };
 
   // Function to update the total token count to be cumulative
