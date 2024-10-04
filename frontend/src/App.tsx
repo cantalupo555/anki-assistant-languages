@@ -648,7 +648,7 @@ const AppInner: React.FC = () => {
                   </>
               )}
 
-              <label htmlFor="word-input">Enter a word:</label>
+              <label htmlFor="word-input">Enter a word or expression:</label>
               <input
                   id="word-input"
                   type="text"
@@ -831,7 +831,7 @@ const AppInner: React.FC = () => {
         <Modal
             isOpen={isFrequencyModalOpen}
             onClose={() => setIsFrequencyModalOpen(false)}
-            title="Word Frequency Analysis"
+            title="Frequency Analysis"
         >
           {frequencyAnalysis ? (
               <div className="frequency-analysis">
