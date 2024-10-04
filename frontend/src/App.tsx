@@ -252,7 +252,7 @@ const AppInner: React.FC = () => {
   // Function to handle word frequency analysis
   const handleAnalyzeFrequency = async () => {
     // Validate required fields
-    if (!nativeLanguage || !targetLanguage || !selectedAPIService || !word || !selectedLLM) {
+    if (!nativeLanguage || !targetLanguage || !selectedAPIService || !word || selectedLLM.value === '') {
       setError('Please fill in all required fields.');
       return;
     }
@@ -319,7 +319,7 @@ const AppInner: React.FC = () => {
     }
   };
 
-// Function to handle the translation of a given sentence
+  // Function to handle the translation of a given sentence
   const handleTranslation = async (sentence: string) => {
     if (isTranslateLoading) return; // Prevent multiple clicks while translating
 
