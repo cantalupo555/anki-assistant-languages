@@ -53,3 +53,8 @@ export interface FrequencyAnalysis {
     text: string;
     tokenCount: TokenCount;
 }
+
+// Define the props for the Login component
+export interface LoginProps {
+    onLogin: (username: string, password: string) => void;
+}

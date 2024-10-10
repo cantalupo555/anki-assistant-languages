@@ -8,6 +8,7 @@ import './styles/App.css';
 import LanguageSelector from './components/languageSelector';
 import Modal from './components/Modal';
 import Notifications from './components/Notifications';
+import Login from './components/Login';
 import { AppProvider, useAppContext } from './context/selectionContext';
 import { handleExport } from './utils/languageCardExporter';
 import { stripMarkdown } from './utils/markdownStripper';
@@ -37,7 +38,6 @@ const llmOptions: { [key: string]: LLMOption[] } = {
   openrouter: [
     { name: 'Select AI', value: '' },
     { name: 'Llama-3.1 70B Instruct (Free)', value: 'meta-llama/llama-3.1-70b-instruct:free' },
-    { name: 'Llama-3.1 405B Instruct (Free)', value: 'meta-llama/llama-3.1-405b-instruct:free' },
     { name: 'Qwen-2.5 72B Instruct', value: 'qwen/qwen-2.5-72b-instruct' },
     { name: 'Claude-3 Haiku', value: 'anthropic/claude-3-haiku' },
     { name: 'Gemini-1.5 Flash', value: 'google/gemini-flash-1.5' },
@@ -56,6 +56,19 @@ const ttsOptions: TTSOption[] = [
 ];
 
 const AppInner: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleLogin = (username: string, password: string) => {
+    // For now, just log the credentials. In the future, you will handle the backend authentication.
+    if (username === 'test' && password === 'test') {
+      console.log('User:', username, 'Password:', password);
+      setIsAuthenticated(true);
+    } else {
+      console.log('Invalid credentials');
+    }
+  };
+
+  // Ensure hooks are called unconditionally
   const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice, selectedLLM, setSelectedLLM } = useAppContext();
   const [word, setWord] = useState('');
   const [definitions, setDefinitions] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
@@ -565,282 +578,288 @@ const AppInner: React.FC = () => {
   // Render the main application components
   return (
       <div className="app-container">
-        <header className="app-header">
-          <h1>📚📖🔖 Anki Assistant Languages</h1>
-          <nav>
-            <ul>
-              <li><a href="#card-generator">Card Generator</a></li>
-              <li><a href="#saved-items">Saved Items</a></li>
-            </ul>
-          </nav>
-        </header>
+        {isAuthenticated ? (
+            <>
+              <header className="app-header">
+                <h1>📚📖🔖 Anki Assistant Languages</h1>
+                <nav>
+                  <ul>
+                    <li><a href="#card-generator">Card Generator</a></li>
+                    <li><a href="#saved-items">Saved Items</a></li>
+                  </ul>
+                </nav>
+              </header>
 
-        <main>
-          {/* Render the card generator section */}
-          <section id="card-generator">
-            <h2>Card Generator</h2>
-            <form onSubmit={handleSubmit}>
-              {/* API service selection dropdown */}
-              <label htmlFor="api-service-select">AI Provider:</label>
-              <select
-                  id="api-service-select"
-                  value={selectedAPIService.value}
-                  onChange={(e) => setSelectedAPIService(apiServiceOptions.find(option => option.value === e.target.value) || apiServiceOptions[0])}
-                  required
-              >
-                {apiServiceOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.name}
-                    </option>
-                ))}
-              </select>
-
-              {/* LLM selection dropdown */}
-              <label htmlFor="llm-select">AI Model:</label>
-              <select
-                  id="llm-select"
-                  value={selectedLLM.value}
-                  onChange={handleLLMChange}
-                  required
-              >
-                {llmOptions[selectedAPIService.value]?.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.name}
-                    </option>
-                ))}
-              </select>
-
-              {/* Render the LanguageSelector component */}
-              <LanguageSelector />
-
-              {/* TTS service selection dropdown */}
-              <label htmlFor="tts-select">TTS Service:</label>
-              <select
-                  id="tts-select"
-                  value={selectedTTS.value}
-                  onChange={(e) => setSelectedTTS(ttsOptions.find(option => option.value === e.target.value) || ttsOptions[0])}
-                  required
-              >
-                {ttsOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.name}
-                    </option>
-                ))}
-              </select>
-
-              {/* Voice selection dropdown */}
-              {(targetLanguage === 'english' || targetLanguage === 'italian' || targetLanguage === 'german' || targetLanguage === 'french' || targetLanguage === 'spanish' || targetLanguage === 'portuguese' || targetLanguage === 'dutch' || targetLanguage === 'polish' || targetLanguage === 'russian' || targetLanguage === 'mandarin' || targetLanguage === 'japanese' || targetLanguage === 'korean') && (
-                  <>
-                    <label htmlFor="voice-select">Select Voice:</label>
+              <main>
+                {/* Render the card generator section */}
+                <section id="card-generator">
+                  <h2>Card Generator</h2>
+                  <form onSubmit={handleSubmit}>
+                    {/* API service selection dropdown */}
+                    <label htmlFor="api-service-select">AI Provider:</label>
                     <select
-                        id="voice-select"
-                        value={selectedVoice.value}
-                        onChange={handleVoiceChange}
+                        id="api-service-select"
+                        value={selectedAPIService.value}
+                        onChange={(e) => setSelectedAPIService(apiServiceOptions.find(option => option.value === e.target.value) || apiServiceOptions[0])}
+                        required
                     >
-                      {voiceOptions
-                          .filter((voice) => voice.language === targetLanguage && voice.ttsService === selectedTTS.value)
-                          .map((voice) => (
-                              <option key={voice.value} value={voice.value}>
-                                {voice.name}
-                              </option>
-                          ))}
-                    </select>
-                  </>
-              )}
-
-              <label htmlFor="word-input">Enter a word or expression:</label>
-              <input
-                  id="word-input"
-                  type="text"
-                  value={word}
-                  onChange={(e) => setWord(e.target.value)}
-                  placeholder={`Enter a ${targetLanguage} word`}
-                  required
-              />
-              <div className="button-container">
-                <button type="submit" className="generate-button" disabled={isGenerateLoading}>
-                  {isGenerateLoading ? 'Generating...' : 'Generate'}
-                </button>
-                <button type="button" className="analyze-button" onClick={handleAnalyzeFrequency} disabled={isAnalyzeLoading}>
-                  {isAnalyzeLoading ? 'Analyzing...' : 'Analyze Frequency'}
-                </button>
-              </div>
-            </form>
-
-            {error && <div className="error" role="alert">{error}</div>}
-
-            {definitions && sentences && (
-                <div className="result-container">
-                  <h3>Results for: {word}</h3>
-                  <div className="result-section">
-                    <h4>Definitions:</h4>
-                    <ReactMarkdown>{definitions.text}</ReactMarkdown>
-                  </div>
-                  <div className="result-section">
-                    <h4>Select 1 Sentence:</h4>
-                    <ul className="sentence-list">
-                      {getCurrentPageSentences().map((sentence, index) => (
-                          <li
-                              key={index}
-                              onClick={() => handleSentenceClick(sentence)}
-                              className={selectedSentence === sentence ? 'selected' : ''}
-                          >
-                            <ReactMarkdown>{sentence}</ReactMarkdown>
-                            {/* TTS listen button */}
-                            {(targetLanguage === 'english' || targetLanguage === 'italian' || targetLanguage === 'german' || targetLanguage === 'french' || targetLanguage === 'spanish' || targetLanguage === 'portuguese' || targetLanguage === 'dutch' || targetLanguage === 'polish' || targetLanguage === 'russian' || targetLanguage === 'mandarin' || targetLanguage === 'japanese' || targetLanguage === 'korean') && (
-                                <button onClick={() => handleTTS(sentence)} className="listen-button">
-                                  Listen
-                                </button>
-                            )}
-                          </li>
+                      {apiServiceOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.name}
+                          </option>
                       ))}
-                    </ul>
+                    </select>
 
-                    <div className="pagination">
-                      <button
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                      >
-                        Previous
+                    {/* LLM selection dropdown */}
+                    <label htmlFor="llm-select">AI Model:</label>
+                    <select
+                        id="llm-select"
+                        value={selectedLLM.value}
+                        onChange={handleLLMChange}
+                        required
+                    >
+                      {llmOptions[selectedAPIService.value]?.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.name}
+                          </option>
+                      ))}
+                    </select>
+
+                    {/* Render the LanguageSelector component */}
+                    <LanguageSelector />
+
+                    {/* TTS service selection dropdown */}
+                    <label htmlFor="tts-select">TTS Service:</label>
+                    <select
+                        id="tts-select"
+                        value={selectedTTS.value}
+                        onChange={(e) => setSelectedTTS(ttsOptions.find(option => option.value === e.target.value) || ttsOptions[0])}
+                        required
+                    >
+                      {ttsOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.name}
+                          </option>
+                      ))}
+                    </select>
+
+                    {/* Voice selection dropdown */}
+                    {(targetLanguage === 'english' || targetLanguage === 'italian' || targetLanguage === 'german' || targetLanguage === 'french' || targetLanguage === 'spanish' || targetLanguage === 'portuguese' || targetLanguage === 'dutch' || targetLanguage === 'polish' || targetLanguage === 'russian' || targetLanguage === 'mandarin' || targetLanguage === 'japanese' || targetLanguage === 'korean') && (
+                        <>
+                          <label htmlFor="voice-select">Select Voice:</label>
+                          <select
+                              id="voice-select"
+                              value={selectedVoice.value}
+                              onChange={handleVoiceChange}
+                          >
+                            {voiceOptions
+                                .filter((voice) => voice.language === targetLanguage && voice.ttsService === selectedTTS.value)
+                                .map((voice) => (
+                                    <option key={voice.value} value={voice.value}>
+                                      {voice.name}
+                                    </option>
+                                ))}
+                          </select>
+                        </>
+                    )}
+
+                    <label htmlFor="word-input">Enter a word or expression:</label>
+                    <input
+                        id="word-input"
+                        type="text"
+                        value={word}
+                        onChange={(e) => setWord(e.target.value)}
+                        placeholder={`Enter a ${targetLanguage} word`}
+                        required
+                    />
+                    <div className="button-container">
+                      <button type="submit" className="generate-button" disabled={isGenerateLoading}>
+                        {isGenerateLoading ? 'Generating...' : 'Generate'}
                       </button>
-                      <span>Page {currentPage} of {sentences.totalPages}</span>
-                      <button
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === sentences.totalPages}
-                      >
-                        Next
+                      <button type="button" className="analyze-button" onClick={handleAnalyzeFrequency} disabled={isAnalyzeLoading}>
+                        {isAnalyzeLoading ? 'Analyzing...' : 'Analyze Frequency'}
                       </button>
                     </div>
+                  </form>
 
-                    {selectedSentence && (
-                        <div className="selected-sentence">
-                          <h4>Selected Sentence:</h4>
-                          <ReactMarkdown>{selectedSentence}</ReactMarkdown>
-                          <button onClick={handleSaveItem}>Save Sentence</button>
-                          <button
-                              className={`translate-button ${isTranslateLoading ? 'loading' : ''}`}
-                              disabled={isTranslateLoading}
-                              onClick={() => handleTranslation(selectedSentence)}
-                          >
-                            {isTranslateLoading ? 'Translating...' : 'Translate this sentence'}
-                          </button>
-                          {translation && (
-                              <div className="translation">
-                                <h4>Translation:</h4>
-                                <ReactMarkdown>{translation}</ReactMarkdown>
+                  {error && <div className="error" role="alert">{error}</div>}
+
+                  {definitions && sentences && (
+                      <div className="result-container">
+                        <h3>Results for: {word}</h3>
+                        <div className="result-section">
+                          <h4>Definitions:</h4>
+                          <ReactMarkdown>{definitions.text}</ReactMarkdown>
+                        </div>
+                        <div className="result-section">
+                          <h4>Select 1 Sentence:</h4>
+                          <ul className="sentence-list">
+                            {getCurrentPageSentences().map((sentence, index) => (
+                                <li
+                                    key={index}
+                                    onClick={() => handleSentenceClick(sentence)}
+                                    className={selectedSentence === sentence ? 'selected' : ''}
+                                >
+                                  <ReactMarkdown>{sentence}</ReactMarkdown>
+                                  {/* TTS listen button */}
+                                  {(targetLanguage === 'english' || targetLanguage === 'italian' || targetLanguage === 'german' || targetLanguage === 'french' || targetLanguage === 'spanish' || targetLanguage === 'portuguese' || targetLanguage === 'dutch' || targetLanguage === 'polish' || targetLanguage === 'russian' || targetLanguage === 'mandarin' || targetLanguage === 'japanese' || targetLanguage === 'korean') && (
+                                      <button onClick={() => handleTTS(sentence)} className="listen-button">
+                                        Listen
+                                      </button>
+                                  )}
+                                </li>
+                            ))}
+                          </ul>
+
+                          <div className="pagination">
+                            <button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                            >
+                              Previous
+                            </button>
+                            <span>Page {currentPage} of {sentences.totalPages}</span>
+                            <button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === sentences.totalPages}
+                            >
+                              Next
+                            </button>
+                          </div>
+
+                          {selectedSentence && (
+                              <div className="selected-sentence">
+                                <h4>Selected Sentence:</h4>
+                                <ReactMarkdown>{selectedSentence}</ReactMarkdown>
+                                <button onClick={handleSaveItem}>Save Sentence</button>
+                                <button
+                                    className={`translate-button ${isTranslateLoading ? 'loading' : ''}`}
+                                    disabled={isTranslateLoading}
+                                    onClick={() => handleTranslation(selectedSentence)}
+                                >
+                                  {isTranslateLoading ? 'Translating...' : 'Translate this sentence'}
+                                </button>
+                                {translation && (
+                                    <div className="translation">
+                                      <h4>Translation:</h4>
+                                      <ReactMarkdown>{translation}</ReactMarkdown>
+                                    </div>
+                                )}
                               </div>
                           )}
                         </div>
-                    )}
-                  </div>
 
-                  <div className="token-info">
-                    <h4>Total Tokens:</h4>
-                    <p>
-                      Input: {totalTokenCount?.inputTokens}<br />
-                      Output: {totalTokenCount?.outputTokens}<br />
-                      Total: {totalTokenCount?.totalTokens}
-                    </p>
+                        <div className="token-info">
+                          <h4>Total Tokens:</h4>
+                          <p>
+                            Input: {totalTokenCount?.inputTokens}<br />
+                            Output: {totalTokenCount?.outputTokens}<br />
+                            Total: {totalTokenCount?.totalTokens}
+                          </p>
+                        </div>
+                      </div>
+                  )}
+                </section>
+
+                {/* Render the saved items section */}
+                <section id="saved-items">
+                  <h2>Saved Items</h2>
+                  {savedItems.length > 0 ? (
+                      <>
+                        <ul className="saved-items-list">
+                          {savedItems.map((item, index) => (
+                              <li key={index}>
+                                <div className="saved-item-content">
+                                  <ReactMarkdown>{item.sentence}</ReactMarkdown>
+                                  <ReactMarkdown>{item.definition}</ReactMarkdown>
+                                  {item.translation && (
+                                      <div className="translation">
+                                        <ReactMarkdown>{item.translation}</ReactMarkdown>
+                                      </div>
+                                  )}
+                                  {item.audioKey && audioData[item.audioKey] && (
+                                      <button onClick={() => playSavedAudio(item.audioKey!)}>
+                                        Play Audio
+                                      </button>
+                                  )}
+                                </div>
+                                <button onClick={() => handleRemoveSavedItem(item)}>Remove</button>
+                              </li>
+                          ))}
+                        </ul>
+                        <div className="action-buttons">
+                          <button onClick={handleExportClick} className="export-button">Export</button>
+                          <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
+                        </div>
+                      </>
+                  ) : (
+                      <p>No saved items yet. Generate some words and save sentences to see them here!</p>
+                  )}
+                </section>
+              </main>
+
+              {/* Footer */}
+              <footer className="app-footer">
+                <div className="footer-content">
+                  <div className="footer-section">
+                    <h3>📚📖🔖 Anki Assistant Languages</h3>
+                    <p>Enhance your language learning with AI-powered flashcards</p>
+                  </div>
+                  <div className="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                      <li><a href="#card-generator">Card Generator</a></li>
+                      <li><a href="#saved-items">Saved Items</a></li>
+                      <li><a href={ankiNoteTypeFile} download>Download Anki Note Type</a></li>
+                    </ul>
+                  </div>
+                  <div className="footer-section">
+                    <h3>Connect</h3>
+                    <ul>
+                      <li><a href="https://github.com/cantalupo555/anki-assistant-languages" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
+                      <li><a href="https://ankiweb.net/" target="_blank" rel="noopener noreferrer">Anki Website</a></li>
+                    </ul>
                   </div>
                 </div>
-            )}
-          </section>
+                <div className="footer-bottom">
+                  <p>© 2024 Anki Assistant Languages. This project is open source under the MIT License.</p>
+                </div>
+              </footer>
 
-          {/* Render the saved items section */}
-          <section id="saved-items">
-            <h2>Saved Items</h2>
-            {savedItems.length > 0 ? (
-                <>
-                  <ul className="saved-items-list">
-                    {savedItems.map((item, index) => (
-                        <li key={index}>
-                          <div className="saved-item-content">
-                            <ReactMarkdown>{item.sentence}</ReactMarkdown>
-                            <ReactMarkdown>{item.definition}</ReactMarkdown>
-                            {item.translation && (
-                                <div className="translation">
-                                  <ReactMarkdown>{item.translation}</ReactMarkdown>
-                                </div>
-                            )}
-                            {item.audioKey && audioData[item.audioKey] && (
-                                <button onClick={() => playSavedAudio(item.audioKey!)}>
-                                  Play Audio
-                                </button>
-                            )}
-                          </div>
-                          <button onClick={() => handleRemoveSavedItem(item)}>Remove</button>
-                        </li>
-                    ))}
-                  </ul>
-                  <div className="action-buttons">
-                    <button onClick={handleExportClick} className="export-button">Export</button>
-                    <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
-                  </div>
-                </>
-            ) : (
-                <p>No saved items yet. Generate some words and save sentences to see them here!</p>
-            )}
-          </section>
-        </main>
+              {/* Scroll-to-top button */}
+              {showScrollTop && (
+                  <button onClick={scrollToTop} className="scroll-to-top">
+                    ↑
+                  </button>
+              )}
 
-        {/* Footer */}
-        <footer className="app-footer">
-          <div className="footer-content">
-            <div className="footer-section">
-              <h3>📚📖🔖 Anki Assistant Languages</h3>
-              <p>Enhance your language learning with AI-powered flashcards</p>
-            </div>
-            <div className="footer-section">
-              <h3>Quick Links</h3>
-              <ul>
-                <li><a href="#card-generator">Card Generator</a></li>
-                <li><a href="#saved-items">Saved Items</a></li>
-                <li><a href={ankiNoteTypeFile} download>Download Anki Note Type</a></li>
-              </ul>
-            </div>
-            <div className="footer-section">
-              <h3>Connect</h3>
-              <ul>
-                <li><a href="https://github.com/cantalupo555/anki-assistant-languages" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
-                <li><a href="https://ankiweb.net/" target="_blank" rel="noopener noreferrer">Anki Website</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p>© 2024 Anki Assistant Languages. This project is open source under the MIT License.</p>
-          </div>
-        </footer>
+              {/* Render the notification messages */}
+              <Notifications
+                  showSaveNotification={showSaveNotification}
+                  showExportNotification={showExportNotification}
+                  showRemoveNotification={showRemoveNotification}
+                  showClearAllNotification={showClearAllNotification}
+                  showGenerateNotification={showGenerateNotification}
+              />
 
-        {/* Scroll-to-top button */}
-        {showScrollTop && (
-            <button onClick={scrollToTop} className="scroll-to-top">
-              ↑
-            </button>
+              {/* Render the modal for frequency analysis */}
+              <Modal
+                  isOpen={isFrequencyModalOpen}
+                  onClose={() => setIsFrequencyModalOpen(false)}
+                  title="Frequency Analysis"
+              >
+                {frequencyAnalysis ? (
+                    <div className="frequency-analysis">
+                      <ReactMarkdown>{frequencyAnalysis.text}</ReactMarkdown>
+                    </div>
+                ) : (
+                    <p>No analysis data available.</p>
+                )}
+              </Modal>
+            </>
+        ) : (
+            <Login onLogin={handleLogin} />
         )}
-
-        {/* Render the notification messages */}
-        <Notifications
-            showSaveNotification={showSaveNotification}
-            showExportNotification={showExportNotification}
-            showRemoveNotification={showRemoveNotification}
-            showClearAllNotification={showClearAllNotification}
-            showGenerateNotification={showGenerateNotification}
-        />
-
-        {/* Render the modal for frequency analysis */}
-        <Modal
-            isOpen={isFrequencyModalOpen}
-            onClose={() => setIsFrequencyModalOpen(false)}
-            title="Frequency Analysis"
-        >
-          {frequencyAnalysis ? (
-              <div className="frequency-analysis">
-                <ReactMarkdown>{frequencyAnalysis.text}</ReactMarkdown>
-              </div>
-          ) : (
-              <p>No analysis data available.</p>
-          )}
-        </Modal>
       </div>
   );
 };
