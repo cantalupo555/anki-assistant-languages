@@ -63,6 +63,7 @@ const AppInner: React.FC = () => {
     if (username === 'test' && password === 'test') {
       console.log('User:', username, 'Password:', password);
       setIsAuthenticated(true);
+      localStorage.setItem('isAuthenticated', 'true'); // Store the authentication state
     } else {
       console.log('Invalid credentials');
     }
@@ -92,15 +93,20 @@ const AppInner: React.FC = () => {
   const [frequencyAnalysis, setFrequencyAnalysis] = useState<FrequencyAnalysis | null>(null);
   const [isFrequencyModalOpen, setIsFrequencyModalOpen] = useState(false); // State to control the frequency analysis modal
 
-  // Effect to load saved items from localStorage on component mount
+  // Effect to load saved items and authentication state from localStorage on component mount
   useEffect(() => {
     const savedItemsFromStorage = localStorage.getItem('savedItems');
     const audioDataFromStorage = localStorage.getItem('audioData');
+    const isAuthenticatedFromStorage = localStorage.getItem('isAuthenticated');
+
     if (savedItemsFromStorage) {
       setSavedItems(JSON.parse(savedItemsFromStorage));
     }
     if (audioDataFromStorage) {
       setAudioData(JSON.parse(audioDataFromStorage));
+    }
+    if (isAuthenticatedFromStorage === 'true') {
+      setIsAuthenticated(true);
     }
   }, []);
 
