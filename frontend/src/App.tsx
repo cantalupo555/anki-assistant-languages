@@ -57,6 +57,7 @@ const ttsOptions: TTSOption[] = [
 
 const AppInner: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const handleLogin = (username: string, password: string) => {
     // For now, just log the credentials. In the future, you will handle the backend authentication.
@@ -64,8 +65,10 @@ const AppInner: React.FC = () => {
       console.log('User:', username, 'Password:', password);
       setIsAuthenticated(true);
       localStorage.setItem('isAuthenticated', 'true'); // Store the authentication state
+      setIsCheckingAuth(false);
     } else {
       console.log('Invalid credentials');
+      setIsCheckingAuth(false);
     }
   };
 
@@ -108,6 +111,7 @@ const AppInner: React.FC = () => {
     if (isAuthenticatedFromStorage === 'true') {
       setIsAuthenticated(true);
     }
+    setIsCheckingAuth(false); // Set checking auth to false after loading state
   }, []);
 
   // Effect to set the default voice option based on the selected language
@@ -582,6 +586,10 @@ const AppInner: React.FC = () => {
   };
 
   // Render the main application components
+  if (isCheckingAuth) {
+    return <div className="loading-screen"><p>Loading...</p></div>;
+  }
+
   return (
       <div className="app-container">
         {isAuthenticated ? (
