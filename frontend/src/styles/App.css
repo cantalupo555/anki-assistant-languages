@@ -541,3 +541,21 @@ select:focus {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
+
+/* Logout Button Styles */
+.logout-button {
+  background-color: var(--remove-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color var(--hover-transition);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-left: 1rem;
+}
+
+.logout-button:hover {
+  background-color: #c82333;
+}

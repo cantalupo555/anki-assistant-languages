@@ -72,6 +72,13 @@ const AppInner: React.FC = () => {
     }
   };
 
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('savedItems');
+    localStorage.removeItem('audioData');
+  };
+
   // Ensure hooks are called unconditionally
   const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice, selectedLLM, setSelectedLLM } = useAppContext();
   const [word, setWord] = useState('');
@@ -602,6 +609,7 @@ const AppInner: React.FC = () => {
                     <li><a href="#saved-items">Saved Items</a></li>
                   </ul>
                 </nav>
+                <button className="logout-button" onClick={handleLogout}>Logout</button>
               </header>
 
               <main>
