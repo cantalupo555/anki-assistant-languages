@@ -14,6 +14,7 @@ import { handleExport } from './utils/languageCardExporter';
 import { stripMarkdown } from './utils/markdownStripper';
 import { TokenCount, SavedItem, TTSOption, APIServiceOption, FrequencyAnalysis, LLMOption } from './utils/Types';
 import { voiceOptions } from './utils/voiceOptions';
+import useAuth from './utils/Auth';
 
 // Path to the Anki note type file
 const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
@@ -56,30 +57,9 @@ const ttsOptions: TTSOption[] = [
 ];
 
 const AppInner: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  // Use the useAuth hook
+  const { isAuthenticated, isCheckingAuth, handleLogin, handleLogout } = useAuth();
 
-  const handleLogin = (username: string, password: string) => {
-    // For now, just log the credentials. In the future, you will handle the backend authentication.
-    if (username === 'test' && password === 'test') {
-      console.log('User:', username, 'Password:', password);
-      setIsAuthenticated(true);
-      localStorage.setItem('isAuthenticated', 'true'); // Store the authentication state
-      setIsCheckingAuth(false);
-    } else {
-      console.log('Invalid credentials');
-      setIsCheckingAuth(false);
-    }
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('savedItems');
-    localStorage.removeItem('audioData');
-  };
-
-  // Ensure hooks are called unconditionally
   const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice, selectedLLM, setSelectedLLM } = useAppContext();
   const [word, setWord] = useState('');
   const [definitions, setDefinitions] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
@@ -107,7 +87,6 @@ const AppInner: React.FC = () => {
   useEffect(() => {
     const savedItemsFromStorage = localStorage.getItem('savedItems');
     const audioDataFromStorage = localStorage.getItem('audioData');
-    const isAuthenticatedFromStorage = localStorage.getItem('isAuthenticated');
 
     if (savedItemsFromStorage) {
       setSavedItems(JSON.parse(savedItemsFromStorage));
@@ -115,10 +94,6 @@ const AppInner: React.FC = () => {
     if (audioDataFromStorage) {
       setAudioData(JSON.parse(audioDataFromStorage));
     }
-    if (isAuthenticatedFromStorage === 'true') {
-      setIsAuthenticated(true);
-    }
-    setIsCheckingAuth(false); // Set checking auth to false after loading state
   }, []);
 
   // Effect to set the default voice option based on the selected language
