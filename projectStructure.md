@@ -27,6 +27,7 @@ anki-assistant-languages/
 │   │   │   ├── languageCardExporter.ts # Module for exporting data to Anki
 │   │   │   ├── markdownStripper.ts     # Module for removing Markdown formatting for TTS
 │   │   │   ├── Types.ts                # Contains type definitions for the project
+│   │   │   ├── useAuth.ts              # Authentication utility functions
 │   │   │   └── voiceOptions.ts         # Module for voice options for Google Cloud TTS and Azure Speech
 │   │   └── App.tsx                   # Main React component
 │   ├── package.json                  # Frontend dependencies

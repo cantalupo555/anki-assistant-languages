@@ -14,7 +14,7 @@ import { handleExport } from './utils/languageCardExporter';
 import { stripMarkdown } from './utils/markdownStripper';
 import { TokenCount, SavedItem, TTSOption, APIServiceOption, FrequencyAnalysis, LLMOption } from './utils/Types';
 import { voiceOptions } from './utils/voiceOptions';
-import useAuth from './utils/Auth';
+import useAuth from './utils/useAuth';
 
 // Path to the Anki note type file
 const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
