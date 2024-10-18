@@ -23,6 +23,7 @@ const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguage
 const ANALYZE_FREQUENCY_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/analyze/frequency';
 const DEFINITIONS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/definitions';
 const SENTENCES_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/sentences';
+const DIALOGUE_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/dialogue';
 const TRANSLATION_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/translate';
 const TOKEN_SUM_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/token/sum';
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
@@ -69,6 +70,7 @@ const AppInner: React.FC = () => {
   const [isGenerateLoading, setIsGenerateLoading] = useState(false);
   const [isAnalyzeLoading, setIsAnalyzeLoading] = useState(false);
   const [isTranslateLoading, setIsTranslateLoading] = useState(false); // State for translation loading
+  const [isDialogueLoading, setIsDialogueLoading] = useState(false); // State for dialogue loading
   const [selectedSentence, setSelectedSentence] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
@@ -82,6 +84,8 @@ const AppInner: React.FC = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [frequencyAnalysis, setFrequencyAnalysis] = useState<FrequencyAnalysis | null>(null);
   const [isFrequencyModalOpen, setIsFrequencyModalOpen] = useState(false); // State to control the frequency analysis modal
+  const [dialogue, setDialogue] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
+  const [isDialogueModalOpen, setIsDialogueModalOpen] = useState(false); // State to control the dialogue modal
 
   // Effect to load saved items and authentication state from localStorage on component mount
   useEffect(() => {
@@ -251,6 +255,75 @@ const AppInner: React.FC = () => {
       }
     } finally {
       setIsGenerateLoading(false);
+    }
+  };
+
+  // Function to handle generating dialogue
+  const handleGenerateDialogue = async () => {
+    if (!nativeLanguage || !targetLanguage || !selectedAPIService || !word || selectedLLM.value === '') {
+      setError('Please fill in all required fields.');
+      return;
+    }
+
+    setError(null); // Clear any previous errors
+    setIsDialogueLoading(true); // Set loading state
+
+    try {
+      // Log request details for debugging
+      console.log('Sending dialogue generation request...');
+      console.log('Request payload:', { word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
+
+      // Send POST request to the dialogue generation endpoint
+      const dialogueResponse = await fetch(DIALOGUE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
+      });
+
+      // Log response status for debugging
+      console.log('Response status for dialogue:', dialogueResponse.status);
+
+      // Check if response is successful
+      if (!dialogueResponse.ok) {
+        const errorText = await dialogueResponse.text();
+        console.error('Error response:', errorText);
+        throw new Error(`HTTP error! status: ${dialogueResponse.status}, message: ${errorText}`);
+      }
+
+      // Parse response JSON
+      const dialogueData = await dialogueResponse.json();
+      console.log('Received dialogue data:', dialogueData);
+
+      // Validate response data structure
+      if (
+          dialogueData.dialogue && typeof dialogueData.dialogue === 'string' &&
+          dialogueData.tokenCount && typeof dialogueData.tokenCount === 'object' &&
+          'inputTokens' in dialogueData.tokenCount &&
+          'outputTokens' in dialogueData.tokenCount &&
+          'totalTokens' in dialogueData.tokenCount
+      ) {
+        // Create and set dialogue object
+        const dialogue: FrequencyAnalysis = {
+          text: dialogueData.dialogue,
+          tokenCount: dialogueData.tokenCount
+        };
+        setDialogue(dialogue);
+        updateTotalTokenCount(dialogueData.tokenCount);
+        console.log('Set dialogue:', dialogue);
+        setIsDialogueModalOpen(true); // Open dialogue modal
+      } else {
+        console.error('Invalid dialogue data structure:', dialogueData);
+        throw new Error('Received invalid dialogue data from the server.');
+      }
+    } catch (error: unknown) {
+      console.error('Error in handleGenerateDialogue:', error);
+      if (error instanceof Error) {
+        setError(`An error occurred while fetching dialogue: ${error.message}`);
+      } else {
+        setError('An unknown error occurred while fetching dialogue.');
+      }
+    } finally {
+      setIsDialogueLoading(false); // Reset loading state
     }
   };
 
@@ -673,7 +746,12 @@ const AppInner: React.FC = () => {
                       <button type="submit" className="generate-button" disabled={isGenerateLoading}>
                         {isGenerateLoading ? 'Generating...' : 'Generate'}
                       </button>
-                      <button type="button" className="analyze-button" onClick={handleAnalyzeFrequency} disabled={isAnalyzeLoading}>
+                      <button type="button" className="dialogue-button" onClick={handleGenerateDialogue}
+                              disabled={isDialogueLoading}>
+                        {isDialogueLoading ? 'Generating...' : 'Generate Dialogue'}
+                      </button>
+                      <button type="button" className="analyze-button" onClick={handleAnalyzeFrequency}
+                              disabled={isAnalyzeLoading}>
                         {isAnalyzeLoading ? 'Analyzing...' : 'Analyze Frequency'}
                       </button>
                     </div>
@@ -683,7 +761,7 @@ const AppInner: React.FC = () => {
 
                   {definitions && sentences && (
                       <div className="result-container">
-                        <h3>Results for: {word}</h3>
+                      <h3>Results for: {word}</h3>
                         <div className="result-section">
                           <h4>Definitions:</h4>
                           <ReactMarkdown>{definitions.text}</ReactMarkdown>
@@ -838,6 +916,21 @@ const AppInner: React.FC = () => {
                   showClearAllNotification={showClearAllNotification}
                   showGenerateNotification={showGenerateNotification}
               />
+
+              {/* Render the modal for generated dialogue */}
+              <Modal
+                  isOpen={isDialogueModalOpen}
+                  onClose={() => setIsDialogueModalOpen(false)}
+                  title="Generated Dialogue"
+              >
+                {dialogue ? (
+                    <div className="dialogue">
+                      <ReactMarkdown>{dialogue.text}</ReactMarkdown>
+                    </div>
+                ) : (
+                    <p>No dialogue data available.</p>
+                )}
+              </Modal>
 
               {/* Render the modal for frequency analysis */}
               <Modal
