@@ -228,15 +228,15 @@ ${nativeLanguage}
 Create a dialogue that naturally incorporates this word or expression. The dialogue should consist of 6 to 8 lines of conversation, alternating between speakers A and B. Make sure to use the given word or expression at least once, preferably more if it fits naturally.
 
 Present your dialogue using only the following format, without any additional text or explanations:
-A: "[Sentence in target language]" | ([Translation sentence in ${nativeLanguage}])
-B: "[Sentence in target language]" | ([Translation sentence in ${nativeLanguage}])
+**A:** "[Sentence in target language]" | ([Translation sentence in ${nativeLanguage}])
+**B:** "[Sentence in target language]" | ([Translation sentence in ${nativeLanguage}])
 (Continue alternating between A and B for 6-8 lines total)
 
 Here's an example of how your output should look (using "Anch'io" as the given word):
-A: "Mi piace la pizza." | (I like pizza.)
-B: "Anch'io!" | (Me too!)
-A: "Stasera esco con gli amici." | (Tonight I'm going out with friends.)
-B: "Anch'io, ci vieni?" | (Me too, are you coming?)
+**A:** "Mi piace la pizza." | (I like pizza.)
+**B:** "Anch'io!" | (Me too!)
+**A:** "Stasera esco con gli amici." | (Tonight I'm going out with friends.)
+**B:** "Anch'io, ci vieni?" | (Me too, are you coming?)
 
 Remember to create a dialogue that sounds natural and contextually appropriate. Vary the topics and situations to make the conversation interesting. If the given word or expression is versatile, try to showcase different ways it can be used.`;
 
