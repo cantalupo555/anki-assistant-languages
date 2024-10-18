@@ -185,6 +185,58 @@ Instructions:
     return [translation, tokenCount];
 }
 
+// Function to get a short dialogue using a given word or idiomatic expression
+export async function getDialogueAnthropicClaude(word: string, targetLanguage: string, nativeLanguage: string, llm: string): Promise<[string, TokenCount]> {
+    // Construct the prompt for the Anthropic API
+    const prompt = `You are tasked with creating a short dialogue in the specified target language that demonstrates the use of a given word or idiomatic expression. The dialogue should be between two speakers, labeled as A and B.
+
+The word or idiomatic expression you should use in the dialogue is:
+${word}
+The target language for the dialogue is:
+${targetLanguage}
+The language for the translation is:
+${nativeLanguage}
+
+Create a dialogue that naturally incorporates this word or expression. The dialogue should consist of 6 to 8 lines of conversation, alternating between speakers A and B. Make sure to use the given word or expression at least once, preferably more if it fits naturally.
+
+Present your dialogue using only the following format, without any additional text or explanations:
+A: "[Sentence in target language]" | ([Translation sentence in ${nativeLanguage}])
+B: "[Sentence in target language]" | ([Translation sentence in ${nativeLanguage}])
+(Continue alternating between A and B for 6-8 lines total)
+
+Here's an example of how your output should look (using "Anch'io" as the given word):
+A: "Mi piace la pizza." | (I like pizza.)
+B: "Anch'io!" | (Me too!)
+A: "Stasera esco con gli amici." | (Tonight I'm going out with friends.)
+B: "Anch'io, ci vieni?" | (Me too, are you coming?)
+
+Remember to create a dialogue that sounds natural and contextually appropriate. Vary the topics and situations to make the conversation interesting. If the given word or expression is versatile, try to showcase different ways it can be used.`;
+
+    // Send the prompt to the Anthropic API and get the response
+    const msg = await anthropic.messages.create({
+        model: llm,
+        max_tokens: 1024,
+        temperature: 1,
+        messages: [
+            {role: "user", content: prompt}
+        ]
+    });
+
+    // Uncomment the line below to log the full API response to the console (useful for debugging)
+    // console.log('API Response:', msg);
+
+    // Extract the dialogue from the response
+    const dialogue = extractTextContent(msg.content);
+    // Calculate the token count
+    const tokenCount: TokenCount = {
+        inputTokens: msg.usage.input_tokens,
+        outputTokens: msg.usage.output_tokens,
+        totalTokens: msg.usage.input_tokens + msg.usage.output_tokens
+    };
+    // Return the dialogue and token count
+    return [dialogue, tokenCount];
+}
+
 // Function to analyze the frequency of use of a word in the target language and translate the response
 export async function analyzeWordFrequencyAnthropicClaude(word: string, targetLanguage: string, nativeLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
