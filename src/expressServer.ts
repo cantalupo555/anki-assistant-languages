@@ -3,8 +3,8 @@
 // cors: Middleware to enable Cross-Origin Resource Sharing (CORS)
 import express from 'express';
 import cors from 'cors';
-import { getDefinitionsAnthropicClaude, getSentencesAnthropicClaude, translateSentenceAnthropicClaude, analyzeWordFrequencyAnthropicClaude } from './anthropicClaude';
-import { getDefinitionsOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter, analyzeWordFrequencyOpenRouter } from './openRouter';
+import { getDefinitionsAnthropicClaude, getSentencesAnthropicClaude, translateSentenceAnthropicClaude, getDialogueAnthropicClaude, analyzeWordFrequencyAnthropicClaude } from './anthropicClaude';
+import { getDefinitionsOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter, getDialogueOpenRouter, analyzeWordFrequencyOpenRouter } from './openRouter';
 import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
 import { textToSpeech as azureTextToSpeech } from './azureTTS';
 
@@ -162,6 +162,53 @@ app.post('/translate', async (req, res) => {
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'An error occurred while processing the translation request' });
+    }
+});
+
+// Route to handle the generation of a dialogue
+app.post('/generate/dialogue', async (req, res) => {
+    try {
+        // Get the word, target language, native language, API service, and llm from the request body
+        const { word, targetLanguage, nativeLanguage, apiService, llm } = req.body;
+        // Validate the word, target language, native language, API service, and llm
+        if (!word || typeof word !== 'string' || word.trim() === '') {
+            return res.status(400).json({ error: 'Valid word is required' });
+        }
+        if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
+            return res.status(400).json({ error: 'Valid target language is required' });
+        }
+        if (!nativeLanguage || typeof nativeLanguage !== 'string' || !supportedLanguages.includes(nativeLanguage)) {
+            return res.status(400).json({ error: 'Valid native language is required' });
+        }
+        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
+            return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+        }
+        if (!llm || typeof llm !== 'string') {
+            return res.status(400).json({ error: 'Valid llm is required' });
+        }
+
+        let dialogue = '';
+        let tokenCount: { inputTokens: number; outputTokens: number; totalTokens: number } = {
+            inputTokens: 0,
+            outputTokens: 0,
+            totalTokens: 0
+        };
+
+        // Create the dialogue using the selected API service and llm
+        if (apiService === 'anthropic') {
+            [dialogue, tokenCount] = await getDialogueAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
+        } else if (apiService === 'openrouter') {
+            [dialogue, tokenCount] = await getDialogueOpenRouter(word, targetLanguage, nativeLanguage, llm);
+        }
+
+        // Log the dialogue result
+        console.log('Dialogue result:', dialogue, tokenCount);
+
+        // Return the dialogue and token count
+        res.json({ dialogue, tokenCount });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'An error occurred while processing the dialogue request' });
     }
 });
 
