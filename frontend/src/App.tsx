@@ -294,6 +294,9 @@ const AppInner: React.FC = () => {
       const dialogueData = await dialogueResponse.json();
       console.log('Received dialogue data:', dialogueData);
 
+      // Log the dialogue result
+      console.log('Dialogue result:', dialogueData.dialogue);
+
       // Validate response data structure
       if (
           dialogueData.dialogue && typeof dialogueData.dialogue === 'string' &&
@@ -363,6 +366,9 @@ const AppInner: React.FC = () => {
       // Parse response JSON
       const analysisData = await analysisResponse.json();
       console.log('Received analysis data:', analysisData);
+
+      // Log the analysis result
+      console.log('Analysis result:', analysisData.analysis);
 
       // Validate response data structure
       if (
@@ -442,6 +448,9 @@ const AppInner: React.FC = () => {
       // Parse response JSON
       const data = await response.json();
       console.log('Received translation data:', data);
+
+      // Log the translation result
+      console.log('Translation result:', data.translation);
 
       // Set the state for the translation
       setTranslation(data.translation);
@@ -761,7 +770,7 @@ const AppInner: React.FC = () => {
 
                   {definitions && sentences && (
                       <div className="result-container">
-                      <h3>Results for: {word}</h3>
+                        <h3>Results for: {word}</h3>
                         <div className="result-section">
                           <h4>Definitions:</h4>
                           <ReactMarkdown>{definitions.text}</ReactMarkdown>
