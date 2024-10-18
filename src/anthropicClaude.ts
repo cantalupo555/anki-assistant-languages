@@ -238,7 +238,7 @@ Remember to create a dialogue that sounds natural and contextually appropriate. 
 }
 
 // Function to analyze the frequency of use of a word in the target language and translate the response
-export async function analyzeWordFrequencyAnthropicClaude(word: string, targetLanguage: string, nativeLanguage: string, llm: string): Promise<[string, TokenCount]> {
+export async function analyzeFrequencyAnthropicClaude(word: string, targetLanguage: string, nativeLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Anthropic API
     const prompt = `You are a language expert tasked with providing information about word usage frequency in different languages. Your goal is to analyze a given word in a target language and generate content about its frequency of use. Follow these instructions carefully:
 

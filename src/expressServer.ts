@@ -3,8 +3,8 @@
 // cors: Middleware to enable Cross-Origin Resource Sharing (CORS)
 import express from 'express';
 import cors from 'cors';
-import { getDefinitionsAnthropicClaude, getSentencesAnthropicClaude, translateSentenceAnthropicClaude, getDialogueAnthropicClaude, analyzeWordFrequencyAnthropicClaude } from './anthropicClaude';
-import { getDefinitionsOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter, getDialogueOpenRouter, analyzeWordFrequencyOpenRouter } from './openRouter';
+import { getDefinitionsAnthropicClaude, getSentencesAnthropicClaude, translateSentenceAnthropicClaude, getDialogueAnthropicClaude, analyzeFrequencyAnthropicClaude } from './anthropicClaude';
+import { getDefinitionsOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter, getDialogueOpenRouter, analyzeFrequencyOpenRouter } from './openRouter';
 import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
 import { textToSpeech as azureTextToSpeech } from './azureTTS';
 
@@ -239,9 +239,9 @@ app.post('/analyze/frequency', async (req, res) => {
 
         // Perform analysis using the selected API service and llm
         if (apiService === 'anthropic') {
-            [analysis, tokenCount] = await analyzeWordFrequencyAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
+            [analysis, tokenCount] = await analyzeFrequencyAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
         } else if (apiService === 'openrouter') {
-            [analysis, tokenCount] = await analyzeWordFrequencyOpenRouter(word, targetLanguage, nativeLanguage, llm);
+            [analysis, tokenCount] = await analyzeFrequencyOpenRouter(word, targetLanguage, nativeLanguage, llm);
         }
 
         // Log the frequency analysis result
