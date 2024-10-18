@@ -305,9 +305,12 @@ const AppInner: React.FC = () => {
           'outputTokens' in dialogueData.tokenCount &&
           'totalTokens' in dialogueData.tokenCount
       ) {
+        // Replace special characters with \n
+        const dialogueText = dialogueData.dialogue.replace(/\n/g, '\n').replace(/<br\s*\/?>/g, '\n');
+
         // Create and set dialogue object
         const dialogue: FrequencyAnalysis = {
-          text: dialogueData.dialogue,
+          text: dialogueText,
           tokenCount: dialogueData.tokenCount
         };
         setDialogue(dialogue);
