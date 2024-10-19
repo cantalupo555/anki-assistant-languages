@@ -5,9 +5,11 @@ import '../styles/Modal.css';
 import { ModalProps } from '../utils/Types';
 
 // Define the Modal component
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, contentType }) => {
     // If the modal is not open, return null to not render it
     if (!isOpen) return null;
+
+    const contentClass = `modal-content modal-content-${contentType}`;
 
     // Return the modal structure
     return (
@@ -17,7 +19,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
                     <h2 className="modal-title">{title}</h2>
                     <span className="modal-close-icon" onClick={onClose}>&times;</span>
                 </div>
-                <div className="modal-content">
+                <div className={contentClass}>
                     {children} {/* Content of the modal */}
                 </div>
                 <button className="modal-close-button" onClick={onClose}>Close</button>

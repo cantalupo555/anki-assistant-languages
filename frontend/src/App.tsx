@@ -909,7 +909,7 @@ const AppInner: React.FC = () => {
                   </div>
                 </div>
                 <div className="footer-bottom">
-                  <p>© 2024 Anki Assistant Languages. This project is open source under the MIT License.</p>
+                  <p>&copy; 2024 Anki Assistant Languages. This project is open source under the MIT License.</p>
                 </div>
               </footer>
 
@@ -934,6 +934,7 @@ const AppInner: React.FC = () => {
                   isOpen={isDialogueModalOpen}
                   onClose={() => setIsDialogueModalOpen(false)}
                   title="Generated Dialogue"
+                  contentType="dialogue"
               >
                 {dialogue ? (
                     <div className="dialogue">
@@ -949,6 +950,7 @@ const AppInner: React.FC = () => {
                   isOpen={isFrequencyModalOpen}
                   onClose={() => setIsFrequencyModalOpen(false)}
                   title="Frequency Analysis"
+                  contentType="analysis"
               >
                 {frequencyAnalysis ? (
                     <div className="frequency-analysis">

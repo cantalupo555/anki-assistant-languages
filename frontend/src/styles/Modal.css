@@ -77,7 +77,25 @@
     flex-grow: 1;
     font-size: 16px;
     line-height: 1.6;
+}
+
+/* Styles for specific content types */
+.modal-content-dialogue {
     white-space: pre-wrap;
+}
+
+.modal-content-analysis p {
+    margin-bottom: 15px;
+}
+
+.modal-content-analysis ul,
+.modal-content-analysis ol {
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+.modal-content-analysis li {
+    margin-bottom: 10px;
 }
 
 /* Heading styles within the modal content */

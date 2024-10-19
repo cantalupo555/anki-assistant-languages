@@ -46,6 +46,7 @@ export interface ModalProps {
     onClose: () => void;
     title: string;
     children: React.ReactNode;
+    contentType: 'dialogue' | 'analysis' | 'default';
 }
 
 // Define a type for frequency analysis, which includes the text and its associated token counts
