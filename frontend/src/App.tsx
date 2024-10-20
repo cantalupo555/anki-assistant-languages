@@ -39,10 +39,10 @@ const apiServiceOptions: APIServiceOption[] = [
 const llmOptions: { [key: string]: LLMOption[] } = {
   openrouter: [
     { name: 'Select AI', value: '' },
-    { name: 'Llama-3.1 70B Instruct (Free)', value: 'meta-llama/llama-3.1-70b-instruct:free' },
+    { name: 'Llama-3.1 70B Instruct', value: 'meta-llama/llama-3.1-70b-instruct:free' },
     { name: 'Qwen-2.5 72B Instruct', value: 'qwen/qwen-2.5-72b-instruct' },
-    { name: 'Claude-3 Haiku', value: 'anthropic/claude-3-haiku' },
     { name: 'Gemini-1.5 Flash', value: 'google/gemini-flash-1.5' },
+    { name: 'Claude-3 Haiku', value: 'anthropic/claude-3-haiku' },
   ],
   anthropic: [
     { name: 'Select AI', value: '' },

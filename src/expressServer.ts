@@ -19,8 +19,8 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// List of supported languages
-const supportedLanguages = ['english', 'italian', 'german', 'french', 'spanish', 'portuguese', 'dutch', 'polish', 'russian', 'mandarin', 'japanese', 'korean'];
+// List of supported languages with updated language codes
+const supportedLanguages = ['en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 'ja-JP', 'ko-KR'];
 
 // Route to handle the generation of definitions
 app.post('/generate/definitions', async (req, res) => {
