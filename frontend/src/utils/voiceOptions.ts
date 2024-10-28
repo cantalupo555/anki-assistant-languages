@@ -1,11 +1,5 @@
 // Interface for voice options
-export interface VoiceOption {
-    name: string;
-    value: string;
-    language: string;
-    languageCode: string;
-    ttsService: 'google' | 'azure';
-}
+import { VoiceOption } from './Types';
 
 // Array of available voice options for TTS
 export const voiceOptions: VoiceOption[] = [

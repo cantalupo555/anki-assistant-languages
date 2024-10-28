@@ -25,7 +25,7 @@ export interface VoiceOption {
     value: string;
     language: string;
     languageCode: string;
-    ttsService: string;
+    ttsService: 'google' | 'azure';
 }
 
 // Define a type for API service options, which are used to select the backend service

@@ -107,6 +107,7 @@
   - [ ] Garantir que apenas usuários autenticados possam acessar certas rotas
   - [ ] Implementar tokens de sessão para manter a autenticação
   - [ ] Adicionar middleware de autenticação para rotas protegidas
+- [x] Mover a interface `VoiceOption` do `voiceOptions.ts` para `Types.ts`
 
 ## Backend
 - [ ] Implementar a funcionalidade de salvar itens no banco de dados
