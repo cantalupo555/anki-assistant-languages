@@ -108,6 +108,10 @@
   - [ ] Implementar tokens de sessão para manter a autenticação
   - [ ] Adicionar middleware de autenticação para rotas protegidas
 - [x] Mover a interface `VoiceOption` do `voiceOptions.ts` para `Types.ts`
+- [x] Alterar a forma que o `supportedLanguages` é apresentado:
+  - [x] Atualizar os `value=` em `languageSelector.tsx` para usar os novos nomes de idioma
+  - [x] Atualizar as comparações de `targetLanguage ===` em `App.tsx` para usar os novos nomes de idioma
+  - [x] Atualizar os `language:` em `voiceOptions.ts` para corresponder aos novos nomes
 
 ## Backend
 - [ ] Implementar a funcionalidade de salvar itens no banco de dados
@@ -184,6 +188,24 @@
   - [ ] Garantir que apenas usuários autenticados possam acessar certas rotas
   - [ ] Implementar tokens de sessão para manter a autenticação
   - [ ] Adicionar middleware de autenticação para rotas protegidas
+- [x] Garantir que a lógica de validação e manipulação de idiomas no backend esteja alinhada com as mudanças feitas no frontend
+  - [x] Alterar o array `supportedLanguages` em `expressServer.ts` para:
+    ```typescript
+    const supportedLanguages = [
+      'English (United States)',
+      'Italian (Italy)',
+      'German (Germany)',
+      'French (France)',
+      'Spanish (Spain)',
+      'Portuguese (Brazil)',
+      'Dutch (Netherlands)',
+      'Polish (Poland)',
+      'Russian (Russia)',
+      'Mandarin (China)',
+      'Japanese (Japan)',
+      'Korean (Korea)'
+    ];
+    ```
 
 ## Integração de APIs
 - [x] ~~Implementar a integração com `Google Gemini`~~ [Gemini agora funciona no OpenRouter]

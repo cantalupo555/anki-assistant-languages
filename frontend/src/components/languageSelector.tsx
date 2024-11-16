@@ -21,18 +21,18 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = () => {
                 required
             >
                 <option value="">Select your native language</option>
-                <option value="en-US">English (US)</option>
-                <option value="it-IT">Italiano (IT)</option>
-                <option value="de-DE">Deutsch (DE)</option>
-                <option value="fr-FR">Français (FR)</option>
-                <option value="es-ES">Español (ES)</option>
-                <option value="pt-BR">Português (BR)</option>
-                <option value="nl-NL">Nederlands (NL)</option>
-                <option value="pl-PL">Polski (PL)</option>
-                <option value="ru-RU">Pусский (RU)</option>
-                <option value="cmn-CN">普通话（CN)</option>
-                <option value="ja-JP">日本語（JP)</option>
-                <option value="ko-KR">한국어（KR)</option>
+                <option value="English (United States)">English (US)</option>
+                <option value="Italian (Italy)">Italiano (IT)</option>
+                <option value="German (Germany)">Deutsch (DE)</option>
+                <option value="French (France)">Français (FR)</option>
+                <option value="Spanish (Spain)">Español (ES)</option>
+                <option value="Portuguese (Brazil)">Português (BR)</option>
+                <option value="Dutch (Netherlands)">Nederlands (NL)</option>
+                <option value="Polish (Poland)">Polski (PL)</option>
+                <option value="Russian (Russia)">Pусский (RU)</option>
+                <option value="Mandarin (China)">普通话（CN)</option>
+                <option value="Japanese (Japan)">日本語（JP)</option>
+                <option value="Korean (Korea)">한국어（KR)</option>
             </select>
 
             {/* Target language selection */}
@@ -44,18 +44,18 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = () => {
                 required
             >
                 <option value="">Select target language</option>
-                <option value="en-US">English (US)</option>
-                <option value="it-IT">Italiano (IT)</option>
-                <option value="de-DE">Deutsch (DE)</option>
-                <option value="fr-FR">Français (FR)</option>
-                <option value="es-ES">Español (ES)</option>
-                <option value="pt-BR">Português (BR)</option>
-                <option value="nl-NL">Nederlands (NL)</option>
-                <option value="pl-PL">Polski (PL)</option>
-                <option value="ru-RU">Pусский (RU)</option>
-                <option value="cmn-CN">普通话（CN)</option>
-                <option value="ja-JP">日本語（JP)</option>
-                <option value="ko-KR">한국어（KR)</option>
+                <option value="English (United States)">English (US)</option>
+                <option value="Italian (Italy)">Italiano (IT)</option>
+                <option value="German (Germany)">Deutsch (DE)</option>
+                <option value="French (France)">Français (FR)</option>
+                <option value="Spanish (Spain)">Español (ES)</option>
+                <option value="Portuguese (Brazil)">Português (BR)</option>
+                <option value="Dutch (Netherlands)">Nederlands (NL)</option>
+                <option value="Polish (Poland)">Polski (PL)</option>
+                <option value="Russian (Russia)">Pусский (RU)</option>
+                <option value="Mandarin (China)">普通话（CN)</option>
+                <option value="Japanese (Japan)">日本語（JP)</option>
+                <option value="Korean (Korea)">한국어（KR)</option>
             </select>
         </div>
     );

@@ -726,7 +726,7 @@ const AppInner: React.FC = () => {
                     </select>
 
                     {/* Voice selection dropdown */}
-                    {(targetLanguage === 'english' || targetLanguage === 'italian' || targetLanguage === 'german' || targetLanguage === 'french' || targetLanguage === 'spanish' || targetLanguage === 'portuguese' || targetLanguage === 'dutch' || targetLanguage === 'polish' || targetLanguage === 'russian' || targetLanguage === 'mandarin' || targetLanguage === 'japanese' || targetLanguage === 'korean') && (
+                    {(targetLanguage === 'English (United States)' || targetLanguage === 'Italian (Italy)' || targetLanguage === 'German (Germany)' || targetLanguage === 'French (France)' || targetLanguage === 'Spanish (Spain)' || targetLanguage === 'Portuguese (Brazil)' || targetLanguage === 'Dutch (Netherlands)' || targetLanguage === 'Polish (Poland)' || targetLanguage === 'Russian (Russia)' || targetLanguage === 'Mandarin (China)' || targetLanguage === 'Japanese (Japan)' || targetLanguage === 'Korean (Korea)') && (
                         <>
                           <label htmlFor="voice-select">Select Voice:</label>
                           <select
@@ -789,7 +789,7 @@ const AppInner: React.FC = () => {
                                 >
                                   <ReactMarkdown>{sentence}</ReactMarkdown>
                                   {/* TTS listen button */}
-                                  {(targetLanguage === 'english' || targetLanguage === 'italian' || targetLanguage === 'german' || targetLanguage === 'french' || targetLanguage === 'spanish' || targetLanguage === 'portuguese' || targetLanguage === 'dutch' || targetLanguage === 'polish' || targetLanguage === 'russian' || targetLanguage === 'mandarin' || targetLanguage === 'japanese' || targetLanguage === 'korean') && (
+                                  {(targetLanguage === 'English (United States)' || targetLanguage === 'Italian (Italy)' || targetLanguage === 'German (Germany)' || targetLanguage === 'French (France)' || targetLanguage === 'Spanish (Spain)' || targetLanguage === 'Portuguese (Brazil)' || targetLanguage === 'Dutch (Netherlands)' || targetLanguage === 'Polish (Poland)' || targetLanguage === 'Russian (Russia)' || targetLanguage === 'Mandarin (China)' || targetLanguage === 'Japanese (Japan)' || targetLanguage === 'Korean (Korea)') && (
                                       <button onClick={() => handleTTS(sentence)} className="listen-button">
                                         Listen
                                       </button>
