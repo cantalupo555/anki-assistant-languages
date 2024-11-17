@@ -87,8 +87,8 @@
 - [x] Exibir conteúdo do `handleGenerateDialogue` no Modal
 - [x] Corrigir problema na exibição do conteúdo Modal devido a implementação do `handleGenerateDialogue`
 - [ ] Corrigir context para o campo AI Model ser salvo corretamente
-- [ ] Modularizar as funções de manipulação de eventos:
-  - [ ] Mover `handleSubmit` para um arquivo separado `handleSubmit.ts`
+- [ ] Modularizar as funções de manipulação de eventos no App.tsx:
+  - [x] Mover `handleSubmit` para um arquivo separado `handleSubmit.ts`
   - [ ] Mover `handleGenerateDialogue` para um arquivo separado `handleGenerateDialogue.ts`
   - [ ] Mover `handleAnalyzeFrequency` para um arquivo separado `handleAnalyzeFrequency.ts`
   - [ ] Mover `handleTranslation` para um arquivo separado `handleTranslation.ts`

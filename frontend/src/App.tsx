@@ -15,6 +15,7 @@ import { stripMarkdown } from './utils/markdownStripper';
 import { TokenCount, SavedItem, TTSOption, APIServiceOption, FrequencyAnalysis, LLMOption } from './utils/Types';
 import { voiceOptions } from './utils/voiceOptions';
 import useAuth from './utils/useAuth';
+import { handleSubmit } from './utils/handleSubmit';
 
 // Path to the Anki note type file
 const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
@@ -145,118 +146,6 @@ const AppInner: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Function to handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nativeLanguage || !targetLanguage || !selectedAPIService || !selectedTTS || !word || !selectedLLM) {
-      setError('Please fill in all required fields.');
-      return;
-    }
-    setError(null);
-    setIsGenerateLoading(true);
-    setCurrentPage(1);
-
-    try {
-      // Log request details for debugging
-      console.log('Submitting form...');
-      console.log('Request payload for definitions:', { word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
-
-      // Fetch definitions
-      const definitionsResponse = await fetch(DEFINITIONS_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
-      });
-
-      // Log response status for debugging
-      console.log('Response status for definitions:', definitionsResponse.status);
-
-      // Check if response is successful
-      if (!definitionsResponse.ok) {
-        const errorText = await definitionsResponse.text();
-        console.error('Error response for definitions:', errorText);
-        throw new Error(`HTTP error! status: ${definitionsResponse.status}, message: ${errorText}`);
-      }
-
-      const definitionsData = await definitionsResponse.json();
-      setDefinitions(definitionsData.definitions);
-      console.log('Received definitions data:', definitionsData);
-
-      // Log request details for debugging
-      console.log('Request payload for sentences:', { word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
-
-      // Fetch sentences
-      const sentencesResponse = await fetch(SENTENCES_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
-      });
-
-      // Log response status for debugging
-      console.log('Response status for sentences:', sentencesResponse.status);
-
-      // Check if response is successful
-      if (!sentencesResponse.ok) {
-        const errorText = await sentencesResponse.text();
-        console.error('Error response for sentences:', errorText);
-        throw new Error(`HTTP error! status: ${sentencesResponse.status}, message: ${errorText}`);
-      }
-
-      const sentencesData = await sentencesResponse.json();
-      setSentences(sentencesData.sentences);
-      console.log('Received sentences data:', sentencesData);
-
-      // Log request details for debugging
-      console.log('Request payload for total token count:', {
-        definitionsTokens: definitionsData.definitions.tokenCount,
-        sentencesTokens: sentencesData.sentences.tokenCount,
-        translationTokens: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
-      });
-
-      // Calculate total token count
-      const totalTokenCountResponse = await fetch(TOKEN_SUM_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          definitionsTokens: definitionsData.definitions.tokenCount,
-          sentencesTokens: sentencesData.sentences.tokenCount,
-          translationTokens: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
-        }),
-      });
-
-      // Log response status for debugging
-      console.log('Response status for total token count:', totalTokenCountResponse.status);
-
-      // Check if response is successful
-      if (!totalTokenCountResponse.ok) {
-        const errorText = await totalTokenCountResponse.text();
-        console.error('Error response for total token count:', errorText);
-        throw new Error(`HTTP error! status: ${totalTokenCountResponse.status}, message: ${errorText}`);
-      }
-
-      const totalTokenCountData = await totalTokenCountResponse.json();
-      setTotalTokenCount(totalTokenCountData);
-      console.log('Received total token count data:', totalTokenCountData);
-
-      setShowGenerateNotification(true);
-    } catch (error) {
-      console.error('Error in handleSubmit:', error);
-      if (error instanceof Error) {
-        setError(`An error occurred while fetching data: ${error.message}`);
-      } else {
-        setError('An unknown error occurred while fetching data.');
-      }
-    } finally {
-      setIsGenerateLoading(false);
-    }
-  };
 
   // Function to handle generating dialogue
   const handleGenerateDialogue = async () => {
@@ -676,7 +565,7 @@ const AppInner: React.FC = () => {
                 {/* Render the card generator section */}
                 <section id="card-generator">
                   <h2>Card Generator</h2>
-                  <form onSubmit={handleSubmit}>
+                  <form onSubmit={(e) => handleSubmit(e, setDefinitions, setSentences, setTotalTokenCount, setError, setIsGenerateLoading, setCurrentPage, updateTotalTokenCount, setShowGenerateNotification, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM)}> {/* Update the onSubmit prop */}
                     {/* API service selection dropdown */}
                     <label htmlFor="api-service-select">AI Provider:</label>
                     <select
