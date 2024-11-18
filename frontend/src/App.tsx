@@ -16,6 +16,7 @@ import { TokenCount, SavedItem, TTSOption, APIServiceOption, FrequencyAnalysis, 
 import { voiceOptions } from './utils/voiceOptions';
 import useAuth from './utils/useAuth';
 import { handleSubmit } from './utils/handleSubmit';
+import { handleGenerateDialogue } from './utils/handleGenerateDialogue';
 
 // Path to the Anki note type file
 const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
@@ -146,81 +147,6 @@ const AppInner: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Function to handle generating dialogue
-  const handleGenerateDialogue = async () => {
-    if (!nativeLanguage || !targetLanguage || !selectedAPIService || !word || selectedLLM.value === '') {
-      setError('Please fill in all required fields.');
-      return;
-    }
-
-    setError(null); // Clear any previous errors
-    setIsDialogueLoading(true); // Set loading state
-
-    try {
-      // Log request details for debugging
-      console.log('Sending dialogue generation request...');
-      console.log('Request payload:', { word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
-
-      // Send POST request to the dialogue generation endpoint
-      const dialogueResponse = await fetch(DIALOGUE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
-      });
-
-      // Log response status for debugging
-      console.log('Response status for dialogue:', dialogueResponse.status);
-
-      // Check if response is successful
-      if (!dialogueResponse.ok) {
-        const errorText = await dialogueResponse.text();
-        console.error('Error response:', errorText);
-        throw new Error(`HTTP error! status: ${dialogueResponse.status}, message: ${errorText}`);
-      }
-
-      // Parse response JSON
-      const dialogueData = await dialogueResponse.json();
-      console.log('Received dialogue data:', dialogueData);
-
-      // Log the dialogue result
-      console.log('Dialogue result:', dialogueData.dialogue);
-
-      // Validate response data structure
-      if (
-          dialogueData.dialogue && typeof dialogueData.dialogue === 'string' &&
-          dialogueData.tokenCount && typeof dialogueData.tokenCount === 'object' &&
-          'inputTokens' in dialogueData.tokenCount &&
-          'outputTokens' in dialogueData.tokenCount &&
-          'totalTokens' in dialogueData.tokenCount
-      ) {
-        // Replace special characters with \n
-        const dialogueText = dialogueData.dialogue.replace(/\n/g, '\n').replace(/<br\s*\/?>/g, '\n');
-
-        // Create and set dialogue object
-        const dialogue: FrequencyAnalysis = {
-          text: dialogueText,
-          tokenCount: dialogueData.tokenCount
-        };
-        setDialogue(dialogue);
-        updateTotalTokenCount(dialogueData.tokenCount);
-        console.log('Set dialogue:', dialogue);
-        setIsDialogueModalOpen(true); // Open dialogue modal
-      } else {
-        console.error('Invalid dialogue data structure:', dialogueData);
-        throw new Error('Received invalid dialogue data from the server.');
-      }
-    } catch (error: unknown) {
-      console.error('Error in handleGenerateDialogue:', error);
-      if (error instanceof Error) {
-        setError(`An error occurred while fetching dialogue: ${error.message}`);
-      } else {
-        setError('An unknown error occurred while fetching dialogue.');
-      }
-    } finally {
-      setIsDialogueLoading(false); // Reset loading state
-    }
-  };
 
   // Function to handle word frequency analysis
   const handleAnalyzeFrequency = async () => {
@@ -647,7 +573,7 @@ const AppInner: React.FC = () => {
                       <button type="submit" className="generate-button" disabled={isGenerateLoading}>
                         {isGenerateLoading ? 'Generating...' : 'Generate'}
                       </button>
-                      <button type="button" className="dialogue-button" onClick={handleGenerateDialogue}
+                      <button type="button" className="dialogue-button" onClick={() => handleGenerateDialogue(setDialogue, setIsDialogueLoading, setError, updateTotalTokenCount, setIsDialogueModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM)}
                               disabled={isDialogueLoading}>
                         {isDialogueLoading ? 'Generating...' : 'Generate Dialogue'}
                       </button>
