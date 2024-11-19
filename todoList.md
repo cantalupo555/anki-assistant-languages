@@ -89,8 +89,8 @@
 - [ ] Corrigir context para o campo AI Model ser salvo corretamente
 - [ ] Modularizar as funções de manipulação de eventos no App.tsx:
   - [x] Mover `handleSubmit` para um arquivo separado `handleSubmit.ts`
-  - [ ] Mover `handleGenerateDialogue` para um arquivo separado `handleGenerateDialogue.ts`
-  - [ ] Mover `handleAnalyzeFrequency` para um arquivo separado `handleAnalyzeFrequency.ts`
+  - [x] Mover `handleGenerateDialogue` para um arquivo separado `handleGenerateDialogue.ts`
+  - [x] Mover `handleAnalyzeFrequency` para um arquivo separado `handleAnalyzeFrequency.ts`
   - [ ] Mover `handleTranslation` para um arquivo separado `handleTranslation.ts`
   - [ ] Importar as funções modularizadas no `App.tsx`
 - [ ] Considerar o uso de cookies HTTP-only para armazenar tokens de autenticação em vez de localStorage:
