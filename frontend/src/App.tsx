@@ -18,6 +18,7 @@ import useAuth from './utils/useAuth';
 import { handleSubmit } from './utils/handleSubmit';
 import { handleGenerateDialogue } from './utils/handleGenerateDialogue';
 import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
+import { handleTranslation } from './utils/handleTranslation';
 
 // Path to the Anki note type file
 const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
@@ -149,75 +150,6 @@ const AppInner: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Function to handle the translation of a given sentence
-  const handleTranslation = async (sentence: string) => {
-    if (isTranslateLoading) return; // Prevent multiple clicks while translating
-
-    try {
-      setIsTranslateLoading(true); // Set loading state
-
-      // Log request details for debugging
-      console.log('Sending translation request...');
-      console.log('Request payload:', {
-        text: sentence,
-        nativeLanguage: nativeLanguage,
-        targetLanguage: targetLanguage,
-        apiService: selectedAPIService.value,
-        llm: selectedLLM.value
-      });
-
-      // Send POST request to the translation API endpoint
-      const response = await fetch(TRANSLATION_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: sentence,
-          nativeLanguage: nativeLanguage,
-          targetLanguage: targetLanguage,
-          apiService: selectedAPIService.value,
-          llm: selectedLLM.value
-        }),
-      });
-
-      // Log response status for debugging
-      console.log('Response status for translation:', response.status);
-
-      // Check if response is successful
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-      }
-
-      // Parse response JSON
-      const data = await response.json();
-      console.log('Received translation data:', data);
-
-      // Log the translation result
-      console.log('Translation result:', data.translation);
-
-      // Set the state for the translation
-      setTranslation(data.translation);
-
-      // Update the total token count to be cumulative
-      updateTotalTokenCount(data.tokenCount);
-
-      return data.translation; // Return the translation
-    } catch (error) {
-      console.error('Error in handleTranslation:', error);
-      if (error instanceof Error) {
-        setError(`An error occurred while translating the sentence: ${error.message}`);
-      } else {
-        setError('An unknown error occurred while translating the sentence. Please try again.');
-      }
-      return ''; // Return an empty string or some default value in case of error
-    } finally {
-      setIsTranslateLoading(false); // Reset loading state
-    }
-  };
-
   // Function to handle clicking on a sentence
   const handleSentenceClick = (sentence: string) => {
     setSelectedSentence(sentence);
@@ -255,7 +187,7 @@ const AppInner: React.FC = () => {
       try {
         // Always generate new TTS for the selected sentence
         const audioBlob = await generateTTS(selectedSentence);
-        const translation = await handleTranslation(selectedSentence);
+        const translation = await handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading);
 
         const audioKey = `audio_${Date.now()}`; // Generate a unique key for the audio
         const newItem: SavedItem = {
@@ -565,7 +497,7 @@ const AppInner: React.FC = () => {
                                 <button
                                     className={`translate-button ${isTranslateLoading ? 'loading' : ''}`}
                                     disabled={isTranslateLoading}
-                                    onClick={() => handleTranslation(selectedSentence)}
+                                    onClick={() => handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading)}
                                 >
                                   {isTranslateLoading ? 'Translating...' : 'Translate this sentence'}
                                 </button>
