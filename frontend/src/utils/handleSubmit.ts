@@ -1,19 +1,14 @@
 // Import necessary dependencies and utility functions
-import React, { useState, useEffect } from 'react';
-import { TokenCount, SavedItem, TTSOption, APIServiceOption, FrequencyAnalysis, LLMOption } from './Types';
-import { voiceOptions } from './voiceOptions';
-import useAuth from './useAuth';
-import { handleExport } from './languageCardExporter';
-import { stripMarkdown } from './markdownStripper';
+import React, { Dispatch, SetStateAction } from 'react';
+import { TokenCount, APIServiceOption, LLMOption, TTSOption } from './Types';
 
 // Define the backend API URLs, using environment variables
-const ANALYZE_FREQUENCY_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/analyze/frequency';
 const DEFINITIONS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/definitions';
 const SENTENCES_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/sentences';
 const TOKEN_SUM_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/token/sum';
 
 // Function to handle form submission
-export const handleSubmit = async (e: React.FormEvent, setDefinitions: React.Dispatch<React.SetStateAction<{ text: string; tokenCount: TokenCount } | null>>, setSentences: React.Dispatch<React.SetStateAction<{ text: string[]; tokenCount: TokenCount; totalPages: number } | null>>, setTotalTokenCount: React.Dispatch<React.SetStateAction<TokenCount | null>>, setError: React.Dispatch<React.SetStateAction<string | null>>, setIsGenerateLoading: React.Dispatch<React.SetStateAction<boolean>>, setCurrentPage: React.Dispatch<React.SetStateAction<number>>, updateTotalTokenCount: (tokenCount: TokenCount) => void, setShowGenerateNotification: React.Dispatch<React.SetStateAction<boolean>>, nativeLanguage: string, targetLanguage: string, selectedAPIService: APIServiceOption, selectedTTS: TTSOption, word: string, selectedLLM: LLMOption) => {
+export const handleSubmit = async (e: React.FormEvent, setDefinitions: Dispatch<SetStateAction<{ text: string; tokenCount: TokenCount } | null>>, setSentences: Dispatch<SetStateAction<{ text: string[]; tokenCount: TokenCount; totalPages: number } | null>>, setTotalTokenCount: Dispatch<SetStateAction<TokenCount | null>>, setError: Dispatch<SetStateAction<string | null>>, setIsGenerateLoading: Dispatch<SetStateAction<boolean>>, setCurrentPage: Dispatch<SetStateAction<number>>, updateTotalTokenCount: (tokenCount: TokenCount) => void, setShowGenerateNotification: Dispatch<SetStateAction<boolean>>, nativeLanguage: string, targetLanguage: string, selectedAPIService: APIServiceOption, selectedTTS: TTSOption, word: string, selectedLLM: LLMOption, TTS_URL: string) => {
   e.preventDefault();
   if (!nativeLanguage || !targetLanguage || !selectedAPIService || !selectedTTS || !word || !selectedLLM) {
     setError('Please fill in all required fields.');

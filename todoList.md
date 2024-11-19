@@ -91,8 +91,16 @@
   - [x] Mover `handleSubmit` para um arquivo separado `handleSubmit.ts`
   - [x] Mover `handleGenerateDialogue` para um arquivo separado `handleGenerateDialogue.ts`
   - [x] Mover `handleAnalyzeFrequency` para um arquivo separado `handleAnalyzeFrequency.ts`
-  - [ ] Mover `handleTranslation` para um arquivo separado `handleTranslation.ts`
-  - [ ] Importar as funções modularizadas no `App.tsx`
+  - [x] Mover `handleTranslation` para um arquivo separado `handleTranslation.ts`
+  - [x] Importar as funções modularizadas no `App.tsx`
+  - [x] Corrigir warnings de "is assigned a value but never used" em `App.tsx`
+  - [x] Corrigir warnings de "is defined but never used" em `handleSubmit.ts`
+  - [x] Corrigir warnings de "is defined but never used" em `handleGenerateDialogue.ts`
+  - [x] Corrigir warnings de "is defined but never used" em `handleAnalyzeFrequency.ts`
+  - [x] Corrigir warnings de "is defined but never used" em `handleTranslation.ts`
+- [x] Atualizar `handleTranslation` para receber as informações do usuário pelo `App.tsx`:
+  - [x] Modificar a função `handleTranslation` para aceitar `nativeLanguage`, `targetLanguage`, `apiService` e `llm` como parâmetros
+  - [x] Passar os valores corretos de `nativeLanguage`, `targetLanguage`, `apiService` e `llm` do `App.tsx` para a função `handleTranslation`
 - [ ] Considerar o uso de cookies HTTP-only para armazenar tokens de autenticação em vez de localStorage:
   - [ ] Instalar e configurar `js-cookie` para gerenciar cookies no frontend
   - [ ] Implementar a armazenagem de tokens de autenticação em cookies HTTP-only no `useAuth.ts`

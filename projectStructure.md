@@ -27,6 +27,7 @@ anki-assistant-languages/
 │   │   │   ├── handleAnalyzeFrequency.ts # Function to handle word frequency analysis
 │   │   │   ├── handleGenerateDialogue.ts # Function to handle generating dialogue
 │   │   │   ├── handleSubmit.ts         # Function to handle form submission
+│   │   │   ├── handleTranslation.ts    # Function to handle translation of sentences
 │   │   │   ├── languageCardExporter.ts # Exports language learning data to Anki format
 │   │   │   ├── markdownStripper.ts     # Removes Markdown formatting from text before TTS processing
 │   │   │   ├── Types.ts                # Type definitions for the project

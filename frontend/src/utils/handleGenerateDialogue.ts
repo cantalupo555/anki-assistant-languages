@@ -1,9 +1,6 @@
 // Import necessary dependencies and utility functions
-import React, { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { TokenCount, APIServiceOption, TTSOption, LLMOption } from './Types';
-import { voiceOptions } from './voiceOptions';
-import useAuth from './useAuth';
-import { stripMarkdown } from './markdownStripper';
 
 // Define the backend API URLs, using environment variables
 const DIALOGUE_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/dialogue';

@@ -23,13 +23,7 @@ import { handleTranslation } from './utils/handleTranslation';
 // Path to the Anki note type file
 const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
 
-// Define the backend API URLs, using environment variables
-const ANALYZE_FREQUENCY_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/analyze/frequency';
-const DEFINITIONS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/definitions';
-const SENTENCES_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/sentences';
-const DIALOGUE_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/dialogue';
-const TRANSLATION_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/translate';
-const TOKEN_SUM_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/token/sum';
+// Define the TTS URL, using environment variables
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 
 // Array of available API service options
@@ -187,7 +181,7 @@ const AppInner: React.FC = () => {
       try {
         // Always generate new TTS for the selected sentence
         const audioBlob = await generateTTS(selectedSentence);
-        const translation = await handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading);
+        const translation = await handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading, nativeLanguage, targetLanguage, selectedAPIService.value, selectedLLM.value);
 
         const audioKey = `audio_${Date.now()}`; // Generate a unique key for the audio
         const newItem: SavedItem = {
@@ -351,7 +345,7 @@ const AppInner: React.FC = () => {
                 {/* Render the card generator section */}
                 <section id="card-generator">
                   <h2>Card Generator</h2>
-                  <form onSubmit={(e) => handleSubmit(e, setDefinitions, setSentences, setTotalTokenCount, setError, setIsGenerateLoading, setCurrentPage, updateTotalTokenCount, setShowGenerateNotification, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM)}> {/* Update the onSubmit prop */}
+                  <form onSubmit={(e) => handleSubmit(e, setDefinitions, setSentences, setTotalTokenCount, setError, setIsGenerateLoading, setCurrentPage, updateTotalTokenCount, setShowGenerateNotification, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM, TTS_URL)}> {/* Update the onSubmit prop */}
                     {/* API service selection dropdown */}
                     <label htmlFor="api-service-select">AI Provider:</label>
                     <select
@@ -497,7 +491,7 @@ const AppInner: React.FC = () => {
                                 <button
                                     className={`translate-button ${isTranslateLoading ? 'loading' : ''}`}
                                     disabled={isTranslateLoading}
-                                    onClick={() => handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading)}
+                                    onClick={() => handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading, nativeLanguage, targetLanguage, selectedAPIService.value, selectedLLM.value)}
                                 >
                                   {isTranslateLoading ? 'Translating...' : 'Translate this sentence'}
                                 </button>

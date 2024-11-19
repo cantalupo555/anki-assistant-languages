@@ -1,7 +1,6 @@
 // Import necessary dependencies and utility functions
-import React, { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { TokenCount, APIServiceOption, LLMOption, FrequencyAnalysis } from './Types';
-import useAuth from './useAuth';
 
 // Define the backend API URLs, using environment variables
 const ANALYZE_FREQUENCY_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/analyze/frequency';
