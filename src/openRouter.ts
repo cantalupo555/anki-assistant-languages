@@ -63,6 +63,8 @@ If the word has only one or two very specific meanings and it's impossible to pr
         OPENROUTER_API_URL,
         {
             model: llm,
+            temperature: 0,
+            max_tokens: 1024,
             messages: [
                 { role: 'user', content: prompt }
             ]
@@ -133,6 +135,8 @@ Please provide your list of 50 sentences below:`;
         OPENROUTER_API_URL,
         {
             model: llm,
+            temperature: 1,
+            max_tokens: 4096,
             messages: [
                 { role: 'user', content: prompt }
             ]
@@ -184,6 +188,8 @@ Instructions:
         OPENROUTER_API_URL,
         {
             model: llm,
+            temperature: 0,
+            max_tokens: 1024,
             messages: [
                 { role: 'user', content: prompt }
             ]
@@ -245,6 +251,8 @@ Remember to create a dialogue that sounds natural and contextually appropriate. 
         OPENROUTER_API_URL,
         {
             model: llm,
+            temperature: 1,
+            max_tokens: 1024,
             messages: [
                 { role: 'user', content: prompt }
             ]
@@ -323,6 +331,8 @@ Remember to tailor your response to the specific word, target language, and nati
         OPENROUTER_API_URL,
         {
             model: llm,
+            temperature: 0,
+            max_tokens: 4096,
             messages: [
                 { role: 'user', content: prompt }
             ]
