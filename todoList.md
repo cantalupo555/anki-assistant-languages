@@ -169,9 +169,9 @@
   - [x] Adicionar a lógica no `anthropicClaude`
   - [x] Adicionar a lógica no `openRouter`
   - [x] Adicionar a lógica de cálculo dos tokens na rota `/generate/dialogue`
-- [ ] Implementar novos parâmetros na chamada de API do `openRouter.ts`:
-  - [ ] Adicionar o parâmetro `max_tokens` nas funções de definições, sentenças, tradução, diálogo, e análise de frequência
-  - [ ] Adicionar o parâmetro `temperature` nas funções de definições, sentenças, tradução, diálogo, e análise de frequência
+- [x] Implementar novos parâmetros na chamada de API do `openRouter.ts`:
+  - [x] Adicionar o parâmetro `max_tokens` nas funções de definições, sentenças, tradução, diálogo, e análise de frequência
+  - [x] Adicionar o parâmetro `temperature` nas funções de definições, sentenças, tradução, diálogo, e análise de frequência
 - [ ] Implementar a gestão de sessões de usuário
 - [ ] Implementar autenticação do usuário:
   - [ ] Validar as credenciais fornecidas pelo frontend
@@ -222,7 +222,7 @@
 - [x] Implementar a integração com `Azure Speech`
 - [x] Implementar a integração com `OpenRouter`
 - [ ] Implementar fallbacks para APIs em caso de falhas
-- [ ] Implementar os parâmetros `max_tokens` e `temperature` na chamada API OpenRouter
+- [x] Implementar os parâmetros `max_tokens` e `temperature` na chamada API OpenRouter
 - [ ] Implementar novos endponints responsável pela autenticação do usuário
 
 ## Documentação
