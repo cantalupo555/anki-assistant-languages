@@ -1,10 +1,10 @@
 // Import necessary dependencies and utility functions
 import React, { Dispatch, SetStateAction } from 'react';
 import { TokenCount, APIServiceOption, LLMOption, TTSOption } from './Types';
+import { handleGenerateDefinitions } from './handleGenerateDefinitions';
+import { handleGenerateSentences } from './handleGenerateSentences';
 
 // Define the backend API URLs, using environment variables
-const DEFINITIONS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/definitions';
-const SENTENCES_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/sentences';
 const TOKEN_SUM_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/token/sum';
 
 // Function to handle form submission
@@ -19,63 +19,16 @@ export const handleSubmit = async (e: React.FormEvent, setDefinitions: Dispatch<
   setCurrentPage(1);
 
   try {
-    // Log request details for debugging
-    console.log('Submitting form...');
-    console.log('Request payload for definitions:', { word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
+    // Generate definitions
+    const definitionsTokenCount = await handleGenerateDefinitions(setDefinitions, setError, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word);
 
-    // Fetch definitions
-    const definitionsResponse = await fetch(DEFINITIONS_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
-    });
-
-    // Log response status for debugging
-    console.log('Response status for definitions:', definitionsResponse.status);
-
-    // Check if response is successful
-    if (!definitionsResponse.ok) {
-      const errorText = await definitionsResponse.text();
-      console.error('Error response for definitions:', errorText);
-      throw new Error(`HTTP error! status: ${definitionsResponse.status}, message: ${errorText}`);
-    }
-
-    const definitionsData = await definitionsResponse.json();
-    setDefinitions(definitionsData.definitions);
-    console.log('Received definitions data:', definitionsData);
-
-    // Log request details for debugging
-    console.log('Request payload for sentences:', { word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
-
-    // Fetch sentences
-    const sentencesResponse = await fetch(SENTENCES_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
-    });
-
-    // Log response status for debugging
-    console.log('Response status for sentences:', sentencesResponse.status);
-
-    // Check if response is successful
-    if (!sentencesResponse.ok) {
-      const errorText = await sentencesResponse.text();
-      console.error('Error response for sentences:', errorText);
-      throw new Error(`HTTP error! status: ${sentencesResponse.status}, message: ${errorText}`);
-    }
-
-    const sentencesData = await sentencesResponse.json();
-    setSentences(sentencesData.sentences);
-    console.log('Received sentences data:', sentencesData);
+    // Generate sentences
+    const sentencesTokenCount = await handleGenerateSentences(setSentences, setError, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word);
 
     // Log request details for debugging
     console.log('Request payload for total token count:', {
-      definitionsTokens: definitionsData.definitions.tokenCount,
-      sentencesTokens: sentencesData.sentences.tokenCount,
+      definitionsTokens: definitionsTokenCount,
+      sentencesTokens: sentencesTokenCount,
       translationTokens: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
     });
 
@@ -86,8 +39,8 @@ export const handleSubmit = async (e: React.FormEvent, setDefinitions: Dispatch<
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        definitionsTokens: definitionsData.definitions.tokenCount,
-        sentencesTokens: sentencesData.sentences.tokenCount,
+        definitionsTokens: definitionsTokenCount,
+        sentencesTokens: sentencesTokenCount,
         translationTokens: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
       }),
     });
