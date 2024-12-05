@@ -42,16 +42,20 @@ app.post('/generate/definitions', async (req, res) => {
         const { word, language: targetLanguage, apiService, llm } = req.body;
         // Validate the word, target language, API service, and llm
         if (!word || typeof word !== 'string' || word.trim() === '') {
-            return res.status(400).json({ error: 'Valid word is required' });
+            res.status(400).json({ error: 'Valid word is required' });
+            return;
         }
         if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
-            return res.status(400).json({ error: 'Valid target language is required' });
+            res.status(400).json({ error: 'Valid target language is required' });
+            return;
         }
         if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
-            return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+            res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+            return;
         }
         if (!llm || typeof llm !== 'string') {
-            return res.status(400).json({ error: 'Valid llm is required' });
+            res.status(400).json({ error: 'Valid llm is required' });
+            return;
         }
 
         let definitions = '';
@@ -88,16 +92,20 @@ app.post('/generate/sentences', async (req, res) => {
         const { word, language: targetLanguage, apiService, llm } = req.body;
         // Validate the word, target language, API service, and llm
         if (!word || typeof word !== 'string' || word.trim() === '') {
-            return res.status(400).json({ error: 'Valid word is required' });
+            res.status(400).json({ error: 'Valid word is required' });
+            return;
         }
         if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
-            return res.status(400).json({ error: 'Valid target language is required' });
+            res.status(400).json({ error: 'Valid target language is required' });
+            return;
         }
         if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
-            return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+            res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+            return;
         }
         if (!llm || typeof llm !== 'string') {
-            return res.status(400).json({ error: 'Valid llm is required' });
+            res.status(400).json({ error: 'Valid llm is required' });
+            return;
         }
 
         let sentences = '';
@@ -141,16 +149,20 @@ app.post('/translate', async (req, res) => {
 
         // Validate input
         if (!inputSentence || typeof inputSentence !== 'string' || inputSentence.trim() === '') {
-            return res.status(400).json({ error: 'Valid input sentence is required' });
+            res.status(400).json({ error: 'Valid input sentence is required' });
+            return;
         }
         if (!nativeLanguage || !targetLanguage || !supportedLanguages.includes(nativeLanguage) || !supportedLanguages.includes(targetLanguage)) {
-            return res.status(400).json({ error: 'Valid native and target languages are required' });
+            res.status(400).json({ error: 'Valid native and target languages are required' });
+            return;
         }
         if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
-            return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+            res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+            return;
         }
         if (!llm || typeof llm !== 'string') {
-            return res.status(400).json({ error: 'Valid llm is required' });
+            res.status(400).json({ error: 'Valid llm is required' });
+            return;
         }
 
         let translation = '';
@@ -185,19 +197,24 @@ app.post('/generate/dialogue', async (req, res) => {
         const { word, targetLanguage, nativeLanguage, apiService, llm } = req.body;
         // Validate the word, target language, native language, API service, and llm
         if (!word || typeof word !== 'string' || word.trim() === '') {
-            return res.status(400).json({ error: 'Valid word is required' });
+            res.status(400).json({ error: 'Valid word is required' });
+            return;
         }
         if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
-            return res.status(400).json({ error: 'Valid target language is required' });
+            res.status(400).json({ error: 'Valid target language is required' });
+            return;
         }
         if (!nativeLanguage || typeof nativeLanguage !== 'string' || !supportedLanguages.includes(nativeLanguage)) {
-            return res.status(400).json({ error: 'Valid native language is required' });
+            res.status(400).json({ error: 'Valid native language is required' });
+            return;
         }
         if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
-            return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+            res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+            return;
         }
         if (!llm || typeof llm !== 'string') {
-            return res.status(400).json({ error: 'Valid llm is required' });
+            res.status(400).json({ error: 'Valid llm is required' });
+            return;
         }
 
         let dialogue = '';
@@ -231,16 +248,20 @@ app.post('/analyze/frequency', async (req, res) => {
         const { word, targetLanguage, nativeLanguage, apiService, llm } = req.body;
 
         if (!word || typeof word !== 'string' || word.trim() === '') {
-            return res.status(400).json({ error: 'Valid word is required' });
+            res.status(400).json({ error: 'Valid word is required' });
+            return;
         }
         if (!nativeLanguage || !targetLanguage || !supportedLanguages.includes(nativeLanguage) || !supportedLanguages.includes(targetLanguage)) {
-            return res.status(400).json({ error: 'Valid native and target languages are required' });
+            res.status(400).json({ error: 'Valid native and target languages are required' });
+            return;
         }
         if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
-            return res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+            res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+            return;
         }
         if (!llm || typeof llm !== 'string') {
-            return res.status(400).json({ error: 'Valid llm is required' });
+            res.status(400).json({ error: 'Valid llm is required' });
+            return;
         }
 
         let analysis = '';
@@ -293,16 +314,20 @@ app.post('/tts', async (req, res) => {
 
         // Validate the text, voice, language code, and TTS service
         if (!text || typeof text !== 'string' || text.trim() === '') {
-            return res.status(400).json({ error: 'Valid text is required' });
+            res.status(400).json({ error: 'Valid text is required' });
+            return;
         }
         if (!voice || typeof voice !== 'string') {
-            return res.status(400).json({ error: 'Valid voice is required' });
+            res.status(400).json({ error: 'Valid voice is required' });
+            return;
         }
         if (!languageCode || typeof languageCode !== 'string') {
-            return res.status(400).json({ error: 'Valid language code is required' });
+            res.status(400).json({ error: 'Valid language code is required' });
+            return;
         }
         if (!ttsService || (ttsService !== 'google' && ttsService !== 'azure')) {
-            return res.status(400).json({ error: 'Valid TTS service (google or azure) is required' });
+            res.status(400).json({ error: 'Valid TTS service (google or azure) is required' });
+            return;
         }
 
         let audioBuffer;
@@ -311,22 +336,26 @@ app.post('/tts', async (req, res) => {
             // Google Cloud TTS
             // Check for supported language codes for Google Cloud TTS
             if (!['en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 'ja-JP', 'ko-KR'].includes(languageCode)) {
-                return res.status(400).json({ error: 'Invalid language code for Google Cloud TTS' });
+                res.status(400).json({ error: 'Invalid language code for Google Cloud TTS' });
+                return;
             }
             // Check if the voice matches the language code for Google Cloud TTS
             if (!voice.startsWith(languageCode)) {
-                return res.status(400).json({ error: 'Voice does not match the language code for Google Cloud TTS' });
+                res.status(400).json({ error: 'Voice does not match the language code for Google Cloud TTS' });
+                return;
             }
             audioBuffer = await googleTextToSpeech(text, voice, languageCode);
         } else {
             // Azure TTS
             // Check for supported language codes for Azure TTS
             if (!['en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'zh-CN', 'ja-JP', 'ko-KR'].includes(languageCode)) {
-                return res.status(400).json({ error: 'Invalid language code for Azure TTS' });
+                res.status(400).json({ error: 'Invalid language code for Azure TTS' });
+                return;
             }
             // Check if the voice matches the language code for Azure TTS
             if (!voice.startsWith(languageCode)) {
-                return res.status(400).json({ error: 'Voice does not match the language code for Azure TTS' });
+                res.status(400).json({ error: 'Voice does not match the language code for Azure TTS' });
+                return;
             }
             audioBuffer = await azureTextToSpeech(text, voice, languageCode);
         }
