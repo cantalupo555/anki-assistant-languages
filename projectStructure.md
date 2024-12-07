@@ -30,6 +30,7 @@ anki-assistant-languages/
 │   │   │   ├── handleTranslation.ts    # Function to handle translation of sentences
 │   │   │   ├── languageCardExporter.ts # Exports language learning data to Anki format
 │   │   │   ├── markdownStripper.ts     # Removes Markdown formatting from text before TTS processing
+│   │   │   ├── Options.ts              # Configuration for available API services, LLM models, and TTS services
 │   │   │   ├── Types.ts                # Type definitions for the project
 │   │   │   ├── useAuth.ts              # Authentication logic and user session management
 │   │   │   └── voiceOptions.ts         # Configuration for available TTS voices

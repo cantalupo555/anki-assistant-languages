@@ -19,41 +19,13 @@ import { handleSubmit } from './utils/handleSubmit';
 import { handleGenerateDialogue } from './utils/handleGenerateDialogue';
 import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
 import { handleTranslation } from './utils/handleTranslation';
+import { apiServiceOptions, llmOptions, ttsOptions } from './utils/Options';
 
 // Path to the Anki note type file
 const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
 
 // Define the TTS URL, using environment variables
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
-
-// Array of available API service options
-const apiServiceOptions: APIServiceOption[] = [
-  { name: 'Select your AI Provider', value: '' },
-  { name: 'OpenRouter', value: 'openrouter' },
-  { name: 'Anthropic', value: 'anthropic' },
-];
-
-// Array of available LLM options for each API service
-const llmOptions: { [key: string]: LLMOption[] } = {
-  openrouter: [
-    { name: 'Select AI', value: '' },
-    { name: 'Qwen-2.5 72B Instruct', value: 'qwen/qwen-2.5-72b-instruct' },
-    { name: 'Llama-3.1 70B Instruct', value: 'meta-llama/llama-3.1-70b-instruct' },
-    { name: 'Gemini-1.5 Flash', value: 'google/gemini-flash-1.5' },
-    { name: 'Claude-3.5 Haiku', value: 'anthropic/claude-3-5-haiku' },
-  ],
-  anthropic: [
-    { name: 'Select AI', value: '' },
-    { name: 'Claude-3.5 Haiku', value: 'claude-3-5-haiku-latest' },
-  ]
-};
-
-// Array of available TTS options
-const ttsOptions: TTSOption[] = [
-  { name: 'Select your TTS Service', value: '' },
-  { name: 'Google TTS', value: 'google' },
-  { name: 'Azure TTS', value: 'azure' },
-];
 
 const AppInner: React.FC = () => {
   // Use the useAuth hook
