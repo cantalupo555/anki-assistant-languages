@@ -13,6 +13,7 @@ anki-assistant-languages/
 │   │       └── AnkiAssistantLanguages.apkg # Anki note type file for importing cards
 │   ├── src/
 │   │   ├── components/               # Reusable UI components
+│   │   │   ├── Footer.tsx            # Footer component for the application
 │   │   │   ├── languageSelector.tsx  # Component for selecting native and target languages
 │   │   │   ├── Login.tsx             # Login component for user authentication
 │   │   │   ├── Modal.tsx             # Reusable modal component for displaying information
