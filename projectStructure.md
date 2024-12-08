@@ -14,6 +14,7 @@ anki-assistant-languages/
 │   ├── src/
 │   │   ├── components/               # Reusable UI components
 │   │   │   ├── Footer.tsx            # Footer component for the application
+│   │   │   ├── Header.tsx            # Header component for the application
 │   │   │   ├── languageSelector.tsx  # Component for selecting native and target languages
 │   │   │   ├── Login.tsx             # Login component for user authentication
 │   │   │   ├── Modal.tsx             # Reusable modal component for displaying information

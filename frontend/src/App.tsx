@@ -20,6 +20,7 @@ import { handleGenerateDialogue } from './utils/handleGenerateDialogue';
 import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
 import { handleTranslation } from './utils/handleTranslation';
 import { apiServiceOptions, llmOptions, ttsOptions } from './utils/Options';
+import Header from './components/Header';
 import Footer from './components/Footer';
 
 // Path to the Anki note type file
@@ -30,7 +31,7 @@ const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 
 const AppInner: React.FC = () => {
   // Use the useAuth hook
-  const { isAuthenticated, isCheckingAuth, handleLogin, handleLogout } = useAuth();
+  const { isAuthenticated, isCheckingAuth, handleLogin } = useAuth();
 
   const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice, selectedLLM, setSelectedLLM } = useAppContext();
   const [word, setWord] = useState('');
@@ -303,16 +304,8 @@ const AppInner: React.FC = () => {
       <div className="app-container">
         {isAuthenticated ? (
             <>
-              <header className="app-header">
-                <h1>📚📖🔖 Anki Assistant Languages</h1>
-                <nav>
-                  <ul>
-                    <li><a href="#card-generator">Card Generator</a></li>
-                    <li><a href="#saved-items">Saved Items</a></li>
-                  </ul>
-                </nav>
-                <button className="logout-button" onClick={handleLogout}>Logout</button>
-              </header>
+              {/* Render the footer */}
+              <Header />
 
               <main>
                 {/* Render the card generator section */}
