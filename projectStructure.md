@@ -46,6 +46,7 @@ anki-assistant-languages/
 │   ├── azureTTS.ts                   # Handles interactions with the Azure Text-to-Speech API
 │   ├── expressServer.ts              # Main Express.js server file
 │   ├── googleCloudTTS.ts             # Handles interactions with the Google Cloud Text-to-Speech API
+│   ├── googleGemini.ts               # Handles interactions with the Google Gemini API
 │   └── openRouter.ts                 # Handles interactions with the OpenRouter API
 ├── .env                              # Environment variables (API keys, etc.) - NOT tracked in version control
 ├── package.json                      # Backend dependencies (yarn)

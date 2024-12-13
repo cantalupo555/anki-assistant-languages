@@ -4,6 +4,7 @@
 import express from 'express';
 import cors from 'cors';
 import { getDefinitionsAnthropicClaude, getSentencesAnthropicClaude, translateSentenceAnthropicClaude, getDialogueAnthropicClaude, analyzeFrequencyAnthropicClaude } from './anthropicClaude';
+import { getDefinitionsGoogleGemini, getSentencesGoogleGemini, translateSentenceGoogleGemini, getDialogueGoogleGemini, analyzeFrequencyGoogleGemini } from './googleGemini';
 import { getDefinitionsOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter, getDialogueOpenRouter, analyzeFrequencyOpenRouter } from './openRouter';
 import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
 import { textToSpeech as azureTextToSpeech } from './azureTTS';
@@ -49,8 +50,8 @@ app.post('/generate/definitions', async (req, res) => {
             res.status(400).json({ error: 'Valid target language is required' });
             return;
         }
-        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
-            res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter' && apiService !== 'google')) {
+            res.status(400).json({ error: 'Valid API service (anthropic, openrouter, or google) is required' });
             return;
         }
         if (!llm || typeof llm !== 'string') {
@@ -70,6 +71,8 @@ app.post('/generate/definitions', async (req, res) => {
             [definitions, definitionsTokens] = await getDefinitionsAnthropicClaude(word, targetLanguage, llm);
         } else if (apiService === 'openrouter') {
             [definitions, definitionsTokens] = await getDefinitionsOpenRouter(word, targetLanguage, llm);
+        } else if (apiService === 'google') {
+            [definitions, definitionsTokens] = await getDefinitionsGoogleGemini(word, targetLanguage, llm);
         }
 
         // Log the definitions result
@@ -99,8 +102,8 @@ app.post('/generate/sentences', async (req, res) => {
             res.status(400).json({ error: 'Valid target language is required' });
             return;
         }
-        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
-            res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter' && apiService !== 'google')) {
+            res.status(400).json({ error: 'Valid API service (anthropic, openrouter, or google) is required' });
             return;
         }
         if (!llm || typeof llm !== 'string') {
@@ -120,6 +123,8 @@ app.post('/generate/sentences', async (req, res) => {
             [sentences, sentencesTokens] = await getSentencesAnthropicClaude(word, targetLanguage, llm);
         } else if (apiService === 'openrouter') {
             [sentences, sentencesTokens] = await getSentencesOpenRouter(word, targetLanguage, llm);
+        } else if (apiService === 'google') {
+             [sentences, sentencesTokens] = await getSentencesGoogleGemini(word, targetLanguage, llm);
         }
 
         // Split sentences into an array
@@ -156,8 +161,8 @@ app.post('/translate', async (req, res) => {
             res.status(400).json({ error: 'Valid native and target languages are required' });
             return;
         }
-        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
-            res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter' && apiService !== 'google')) {
+            res.status(400).json({ error: 'Valid API service (anthropic, openrouter, or google) is required' });
             return;
         }
         if (!llm || typeof llm !== 'string') {
@@ -177,6 +182,8 @@ app.post('/translate', async (req, res) => {
             [translation, tokenCount] = await translateSentenceAnthropicClaude(inputSentence, targetLanguage, nativeLanguage, llm);
         } else if (apiService === 'openrouter') {
             [translation, tokenCount] = await translateSentenceOpenRouter(inputSentence, targetLanguage, nativeLanguage, llm);
+        } else if (apiService === 'google') {
+            [translation, tokenCount] = await translateSentenceGoogleGemini(inputSentence, targetLanguage, nativeLanguage, llm);
         }
 
         // Log the translation result
@@ -208,8 +215,8 @@ app.post('/generate/dialogue', async (req, res) => {
             res.status(400).json({ error: 'Valid native language is required' });
             return;
         }
-        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
-            res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter' && apiService !== 'google')) {
+            res.status(400).json({ error: 'Valid API service (anthropic, openrouter, or google) is required' });
             return;
         }
         if (!llm || typeof llm !== 'string') {
@@ -229,6 +236,8 @@ app.post('/generate/dialogue', async (req, res) => {
             [dialogue, tokenCount] = await getDialogueAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
         } else if (apiService === 'openrouter') {
             [dialogue, tokenCount] = await getDialogueOpenRouter(word, targetLanguage, nativeLanguage, llm);
+        } else if (apiService === 'google') {
+            [dialogue, tokenCount] = await getDialogueGoogleGemini(word, targetLanguage, nativeLanguage, llm);
         }
 
         // Log the dialogue result
@@ -255,8 +264,8 @@ app.post('/analyze/frequency', async (req, res) => {
             res.status(400).json({ error: 'Valid native and target languages are required' });
             return;
         }
-        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter')) {
-            res.status(400).json({ error: 'Valid API service (anthropic or openrouter) is required' });
+        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter' && apiService !== 'google')) {
+            res.status(400).json({ error: 'Valid API service (anthropic, openrouter, or google) is required' });
             return;
         }
         if (!llm || typeof llm !== 'string') {
@@ -276,6 +285,8 @@ app.post('/analyze/frequency', async (req, res) => {
             [analysis, tokenCount] = await analyzeFrequencyAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
         } else if (apiService === 'openrouter') {
             [analysis, tokenCount] = await analyzeFrequencyOpenRouter(word, targetLanguage, nativeLanguage, llm);
+        } else if (apiService === 'google') {
+            [analysis, tokenCount] = await analyzeFrequencyGoogleGemini(word, targetLanguage, nativeLanguage, llm);
         }
 
         // Log the frequency analysis result
