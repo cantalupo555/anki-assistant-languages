@@ -1,4 +1,6 @@
 // Import necessary libraries
+// Import the Google SDK to interact with the Gemini API
+// dotenv: Used to load environment variables from a .env file
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import dotenv from "dotenv";
 
@@ -81,7 +83,11 @@ If the word has only one or two very specific meanings and it's impossible to pr
     // Send the prompt to the Google Gemini API and get the response
     const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        safetySettings
+        safetySettings,
+        generationConfig: {
+            temperature: 0,
+            maxOutputTokens: 1024,
+        }
     });
 
     const response = await result.response;
@@ -163,7 +169,11 @@ Please provide your list of 50 sentences below:`;
     // Send the prompt to the Google Gemini API and get the response
     const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        safetySettings
+        safetySettings,
+        generationConfig: {
+            temperature: 1,
+            maxOutputTokens: 4096,
+        }
     });
 
     const response = await result.response;
@@ -226,7 +236,11 @@ Instructions:
     // Send the prompt to the Google Gemini API and get the response
     const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        safetySettings
+        safetySettings,
+        generationConfig: {
+            temperature: 0,
+            maxOutputTokens: 1024,
+        }
     });
 
     const response = await result.response;
@@ -299,7 +313,11 @@ Remember to create a dialogue that sounds natural and contextually appropriate. 
     // Send the prompt to the Google Gemini API and get the response
     const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        safetySettings
+        safetySettings,
+        generationConfig: {
+            temperature: 1,
+            maxOutputTokens: 1024,
+        }
     });
 
     const response = await result.response;
@@ -389,7 +407,11 @@ Remember to tailor your response to the specific word, target language, and nati
     // Send the prompt to the Google Gemini API and get the response
     const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        safetySettings
+        safetySettings,
+        generationConfig: {
+            temperature: 0,
+            maxOutputTokens: 4096,
+        }
     });
 
     const response = await result.response;
