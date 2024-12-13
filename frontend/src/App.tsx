@@ -12,7 +12,7 @@ import Login from './components/Login';
 import { AppProvider, useAppContext } from './context/selectionContext';
 import { handleExport } from './utils/languageCardExporter';
 import { stripMarkdown } from './utils/markdownStripper';
-import { TokenCount, SavedItem, TTSOption, APIServiceOption, FrequencyAnalysis, LLMOption } from './utils/Types';
+import { TokenCount, SavedItem, FrequencyAnalysis } from './utils/Types';
 import { voiceOptions } from './utils/voiceOptions';
 import useAuth from './utils/useAuth';
 import { handleSubmit } from './utils/handleSubmit';
@@ -22,9 +22,6 @@ import { handleTranslation } from './utils/handleTranslation';
 import { apiServiceOptions, llmOptions, ttsOptions } from './utils/Options';
 import Header from './components/Header';
 import Footer from './components/Footer';
-
-// Path to the Anki note type file
-const ankiNoteTypeFile = process.env.PUBLIC_URL + '/assets/AnkiAssistantLanguages.apkg';
 
 // Define the TTS URL, using environment variables
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
