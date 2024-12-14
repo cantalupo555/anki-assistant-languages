@@ -10,8 +10,11 @@ export const apiServiceOptions: APIServiceOption[] = [
 export const llmOptions: { [key: string]: LLMOption[] } = {
   openrouter: [
     { name: 'Select AI', value: '' },
-    { name: 'Qwen-2.5 72B Instruct', value: 'qwen/qwen-2.5-72b-instruct' },
-    { name: 'Claude-3.5 Haiku', value: 'anthropic/claude-3-5-haiku' },
+    { name: 'Qwen2.5 72B Instruct', value: 'qwen/qwen-2.5-72b-instruct' },
+    { name: 'Llama 3.3 70B Instruct', value: 'meta-llama/llama-3.3-70b-instruct' },
+    { name: 'Nova Lite 1.0', value: 'amazon/nova-lite-v1' },
+    { name: 'Command R (08-2024)', value: 'cohere/command-r-08-2024' },
+    { name: 'Claude 3.5 Haiku', value: 'anthropic/claude-3-5-haiku' },
   ],
   google: [
     { name: 'Select AI', value: '' },
