@@ -32,31 +32,69 @@ type TokenCount = {
 // Function to get the definitions of a word with token count using OpenRouter
 export async function getDefinitionsOpenRouter(word: string, targetLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the OpenRouter API
-    const prompt = `You are tasked with providing basic ${targetLanguage} definitions for a given word, as they would appear in a ${targetLanguage}-${targetLanguage} dictionary. Your goal is to provide three essential meanings of the word, without any additional information.
+    const prompt = `You are a linguistic expert tasked with providing comprehensive dictionary-style definitions for words. Your goal is to offer three essential meanings of a given word in a specified target language, as they would appear in a monolingual dictionary.
 
-The word you need to define is:
-${word}
-
-The language for the definitions is:
+Here is the target language for the definitions:
+<target_language>
 ${targetLanguage}
+</target_language>
 
-Follow these steps:
-1. Identify three basic, fundamental definitions of the word in the specified language.
-2. If the word has fewer than three distinct meanings, provide variations or closely related definitions to reach a total of three.
-3. Ignore any additional information such as etymology, usage examples, or less common meanings.
-4. Before using the word "${word}", remove any leading or trailing spaces. Use the trimmed version of the word in your sentences.
-5. Present your answer in the following format:
-**${word}**: 1. [your first basic definition] | 2. [your second basic definition] | 3. [your third basic definition]
+Here is the word you need to define:
+<word>
+${word}
+</word>
+
+Instructions:
+1. Read the given word carefully, removing any leading or trailing spaces.
+2. In your thinking process, consider the following for each definition:
+   - The word's part of speech
+   - Its most common usage contexts
+   - Any nuances or connotations associated with the word
+   - How it differs from similar words or synonyms
+
+3. Identify three fundamental definitions or closely related meanings of the word in the specified language.
+4. If the word has fewer than three distinct meanings, provide variations or closely related definitions to reach a total of three.
+5. Ensure that each definition is comprehensive and informative, avoiding overly brief or single-word explanations.
+6. Ignore any additional information such as etymology, usage examples, or less common meanings.
+7. Present your answer in the following format:
+   **[word]**: 1. [your first basic definition] | 2. [your second basic definition] | 3. [your third basic definition]
 
 Remember:
 - Provide exactly three basic definitions or closely related meanings.
 - Do not include any information beyond the fundamental meanings.
 - The word itself should be in bold before the colon.
 - Do not mix languages or provide translations unless explicitly instructed to do so.
-- All definitions must be in the specified language.
-- Aim for concise and clear definitions.
+- All definitions must be in the specified target language.
+- Aim for clear, informative definitions that capture the essence of the word's usage.
 
-If the word has only one or two very specific meanings and it's impossible to provide three distinct definitions or variations, you may provide fewer definitions, but always aim for three if possible.`;
+Before providing your final output, analyze each definition inside <definition_analysis> tags:
+
+1. List potential parts of speech for the word.
+2. Brainstorm at least three common usage contexts for this definition.
+3. Note any nuances or connotations associated with this usage.
+4. Compare this definition to the others to ensure it's distinct and captures a different aspect of the word's meaning.
+
+This analysis will help ensure that your definitions are sufficiently detailed and comprehensive.
+
+Example output structure (note that this is a generic example and should not influence the content of your definitions):
+
+<definition_analysis>
+Definition 1:
+- Parts of speech: [list potential parts of speech]
+- Usage contexts: [list at least three contexts]
+- Nuances/connotations: [note any important nuances]
+- Distinctness: [compare to other definitions]
+
+Definition 2:
+[Repeat the above structure]
+
+Definition 3:
+[Repeat the above structure]
+</definition_analysis>
+
+**[word]**: 1. [Comprehensive definition 1] | 2. [Comprehensive definition 2] | 3. [Comprehensive definition 3]
+
+Please proceed with defining the given word in the specified target language.`;
 
     // Send the prompt to the OpenRouter API and get the response
     const response = await axios.post(
