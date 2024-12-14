@@ -18,7 +18,9 @@ function extractTextContent(response: any): string {
     if (!response || !response.text()) {
         throw new Error("No valid text content found in the response");
     }
-    return response.text();
+    // Remove the content within the <definition_analysis> tag
+    let text = response.text().replace(/<definition_analysis>.*?<\/definition_analysis>/s, '');
+    return text;
 }
 
 // Type definition for token count
