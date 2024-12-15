@@ -100,30 +100,9 @@ Please proceed with defining the given word in the specified target language.`;
     // Access the Gemini model
     const model = genAI.getGenerativeModel({ model: llm });
 
-    // Configure safety settings
-    const safetySettings = [
-        {
-            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-    ];
-
     // Send the prompt to the Google Gemini API and get the response
     const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        safetySettings,
         generationConfig: {
             temperature: 0,
             maxOutputTokens: 1024,
@@ -186,30 +165,9 @@ Please provide your list of 50 sentences below:`;
     // Access the Gemini model
     const model = genAI.getGenerativeModel({ model: llm });
 
-    // Configure safety settings
-    const safetySettings = [
-        {
-            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-    ];
-
     // Send the prompt to the Google Gemini API and get the response
     const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        safetySettings,
         generationConfig: {
             temperature: 1,
             maxOutputTokens: 4096,
@@ -253,30 +211,9 @@ Instructions:
     // Access the Gemini model
     const model = genAI.getGenerativeModel({ model: llm });
 
-    // Configure safety settings
-    const safetySettings = [
-        {
-            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-    ];
-
     // Send the prompt to the Google Gemini API and get the response
     const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        safetySettings,
         generationConfig: {
             temperature: 0,
             maxOutputTokens: 1024,
@@ -330,30 +267,9 @@ Remember to create a dialogue that sounds natural and contextually appropriate. 
     // Access the Gemini model
     const model = genAI.getGenerativeModel({ model: llm });
 
-    // Configure safety settings
-    const safetySettings = [
-        {
-            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-    ];
-
     // Send the prompt to the Google Gemini API and get the response
     const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        safetySettings,
         generationConfig: {
             temperature: 1,
             maxOutputTokens: 1024,
@@ -424,30 +340,9 @@ Remember to tailor your response to the specific word, target language, and nati
     // Access the Gemini model
     const model = genAI.getGenerativeModel({ model: llm });
 
-    // Configure safety settings
-    const safetySettings = [
-        {
-            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-    ];
-
     // Send the prompt to the Google Gemini API and get the response
     const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        safetySettings,
         generationConfig: {
             temperature: 0,
             maxOutputTokens: 4096,
