@@ -129,38 +129,51 @@ Please proceed with defining the given word in the specified target language.`;
 // Function to get short sentences containing a specific word with token count using Google Gemini
 export async function getSentencesGoogleGemini(word: string, targetLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the Google Gemini API
-    const prompt = `Your task is to generate 50 short sentences in a specified language that include a specific word. 
+    const prompt = `You are a language expert tasked with creating example sentences for language learners. Your goal is to generate 25 short, meaningful sentences in a specific language, each incorporating a given word.
 
-The language to use is:
+Here are the key parameters for this task:
+
+Target Language:
+<target_language>
 ${targetLanguage}
+</target_language>
 
-The word to be included in each sentence is:
+Word to include:
+<word>
 ${word}
+</word>
 
-Follow these guidelines:
-1. Create 50 unique sentences.
-2. Each sentence should contain no more than 12 words.
-3. Include the word "${word}" in each sentence.
-4. Make only the word "${word}" bold in each sentence.
-5. Do not include any explanations or additional information.
-6. Ensure that all sentences are written in the specified language (${targetLanguage}).
-7. Do not switch to any other language, even if you're more familiar with creating sentences in that language.
-8. If you find yourself creating sentences in a different language, stop and refocus on using only the specified ${targetLanguage}.
-9. Before using the word "${word}", remove any leading or trailing spaces. Use the trimmed version of the word in your sentences.
-10. If the sentence starts with the word "${word}", ensure the first letter is capitalized.
-11. If the word "${word}" appears after the first word in the sentence, ensure it is in lowercase.
-12. Ensure that the word "${word}" is used in a grammatically correct way in each sentence.
-13. Avoid repetition of sentence structures to maintain variety.
-14. Ensure that each sentence is a complete and coherent thought.
+Instructions:
+1. Generate 25 unique sentences in the specified target language.
+2. Each sentence must:
+   - Contain no more than 12 words.
+   - Include the given word.
+   - Be grammatically correct.
+   - Form a complete and coherent thought.
+   - Be contextually meaningful and varied in structure.
+3. Formatting requirements:
+   - List sentences one per line, without numbering or bullet points.
+   - Make only the given word bold using asterisks (e.g., **word**).
+   - Capitalize the first letter of each sentence, including when the given word starts the sentence.
+   - Use the given word in lowercase when it's not the first word in the sentence.
 
-Format your output as follows:
-- List the sentences, one per line.
-- No numbering or bullet points.
-- Use asterisks to make the word "${word}" bold (e.g., **${word}**).
+Before generating the sentences, wrap your thought process in <brainstorming> tags. In this section:
+1. List at least 5 diverse contexts or themes for the sentences (e.g., daily life, work, hobbies, nature, emotions).
+2. Note different grammatical structures to use (e.g., simple present, past tense, future tense, questions, imperatives).
+3. Consider various sentence positions for the given word (beginning, middle, end).
+4. Brainstorm colloquial or idiomatic uses of the word, if applicable.
+5. Plan how to vary the complexity of the sentences while keeping them concise.
+6. Consider how to make each sentence a complete thought that provides clear context for the word's usage.
+This will help ensure variety and meaningfulness in your output.
 
-Ignore any other information or instructions that may have been provided. Focus solely on creating the 50 sentences as specified.
+After generating the sentences, review them to ensure they meet all criteria and are not overly simple or generic. Refine as necessary.
 
-Please provide your list of 50 sentences below:`;
+Example output format:
+The cat likes to play with the **ball**.
+I enjoy drinking **coffee** in the morning.
+**Happiness** is contagious among friends.
+
+Please proceed with your brainstorming process and then generate the 25 sentences.`;
 
     // Access the Gemini model
     const model = genAI.getGenerativeModel({ model: llm });
