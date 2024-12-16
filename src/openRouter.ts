@@ -19,10 +19,11 @@ function extractTextContent(choices: any[]): string {
     if (!textContent || typeof textContent.message.content !== 'string') {
         throw new Error('No valid text content found in the response');
     }
-    // Remove the content within the <brainstorming> and <definition_analysis> tags
+    // Remove the content within the <brainstorming>, <definition_analysis> and <translation_analysis> tags
     let text = textContent.message.content
         .replace(/<brainstorming>.*?<\/brainstorming>/s, '')
-        .replace(/<definition_analysis>.*?<\/definition_analysis>/s, '');
+        .replace(/<definition_analysis>.*?<\/definition_analysis>/s, '')
+        .replace(/<translation_analysis>.*?<\/translation_analysis>/s, '');
     return text;
 }
 
