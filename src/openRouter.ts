@@ -19,8 +19,10 @@ function extractTextContent(choices: any[]): string {
     if (!textContent || typeof textContent.message.content !== 'string') {
         throw new Error('No valid text content found in the response');
     }
-    // Remove the content within the <definition_analysis> tag
-    let text = textContent.message.content.replace(/<definition_analysis>.*?<\/definition_analysis>/s, '');
+    // Remove the content within the <brainstorming> and <definition_analysis> tags
+    let text = textContent.message.content
+        .replace(/<brainstorming>.*?<\/brainstorming>/s, '')
+        .replace(/<definition_analysis>.*?<\/definition_analysis>/s, '');
     return text;
 }
 
