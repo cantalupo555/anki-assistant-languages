@@ -224,19 +224,50 @@ Please proceed with your brainstorming process and then generate the 25 sentence
 // Function to translate a sentence using OpenRouter
 export async function translateSentenceOpenRouter(inputSentence: string, targetLanguage: string, nativeLanguage: string, llm: string): Promise<[string, TokenCount]> {
     // Construct the prompt for the OpenRouter API
-    const prompt = `You are tasked with translating a sentence from ${targetLanguage} to ${nativeLanguage}. Your goal is to provide the most accurate and natural translation without any additional explanations.
+    const prompt = `You are an expert translator tasked with translating a sentence from one language to another. Your goal is to provide the most accurate and natural translation possible.
 
-Here is the sentence to translate:
+Here are the details for this translation task:
+
+Target Language (language to translate from): 
+<target_language>
+${targetLanguage}
+</target_language>
+
+Native Language (language to translate to):
+<native_language>
+${nativeLanguage}
+</native_language>
+
+Sentence to translate:
+<input_sentence>
 ${inputSentence}
+</input_sentence>
 
 Instructions:
-1. Translate the given sentence into the specified language.
-2. Provide only the most accurate and natural translation.
-3. Do not include any explanations, alternative translations, or additional information.
-4. Maintain the original meaning and tone of the sentence as closely as possible.
-5. If the sentence contains idiomatic expressions, translate them to equivalent expressions in the target language if possible.
-6. Preserve any formatting present in the original sentence, such as bold or italic text.
-7. Maintain the formality or informality of the original sentence in the translation.`;
+1. Analyze the input sentence carefully, noting any idiomatic expressions, formatting, or special considerations.
+2. Translate the sentence from the target language to the native language, ensuring that you:
+   - Maintain the original meaning and tone as closely as possible
+   - Preserve the level of formality or informality
+   - Use equivalent idiomatic expressions in the native language when appropriate
+   - Retain any special formatting (e.g., bold or italic text) present in the original sentence
+3. Wrap your translation analysis inside <translation_analysis> tags, including:
+   - Identification of idiomatic expressions, cultural references, or linguistic nuances in the original sentence
+   - Initial translation
+   - Multiple translation options for challenging phrases or words
+   - Reasoning for choosing specific translations
+   - Refinement of the translation
+   - Final check for accuracy and naturalness
+4. Provide only the final translated sentence as your output, without any additional explanations or information.
+
+Example output structure:
+
+<translation_analysis>
+[Your detailed translation analysis, including identification of nuances, initial translation, alternative options, reasoning, and refinements]
+</translation_analysis>
+
+[Final translated sentence with preserved formatting]
+
+Remember, the quality of the translation is paramount. Take the time to ensure that your translation is excellent, natural-sounding, and faithful to the original sentence.`;
 
     // Send the prompt to the OpenRouter API and get the response
     const response = await axios.post(
