@@ -41,6 +41,9 @@ anki-assistant-languages/
 │   ├── tsconfig.json                 # TypeScript configuration
 │   └── ...
 │
+├── scripts/                          # Scripts for development and maintenance
+│   └── checkDatabaseConnection.ts    # Script to check the database connection
+│
 ├── src/                              # Backend application built with Express.js and TypeScript
 │   ├── anthropicClaude.ts            # Handles interactions with the Anthropic Claude API
 │   ├── azureTTS.ts                   # Handles interactions with the Azure Text-to-Speech API
@@ -48,28 +51,35 @@ anki-assistant-languages/
 │   ├── googleCloudTTS.ts             # Handles interactions with the Google Cloud Text-to-Speech API
 │   ├── googleGemini.ts               # Handles interactions with the Google Gemini API
 │   └── openRouter.ts                 # Handles interactions with the OpenRouter API
+│
 ├── .env                              # Environment variables (API keys, etc.) - NOT tracked in version control
 ├── package.json                      # Backend dependencies (yarn)
-├── tsconfig.json                     # TypeScript configuration
-│   └── ...
 ├── projectStructure.md               # Project structure documentation
 ├── README.md                         # Project overview and instructions
 ├── todoList.md                       # Project task tracking list
+├── tsconfig.json                     # TypeScript configuration
 └── ...
-```
 
 ## Environment Variables
 
 The `.env` file contains sensitive information and should **not** be committed to version control.  The following environment variables are expected:
 
-- `BACKEND_API_URL`:  The base URL for the backend API.
-- `GOOGLE_CLOUD_TTS_KEY`: Google Cloud Text-to-Speech API key.
-- `AZURE_SPEECH_KEY`: Azure Speech API key.
-- `OPENROUTER_API_KEY`: OpenRouter API key.
-- `ANTHROPIC_API_KEY`: Anthropic API key.
-
+- `ANTHROPIC_CLAUDE_API_KEY`: Anthropic Claude API key.
+- `AZURE_SPEECH_REGION`: Azure Speech Region.
+- `AZURE_SPEECH_RESOURCE_KEY`: Azure Speech Resource Key.
+- `DB_DATABASE`: Name of the PostgreSQL database.
+- `DB_HOST`: Host address for the PostgreSQL database.
+- `DB_PASSWORD`: Password for the PostgreSQL database.
+- `DB_PORT`: Port number for the PostgreSQL database.
+- `DB_USER`: Username for the PostgreSQL database.
+- `GOOGLE_CLOUD_TTS_API_KEY`: Google Cloud Text-to-Speech API key.
+- `GOOGLE_GEMINI_API_KEY`: Google Cloud Gemini API Key.
+- `OPENROUTER_API_KEY`: OpenRouter API Key.
+- `OPENROUTER_YOUR_SITE_NAME`: OpenRouter Name of your site.
+- `OPENROUTER_YOUR_SITE_URL`: OpenRouter URL of your site.
 
 ## Notes
 
 - **README.md**: The main documentation file for the project, providing an overview, setup instructions, and usage details.
+- **scripts/checkDatabaseConnection.ts**: A script to test the connection to the PostgreSQL database using the environment variables.
 - **todoList.md**: A list of tasks and features to be implemented in the project.
