@@ -1,8 +1,15 @@
+// Import necessary dependencies
+// Client: Manages database connections
+// dotenv: Loads environment variables from a .env file
 import { Client } from 'pg';
 import * as dotenv from 'dotenv';
+
+// Load environment variables
 dotenv.config();
 
+// Function to test the database connection
 async function testDatabaseConnection() {
+    // Configure database connection
     const client = new Client({
         user: process.env.DB_USER,
         host: process.env.DB_HOST,
@@ -12,6 +19,7 @@ async function testDatabaseConnection() {
     });
 
     try {
+        // Connect to the database
         await client.connect();
         console.log('Database connection established successfully!');
 
@@ -22,10 +30,12 @@ async function testDatabaseConnection() {
     } catch (error) {
         console.error('Error connecting to the database:', error);
     } finally {
-        await client.end(); // Close the connection
+        // Close the connection
+        await client.end();
     }
 }
 
+// Main function to execute the database connection test
 async function main() {
     try {
         await testDatabaseConnection();
@@ -34,4 +44,5 @@ async function main() {
     }
 }
 
+// Execute the main function
 main();
