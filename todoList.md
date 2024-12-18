@@ -117,7 +117,7 @@
   - [ ] Adicionar middleware de autenticação para rotas protegidas
 - [x] Mover a interface `VoiceOption` do `voiceOptions.ts` para `Types.ts`
 - [x] Alterar a forma que o `supportedLanguages` é apresentado:
-  - [x] Atualizar os `value=` em `languageSelector.tsx` para usar os novos nomes de idioma
+  - [x] Atualizar os `value=` em `LanguageSelector.tsx` para usar os novos nomes de idioma
   - [x] Atualizar as comparações de `targetLanguage ===` em `App.tsx` para usar os novos nomes de idioma
   - [x] Atualizar os `language:` em `voiceOptions.ts` para corresponder aos novos nomes
 

@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './styles/App.css';
-import LanguageSelector from './components/languageSelector';
+import LanguageSelector from './components/LanguageSelector';
 import Modal from './components/Modal';
 import Notifications from './components/Notifications';
 import Login from './components/Login';

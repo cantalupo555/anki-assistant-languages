@@ -4,7 +4,7 @@ This document provides an overview of the project structure for the `anki-assist
 
 ## Directory Structure
 
-```
+<pre>
 anki-assistant-languages/
 │
 ├── frontend/                         # Frontend application built with React
@@ -15,7 +15,7 @@ anki-assistant-languages/
 │   │   ├── components/               # Reusable UI components
 │   │   │   ├── Footer.tsx            # Footer component for the application
 │   │   │   ├── Header.tsx            # Header component for the application
-│   │   │   ├── languageSelector.tsx  # Component for selecting native and target languages
+│   │   │   ├── LanguageSelector.tsx  # Component for selecting native and target languages
 │   │   │   ├── Login.tsx             # Login component for user authentication
 │   │   │   ├── Modal.tsx             # Reusable modal component for displaying information
 │   │   │   └── Notifications.tsx     # Component for displaying notifications to the user
@@ -42,7 +42,8 @@ anki-assistant-languages/
 │   └── ...
 │
 ├── scripts/                          # Scripts for development and maintenance
-│   └── checkDatabaseConnection.ts    # Script to check the database connection
+│   ├── checkDatabaseConnection.ts    # Script to check the database connection
+│   └── createUsersTable.ts           # Script to create the users table in the database
 │
 ├── src/                              # Backend application built with Express.js and TypeScript
 │   ├── anthropicClaude.ts            # Handles interactions with the Anthropic Claude API
@@ -59,6 +60,7 @@ anki-assistant-languages/
 ├── todoList.md                       # Project task tracking list
 ├── tsconfig.json                     # TypeScript configuration
 └── ...
+</pre>
 
 ## Environment Variables
 
@@ -82,4 +84,5 @@ The `.env` file contains sensitive information and should **not** be committed t
 
 - **README.md**: The main documentation file for the project, providing an overview, setup instructions, and usage details.
 - **scripts/checkDatabaseConnection.ts**: A script to test the connection to the PostgreSQL database using the environment variables.
+- **scripts/createUsersTable.ts**: A script to create the users table in the database.
 - **todoList.md**: A list of tasks and features to be implemented in the project.
