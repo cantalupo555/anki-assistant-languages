@@ -5,8 +5,8 @@
   - [ ] Campo word-input
   - [ ] Verificar se os dados inseridos são válidos (por exemplo, e-mail no formato correto)
 - [x] Tornar todos os campos obrigatórios
-- [ ] Criar uma página de login:
-  - [ ] Adicionar rotas para a página de login
+- [x] Criar uma página de login:
+  - [x] Adicionar rotas para a página de login
   - [x] Criar um formulário de login
 - [ ] Implementar a autenticação do usuário:
   - [ ] Adicionar campo de e-mail no formulário de login
@@ -87,7 +87,7 @@
 - [x] Exibir conteúdo do `handleGenerateDialogue` no Modal
 - [x] Corrigir problema na exibição do conteúdo Modal devido a implementação do `handleGenerateDialogue`
 - [ ] Corrigir context para o campo AI Model ser salvo corretamente
-- [ ] Modularizar as funções de manipulação de eventos no App.tsx:
+- [x] Modularizar as funções de manipulação de eventos no App.tsx:
   - [x] Mover `handleSubmit` para um arquivo separado `handleSubmit.ts`
   - [x] Mover `handleGenerateDialogue` para um arquivo separado `handleGenerateDialogue.ts`
   - [x] Mover `handleAnalyzeFrequency` para um arquivo separado `handleAnalyzeFrequency.ts`
@@ -120,6 +120,7 @@
   - [x] Atualizar os `value=` em `LanguageSelector.tsx` para usar os novos nomes de idioma
   - [x] Atualizar as comparações de `targetLanguage ===` em `App.tsx` para usar os novos nomes de idioma
   - [x] Atualizar os `language:` em `voiceOptions.ts` para corresponder aos novos nomes
+- [x] Renomeei o arquivo `languageSelector.tsx` para `LanguageSelector.tsx` para seguir a convenção PascalCase para componentes React 
 
 ## Backend
 - [ ] Implementar a funcionalidade de salvar itens no banco de dados
@@ -176,14 +177,14 @@
 - [ ] Implementar autenticação do usuário:
   - [ ] Validar as credenciais fornecidas pelo frontend
 - [ ] Implementar endpoints na autenticação do usuário:
-  - [ ] Criar endpoint `/user/login` para autenticação de usuários
-  - [ ] Criar endpoint `/user/logout` para logout de usuários
-  - [ ] Criar endpoint `/user/register` para registro de usuários
-  - [ ] Criar endpoint `/check-auth` para verificar se o usuário está autenticado
+  - [x] Criar endpoint `/user/login` para autenticação de usuários
+  - [x] Criar endpoint `/user/logout` para logout de usuários
+  - [x] Criar endpoint `/user/register` para registro de usuários
+  - [x] Criar endpoint `/check-auth` para verificar se o usuário está autenticado
   - [ ] Implementar a lógica de validação de credenciais no backend
 - [ ] Implementar o uso de um banco de dados PostgreSQL para armazenar dados de usuários e senhas:
-  - [ ] Configurar o banco de dados PostgreSQL
-  - [ ] Criar tabelas para usuários
+  - [x] Configurar o banco de dados PostgreSQL
+  - [x] Criar tabelas para usuários
   - [ ] Implementar queries para autenticação e registro de usuários
   - [ ] Implementar a criptografia de senhas (bcrypt) antes de armazená-las no banco de dados
 - [ ] Considerar o uso de cookies HTTP-only para armazenar tokens de autenticação em vez de localStorage:
@@ -214,24 +215,39 @@
       'Korean (Korea)'
     ];
     ```
+- [ ] Melhorias prompts para que outros LLMs sejam capazes de gerar conteúdo desejado para o projeto
+  - [x] getDefinitions
+  - [x] getSentences
+  - [x] translateSentence
+  - [ ] getDialogue
+  - [ ] analyzeFrequency
+- [x] Criar script `checkDatabaseConnection.ts` para verificar a conexão com o banco de dados PostgreSQL
+- [x] Criar script `createUsersTable.ts` para criar a tabela users no banco de dados PostgreSQL, definindo as colunas necessárias para armazenar informações dos usuários
 
 ## Integração de APIs
-- [x] ~~Implementar a integração com `Google Gemini`~~ [Gemini agora funciona no OpenRouter]
+- [x] Implementar a integração com `Google Gemini`
 - [x] Implementar a integração com `Anthropic Claude`
 - [x] Implementar a integração com `Google Cloud TTS`
 - [x] Implementar a integração com `Azure Speech`
 - [x] Implementar a integração com `OpenRouter`
+- [ ] Implementar a integração com `Alibaba Cloud Qwen`
 - [ ] Implementar fallbacks para APIs em caso de falhas
 - [x] Implementar os parâmetros `max_tokens` e `temperature` na chamada API OpenRouter
-- [ ] Implementar novos endponints responsável pela autenticação do usuário
+- [ ] Implementar novos endpoint responsável pela autenticação e registro do usuário
 
 ## Documentação
 - [x] Adicionar informações sobre o projeto no `README.md`
+- [x] Adicionar arquivo referente a convenções de código no `CONVENTIONS.md`
+- [ ] Criar arquivo `CHANGELOG.md` para manter um registro de todas as mudanças significativas no projeto
+- [ ] Criar arquivo `SECURITY.md` com informações sobre como relatar vulnerabilidades de segurança
+- [ ] Forneça instruções detalhadas no arquio `CONTRIBUTING.md` sobre como contribuir para o projeto
+- [x] Renomear `todoList.md` para `TODO.md`
+- [x] Renomear `projectStructure.md` para `STRUCTURE.md`
+- [ ] Adicionar documentação MIT no projeto:
+  - [ ] Incluir a licença MIT no arquivo `LICENSE`
+  - [ ] Atualizar o `README.md` com informações sobre a licença MIT
 - [ ] Criar guias de instalação e configuração
 - [ ] Criar guia detalhado para importação de flashcards no Anki
-- [ ] Adicionar documentação MIT no projeto:
-  - [ ] Incluir a licença MIT no arquivo `LICENSE.md`
-  - [ ] Atualizar o `README.md` com informações sobre a licença MIT
 
 ## Performance e Otimização
 - [ ] Otimizar o uso de memória e desempenho das rotas do Express
