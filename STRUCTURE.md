@@ -55,9 +55,9 @@ anki-assistant-languages/
 │
 ├── .env                              # Environment variables (API keys, etc.) - NOT tracked in version control
 ├── package.json                      # Backend dependencies (yarn)
-├── projectStructure.md               # Project structure documentation
 ├── README.md                         # Project overview and instructions
-├── todoList.md                       # Project task tracking list
+├── STRUCTURE.md                      # Project structure documentation
+├── TODO.md                           # Project task tracking list
 ├── tsconfig.json                     # TypeScript configuration
 └── ...
 </pre>
