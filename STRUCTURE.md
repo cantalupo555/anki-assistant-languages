@@ -54,6 +54,7 @@ anki-assistant-languages/
 │   └── openRouter.ts                 # Handles interactions with the OpenRouter API
 │
 ├── .env                              # Environment variables (API keys, etc.) - NOT tracked in version control
+├── CONVENTIONS.md                    # Project code conventions
 ├── package.json                      # Backend dependencies (yarn)
 ├── README.md                         # Project overview and instructions
 ├── STRUCTURE.md                      # Project structure documentation
