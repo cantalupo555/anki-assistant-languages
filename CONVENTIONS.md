@@ -51,6 +51,64 @@ This file defines the code conventions that should be followed in this project. 
 ## Backend (Node.js/TypeScript)
 
 -   **Database:** Use direct SQL queries with `pg` to interact with the database.
+    -   **Database System:** PostgreSQL
+    -   **SQL Queries:** Construct SQL queries carefully to prevent SQL injection vulnerabilities. Use parameterized queries with `pg` to safely handle user inputs.
+      ```typescript
+      const query = 'SELECT * FROM users WHERE email = $1';
+      const values = [email];
+      client.query(query, values, (err, res) => {
+          if (err) {
+              console.error('Error executing query', err.stack);
+              return;
+          }
+          console.log(res.rows);
+      });
+      ```
+    -   **Transactions:** Use database transactions to ensure data consistency when performing multiple operations.
+      ```typescript
+      client.query('BEGIN', (err) => {
+          if (err) {
+              console.error('Error starting transaction', err.stack);
+              return;
+          }
+          client.query('INSERT INTO users(name) VALUES($1)', ['Alice'], (err) => {
+              if (err) {
+                  console.error('Error inserting user', err.stack);
+                  client.query('ROLLBACK', (err) => {
+                      if (err) {
+                          console.error('Error rolling back transaction', err.stack);
+                      }
+                  });
+                  return;
+              }
+              client.query('COMMIT', (err) => {
+                  if (err) {
+                      console.error('Error committing transaction', err.stack);
+                      return;
+                  }
+                  console.log('Transaction completed successfully');
+              });
+          });
+      });
+      ```
+    -   **Query Organization:** Consider organizing SQL queries in separate files or modules for better maintainability.
+      ```typescript
+      // queries/userQueries.ts
+      export const getUserByEmail = 'SELECT * FROM users WHERE email = $1';
+      export const insertUser = 'INSERT INTO users(name, email) VALUES($1, $2)';
+      ```
+    -   **Error Handling:** Implement proper error handling when executing database queries. Log errors and return appropriate error messages to the client.
+      ```typescript
+      client.query(query, values, (err, res) => {
+          if (err) {
+              console.error('Error executing query', err.stack);
+              // Retorne uma mensagem de erro genérica ao cliente
+              return res.status(500).json({ error: 'Internal Server Error' });
+          }
+          // Processar o resultado da consulta
+          res.json(res.rows);
+      });
+      ```
 -   **Routes:** Organize routes logically and use middlewares for authentication and validation.
     -   **Folder Structure:** Create a `routes` directory to group routes by functionality.
     -   **Middlewares:** Create a `middlewares` directory to group middlewares.
@@ -112,27 +170,35 @@ This file defines the code conventions that should be followed in this project. 
 -   Use clear and concise commit messages, explaining the purpose of the change.
 -   Use the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format for commit messages.
 -   If necessary, you can include a description for the commit. The format of the commit message should be:
-    <pre>
+    ```markdown
     [Commit title]
 
     [Commit description with commit details]
-    </pre>
-- Example:
-    <pre>
+    ```
+-   Example:
+    ```markdown
     feat: Add login functionality
 
     Implements the login screen with user and password validation.
     Uses JWT for authentication.
-    </pre>
-    
+    ```
+
     or
 
-    <pre>
+    ```markdown
     fix: Fix bug on registration screen
 
     Fixes the bug that prevented new users from registering.
     Adds validation to ensure all fields are filled.
-    </pre>
+    ```
+
+-   **Code Highlighting in Commit Messages:** When mentioning file names, functions, variables, or similar code elements within commit messages, always highlight them using backticks.
+-   Example:
+    ```markdown
+    feat: Update `Login.tsx` component
+
+    This commit updates the `handleLogin` function in the `Login.tsx` component to use the new authentication service.
+    ```
 
 ## Environment Variables
 
@@ -140,6 +206,21 @@ This file defines the code conventions that should be followed in this project. 
     1. Copy the `.env.tmp` file to a new file named `.env`.
     2. Replace the example values with your own credentials and settings.
     3. Make sure the `.env` file is not added to version control, as it contains sensitive information.
+
+-   **Required Environment Variables:**
+    -   `ANTHROPIC_CLAUDE_API_KEY`: Anthropic Claude API key.
+    -   `AZURE_SPEECH_REGION`: Azure Speech Region.
+    -   `AZURE_SPEECH_RESOURCE_KEY`: Azure Speech Resource Key.
+    -   `DB_DATABASE`: Name of the PostgreSQL database.
+    -   `DB_HOST`: Host address for the PostgreSQL database.
+    -   `DB_PASSWORD`: Password for the PostgreSQL database.
+    -   `DB_PORT`: Port number for the PostgreSQL database.
+    -   `DB_USER`: Username for the PostgreSQL database.
+    -   `GOOGLE_CLOUD_TTS_API_KEY`: Google Cloud Text-to-Speech API key.
+    -   `GOOGLE_GEMINI_API_KEY`: Google Cloud Gemini API Key.
+    -   `OPENROUTER_API_KEY`: OpenRouter API Key.
+    -   `OPENROUTER_YOUR_SITE_NAME`: OpenRouter Name of your site.
+    -   `OPENROUTER_YOUR_SITE_URL`: OpenRouter URL of your site.
 
 ## Notes
 
