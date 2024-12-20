@@ -59,3 +59,8 @@ export interface FrequencyAnalysis {
 export interface LoginProps {
     onLogin: (username: string, password: string) => void;
 }
+
+// Define the props for the Register component
+export interface RegisterProps {
+    onRegister: (username: string, email: string, password: string) => void;
+}

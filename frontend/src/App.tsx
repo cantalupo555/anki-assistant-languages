@@ -9,6 +9,7 @@ import LanguageSelector from './components/LanguageSelector';
 import Modal from './components/Modal';
 import Notifications from './components/Notifications';
 import Login from './components/Login';
+import Register from './components/Register';
 import { AppProvider, useAppContext } from './context/selectionContext';
 import { handleExport } from './utils/languageCardExporter';
 import { stripMarkdown } from './utils/markdownStripper';
@@ -27,8 +28,9 @@ import Footer from './components/Footer';
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 
 const AppInner: React.FC = () => {
-  // Use the useAuth hook
-  const { isAuthenticated, isCheckingAuth, handleLogin } = useAuth();
+    // Use the useAuth hook
+    const { isAuthenticated, isCheckingAuth, handleLogin, handleRegister: authHandleRegister } = useAuth();
+    const [isRegistering, setIsRegistering] = useState(false);
 
   const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice, selectedLLM, setSelectedLLM } = useAppContext();
   const [word, setWord] = useState('');
@@ -279,23 +281,37 @@ const AppInner: React.FC = () => {
   };
 
   // Function to handle voice change
-  const handleVoiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newVoice = voiceOptions.find(voice => voice.value === e.target.value) || voiceOptions[0];
-    setSelectedVoice(newVoice);
-    localStorage.setItem('selectedVoice', JSON.stringify(newVoice));
-  };
+    const handleVoiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newVoice = voiceOptions.find(voice => voice.value === e.target.value) || voiceOptions[0];
+        setSelectedVoice(newVoice);
+        localStorage.setItem('selectedVoice', JSON.stringify(newVoice));
+    };
 
-  // Function to handle LLM change
-  const handleLLMChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLLM = llmOptions[selectedAPIService.value]?.find(llm => llm.value === e.target.value) || llmOptions[selectedAPIService.value][0];
-    setSelectedLLM(newLLM);
-    localStorage.setItem('selectedLLM', JSON.stringify(newLLM));
-  };
+    // Function to handle LLM change
+    const handleLLMChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newLLM = llmOptions[selectedAPIService.value]?.find(llm => llm.value === e.target.value) || llmOptions[selectedAPIService.value][0];
+        setSelectedLLM(newLLM);
+        localStorage.setItem('selectedLLM', JSON.stringify(newLLM));
+    };
 
-  // Render the main application components
-  if (isCheckingAuth) {
-    return <div className="loading-screen"><p>Loading...</p></div>;
-  }
+    const handleRegister = async (username: string, email: string, password: string) => {
+        try {
+            await authHandleRegister(username, email, password);
+            setIsRegistering(false);
+        } catch (error) {
+            console.error('Error during registration:', error);
+            setError('Registration failed. Please try again.');
+        }
+    };
+
+    // Function to handle the register button click
+    const handleRegisterClick = () => {
+        setIsRegistering(true);
+    };
+
+    if (isCheckingAuth) {
+        return <div className="loading-screen"><p>Loading...</p></div>;
+    }
 
   return (
       <div className="app-container">
@@ -569,20 +585,26 @@ const AppInner: React.FC = () => {
               <Footer />
             </>
         ) : (
-            <Login onLogin={handleLogin} />
+            isRegistering ? <Register onRegister={handleRegister} /> : <Login onLogin={handleLogin} onRegisterClick={handleRegisterClick} />
         )}
-      </div>
-  );
+        {!isAuthenticated && (
+            <div className="auth-switch">
+                <button onClick={() => setIsRegistering(false)}>Go to Login</button>
+                <button onClick={() => setIsRegistering(true)}>Go to Register</button>
+            </div>
+        )}
+    </div>
+    );
 };
 
 // Main App component
 const App: React.FC = () => {
-  // Wrap the AppInner component with the AppProvider to provide the context
-  return (
-      <AppProvider>
-        <AppInner />
-      </AppProvider>
-  );
+    // Wrap the AppInner component with the AppProvider to provide the context
+    return (
+        <AppProvider>
+            <AppInner />
+        </AppProvider>
+    );
 };
 
 // Export the main App component

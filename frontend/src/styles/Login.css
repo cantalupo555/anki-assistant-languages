@@ -71,6 +71,46 @@
 }
 
 .login-button:disabled {
-  background-color: var(--secondary-color);
-  cursor: not-allowed;
+    background-color: var(--secondary-color);
+    cursor: not-allowed;
+}
+
+/* Register Button Styles */
+.register-button {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color var(--hover-transition);
+    width: 100%;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+.register-button:hover {
+    background-color: #0056b3;
+}
+
+.auth-switch {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.auth-switch button {
+    padding: 0.5rem 1rem;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color var(--hover-transition);
+}
+
+.auth-switch button:hover {
+    background-color: var(--primary-color);
 }

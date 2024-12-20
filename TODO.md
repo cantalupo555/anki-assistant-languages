@@ -15,12 +15,12 @@
   - [ ] Adicionar feedback visual quando o login for concluído
   - [ ] Adicionar feedback visual quando o login for falho
   - [ ] Adicionar feedback visual quando executar o logout
-- [ ] Adicionar suporte para registro de novos usuários:
-  - [ ] Criar uma página de registro
-  - [ ] Adicionar rotas para a página de registro
-  - [ ] Adicionar um formulário de registro
-  - [ ] Implementar a criptografia de senhas antes de registrá-las
-  - [ ] Validar a integridade dos dados de registro (e-mail, senha, etc.)
+- [x] Adicionar suporte para registro de novos usuários:
+  - [x] Criar uma página de registro
+  - [x] Adicionar rotas para a página de registro
+  - [x] Adicionar um formulário de registro
+  - [x] Implementar a criptografia de senhas antes de registrá-las
+  - [x] Validar a integridade dos dados de registro (e-mail, senha, etc.)
 - [x] Adicionar opção de logout
 - [x] Dividir a rota `/generate` para separar a geração de definições e sentenças, garantindo que ao clicar no botão `Generate` faça chamadas ao mesmo tempo na geração de definições e sentenças:
   - [x] Criar uma função separada para fazer a chamada à rota `/generate/definitions`
@@ -243,6 +243,7 @@
 - [ ] Forneça instruções detalhadas no arquio `CONTRIBUTING.md` sobre como contribuir para o projeto
 - [x] Renomear `todoList.md` para `TODO.md`
 - [x] Renomear `projectStructure.md` para `STRUCTURE.md`
+- [ ] Adicionar arquivo `CODE_OF_CONDUCT.md` com as diretrizes de conduta do projeto
 - [ ] Adicionar documentação MIT no projeto:
   - [ ] Incluir a licença MIT no arquivo `LICENSE`
   - [ ] Atualizar o `README.md` com informações sobre a licença MIT
