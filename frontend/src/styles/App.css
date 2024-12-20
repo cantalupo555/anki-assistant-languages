@@ -475,8 +475,10 @@ footer {
 .generate-notification { background-color: var(--generate-color); }
 
 @keyframes fadeInOut {
-  0%, 100% { opacity: 0; }
-  10%, 90% { opacity: 1; }
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* Scroll-to-Top Button Styles */
