@@ -11,6 +11,7 @@ import { getDefinitionsGoogleGemini, getSentencesGoogleGemini, translateSentence
 import { getDefinitionsOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter, getDialogueOpenRouter, analyzeFrequencyOpenRouter } from './openRouter';
 import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
 import { textToSpeech as azureTextToSpeech } from './azureTTS';
+import { authenticateToken } from './middlewares/authMiddleware';
 
 // Create an Express application instance
 const app = express();
@@ -117,19 +118,6 @@ app.post('/login', async (req: Request, res: Response) => {
     }
 });
 
-// Authentication middleware
-const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    if (token == null) return res.sendStatus(401);
-
-    jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-        if (err) return res.sendStatus(403);
-        (req as any).user = user;
-        next();
-    });
-};
-
 // Protected route
 app.get('/user', authenticateToken, async (req: Request, res: Response) => {
     try {
@@ -202,7 +190,7 @@ app.post('/user/change-password', authenticateToken, async (req: Request, res: R
 });
 
 // Route to handle the generation of definitions
-app.post('/generate/definitions', async (req, res) => {
+app.post('/generate/definitions', authenticateToken, async (req, res) => {
     try {
         // Get the word, target language, API service, and llm from the request body
         const { word, language: targetLanguage, apiService, llm } = req.body;
@@ -254,7 +242,7 @@ app.post('/generate/definitions', async (req, res) => {
 });
 
 // Route to handle the generation of sentences
-app.post('/generate/sentences', async (req, res) => {
+app.post('/generate/sentences', authenticateToken, async (req, res) => {
     try {
         // Get the word, target language, API service, and llm from the request body
         const { word, language: targetLanguage, apiService, llm } = req.body;
@@ -313,7 +301,7 @@ app.post('/generate/sentences', async (req, res) => {
 });
 
 // Route to handle the translation request
-app.post('/translate', async (req, res) => {
+app.post('/translate', authenticateToken, async (req, res) => {
     try {
         const { text: inputSentence, targetLanguage, nativeLanguage, apiService, llm } = req.body;
 
@@ -363,7 +351,7 @@ app.post('/translate', async (req, res) => {
 });
 
 // Route to handle the generation of a dialogue
-app.post('/generate/dialogue', async (req, res) => {
+app.post('/generate/dialogue', authenticateToken, async (req, res) => {
     try {
         // Get the word, target language, native language, API service, and llm from the request body
         const { word, targetLanguage, nativeLanguage, apiService, llm } = req.body;
@@ -417,7 +405,7 @@ app.post('/generate/dialogue', async (req, res) => {
 });
 
 // Route to handle the word frequency analysis request
-app.post('/analyze/frequency', async (req, res) => {
+app.post('/analyze/frequency', authenticateToken, async (req, res) => {
     try {
         const { word, targetLanguage, nativeLanguage, apiService, llm } = req.body;
 
@@ -465,7 +453,7 @@ app.post('/analyze/frequency', async (req, res) => {
 });
 
 // Route to handle token sum
-app.post('/token/sum', (req, res) => {
+app.post('/token/sum', authenticateToken, (req, res) => {
     try {
         const { definitionsTokens, sentencesTokens, translationTokens } = req.body;
 
@@ -483,7 +471,7 @@ app.post('/token/sum', (req, res) => {
 });
 
 // Route to handle TTS requests
-app.post('/tts', async (req, res) => {
+app.post('/tts', authenticateToken, async (req, res) => {
     try {
         // Get the text, voice, language code, and TTS service from the request body
         const { text, voice, languageCode, ttsService } = req.body;
