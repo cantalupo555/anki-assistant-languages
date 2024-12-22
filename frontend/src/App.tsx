@@ -2,27 +2,36 @@
 // React: Core library for building user interfaces
 // useState, useEffect: React hooks for managing state and side effects
 // ReactMarkdown: Component to render Markdown as React components
+// External library imports
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import './styles/App.css';
+
+// Internal component imports
+import Footer from './components/Footer';
+import Header from './components/Header';
 import LanguageSelector from './components/LanguageSelector';
+import Login from './components/Login';
 import Modal from './components/Modal';
 import Notifications from './components/Notifications';
-import Login from './components/Login';
 import Register from './components/Register';
+
+// Context imports
 import { AppProvider, useAppContext } from './context/selectionContext';
+
+// Style imports
+import './styles/App.css';
+
+// Utility function imports
+import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
+import { handleGenerateDialogue } from './utils/handleGenerateDialogue';
+import { handleSubmit } from './utils/handleSubmit';
+import { handleTranslation } from './utils/handleTranslation';
 import { handleExport } from './utils/languageCardExporter';
 import { stripMarkdown } from './utils/markdownStripper';
-import { TokenCount, SavedItem, FrequencyAnalysis } from './utils/Types';
-import { voiceOptions } from './utils/voiceOptions';
 import useAuth from './utils/useAuth';
-import { handleSubmit } from './utils/handleSubmit';
-import { handleGenerateDialogue } from './utils/handleGenerateDialogue';
-import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
-import { handleTranslation } from './utils/handleTranslation';
 import { apiServiceOptions, llmOptions, ttsOptions } from './utils/Options';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import { voiceOptions } from './utils/voiceOptions';
+import { TokenCount, SavedItem, FrequencyAnalysis } from './utils/Types';
 
 // Define the TTS URL, using environment variables
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
