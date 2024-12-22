@@ -17,7 +17,11 @@ const app = express();
 // Get the port number from the environment variable 'PORT'
 const port = process.env.PORT || 5000;
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // Use a strong secret key
+const JWT_SECRET = process.env.JWT_SECRET; // Use a strong secret key
+if (!JWT_SECRET) {
+    console.error('JWT_SECRET environment variable is not set. Exiting.');
+    process.exit(1);
+}
 
 const pool = new Pool({
     user: process.env.DB_USER,
