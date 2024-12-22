@@ -19,11 +19,15 @@ export const handleGenerateSentences = async (setSentences: Dispatch<SetStateAct
     console.log('Sending sentences generation request...');
     console.log('Request payload:', { word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
+    // Get the token from localStorage
+    const token = localStorage.getItem('token');
+
     // Send POST request to the sentences generation endpoint
     const sentencesResponse = await fetch(SENTENCES_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
       },
       body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
     });

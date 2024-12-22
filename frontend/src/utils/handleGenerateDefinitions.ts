@@ -19,10 +19,16 @@ export const handleGenerateDefinitions = async (setDefinitions: Dispatch<SetStat
     console.log('Sending definitions generation request...');
     console.log('Request payload:', { word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
+    // Get the token from localStorage
+    const token = localStorage.getItem('token');
+
     // Send POST request to the definitions generation endpoint
     const definitionsResponse = await fetch(DEFINITIONS_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
+      },
       body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
     });
 

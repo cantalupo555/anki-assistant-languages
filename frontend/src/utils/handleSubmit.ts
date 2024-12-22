@@ -32,11 +32,15 @@ export const handleSubmit = async (e: React.FormEvent, setDefinitions: Dispatch<
       translationTokens: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
     });
 
+    // Get the token from localStorage
+    const token = localStorage.getItem('token');
+
     // Calculate total token count
     const totalTokenCountResponse = await fetch(TOKEN_SUM_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
       },
       body: JSON.stringify({
         definitionsTokens: definitionsTokenCount,

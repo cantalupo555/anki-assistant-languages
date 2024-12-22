@@ -22,11 +22,15 @@ export const handleTranslation = async (sentence: string, setError: Dispatch<Set
       llm: selectedLLM
     });
 
+    // Get the token from localStorage
+    const token = localStorage.getItem('token');
+
     // Send POST request to the translation API endpoint
     const response = await fetch(TRANSLATION_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
       },
       body: JSON.stringify({
         text: sentence,

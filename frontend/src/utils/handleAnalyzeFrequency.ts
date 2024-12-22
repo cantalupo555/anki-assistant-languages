@@ -21,10 +21,16 @@ export const handleAnalyzeFrequency = async (setFrequencyAnalysis: Dispatch<SetS
     console.log('Sending frequency analysis request...');
     console.log('Request payload:', { word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
+    // Get the token from localStorage
+    const token = localStorage.getItem('token');
+
     // Send POST request to the frequency analysis endpoint
     const analysisResponse = await fetch(ANALYZE_FREQUENCY_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
+      },
       body: JSON.stringify({ word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
     });
 

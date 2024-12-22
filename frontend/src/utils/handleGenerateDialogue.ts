@@ -20,10 +20,16 @@ export const handleGenerateDialogue = async (setDialogue: Dispatch<SetStateActio
     console.log('Sending dialogue generation request...');
     console.log('Request payload:', { word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
+    // Get the token from localStorage
+    const token = localStorage.getItem('token');
+
     // Send POST request to the dialogue generation endpoint
     const dialogueResponse = await fetch(DIALOGUE_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
+      },
       body: JSON.stringify({ word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
     });
 
