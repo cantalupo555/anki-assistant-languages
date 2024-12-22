@@ -4,45 +4,44 @@
 import React, { useState } from 'react';
 import '../styles/Login.css';
 import { RegisterProps } from '../utils/Types';
+import useAuth from '../utils/useAuth';
 
-// Define the Register component, which handles user registration
 const Register: React.FC<RegisterProps> = ({ onRegister }) => {
-    // State variables to store form input values
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    // State variable to store any error messages
     const [error, setError] = useState<string | null>(null);
+    const { handleRegister: authHandleRegister } = useAuth();
 
-    // Function to handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault(); // Prevent the default form submission behavior
-        setError(null); // Clear previous errors
+        e.preventDefault();
+        setError(null);
 
-        // Check if all fields are filled
         if (!username || !email || !password || !confirmPassword) {
             setError('All fields are required.');
             return;
         }
 
-        // Check if the password is at least 8 characters long
         if (password.length < 8) {
             setError('Password must be at least 8 characters.');
             return;
         }
 
-        // Check if the password and confirm password fields match
         if (password !== confirmPassword) {
             setError('Passwords do not match.');
             return;
         }
 
-        // Call the onRegister function passed as a prop, passing the form data
-        onRegister(username, email, password);
+        try {
+            await authHandleRegister(username, email, password);
+            onRegister(username, email, password);
+        } catch (error) {
+            console.error('Error during registration:', error);
+            setError('Registration failed. Please try again.');
+        }
     };
 
-    // Render the registration form
     return (
         <div className="login-container">
             <div className="login-form">
@@ -95,5 +94,6 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
         </div>
     );
 };
+
 
 export default Register;

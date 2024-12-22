@@ -38,7 +38,7 @@ const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 
 const AppInner: React.FC = () => {
     // Use the useAuth hook
-    const { isAuthenticated, isCheckingAuth, handleLogin, handleRegister: authHandleRegister } = useAuth();
+    const { isAuthenticated, isCheckingAuth, handleLogin } = useAuth();
     const [isRegistering, setIsRegistering] = useState(false);
 
   const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice, selectedLLM, setSelectedLLM } = useAppContext();
@@ -303,19 +303,12 @@ const AppInner: React.FC = () => {
         localStorage.setItem('selectedLLM', JSON.stringify(newLLM));
     };
 
-    const handleRegister = async (username: string, email: string, password: string) => {
-        try {
-            await authHandleRegister(username, email, password);
-            setIsRegistering(false);
-        } catch (error) {
-            console.error('Error during registration:', error);
-            setError('Registration failed. Please try again.');
-        }
-    };
-
-    // Function to handle the register button click
     const handleRegisterClick = () => {
         setIsRegistering(true);
+    };
+
+    const handleRegisterClose = () => {
+        setIsRegistering(false);
     };
 
     if (isCheckingAuth) {
@@ -326,7 +319,6 @@ const AppInner: React.FC = () => {
       <div className="app-container">
         {isAuthenticated ? (
             <>
-              {/* Render the footer */}
               <Header />
 
               <main>
@@ -594,7 +586,7 @@ const AppInner: React.FC = () => {
               <Footer />
             </>
         ) : (
-            isRegistering ? <Register onRegister={handleRegister} /> : <Login onLogin={handleLogin} onRegisterClick={handleRegisterClick} />
+            isRegistering ? <Register onRegister={handleRegisterClose} /> : <Login onLogin={handleLogin} onRegisterClick={handleRegisterClick} />
         )}
         {!isAuthenticated && (
             <div className="auth-switch">
