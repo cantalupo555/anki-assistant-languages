@@ -7,7 +7,8 @@
     "dev": "tsx watch src/expressServer.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "check-db-connection": "tsx scripts/checkDatabaseConnection.ts",
-    "create-users-table": "tsx scripts/createUsersTable.ts"
+    "create-users-table": "tsx scripts/createUsersTable.ts",
+    "create-tokens-table": "tsx scripts/createTokensTable.ts"
   },
   "keywords": [],
   "author": "",
