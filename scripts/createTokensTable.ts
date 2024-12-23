@@ -1,13 +1,13 @@
-
-// Import the Pool class from the 'pg' module for managing PostgreSQL database connections.
+// Import necessary dependencies
+// Client: Manages database connections
+// dotenv: Loads environment variables from a .env file
 import { Pool } from 'pg';
-// Import the 'dotenv' module to load environment variables from a .env file.
 import * as dotenv from 'dotenv';
 
-// Load environment variables from the .env file into process.env.
+// Load environment variables
 dotenv.config();
 
-// Create a new connection pool to the PostgreSQL database using environment variables.
+// Configure database connection
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -16,7 +16,7 @@ const pool = new Pool({
     port: parseInt(process.env.DB_PORT || '5432', 10),
 });
 
-// Asynchronous function to create the 'user_tokens' table in the database.
+// Function to create the 'user_tokens' table in the database.
 const createTokensTable = async () => {
     // Get a client from the connection pool.
     const client = await pool.connect();
@@ -31,7 +31,9 @@ const createTokensTable = async () => {
                 output_tokens INTEGER NOT NULL DEFAULT 0,
                 total_tokens INTEGER NOT NULL DEFAULT 0,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id)
+                tokens_context_id UUID NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (tokens_context_id) REFERENCES tokens_context(id)
             );
         `);
 

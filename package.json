@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "check-db-connection": "tsx scripts/checkDatabaseConnection.ts",
     "create-users-table": "tsx scripts/createUsersTable.ts",
-    "create-tokens-table": "tsx scripts/createTokensTable.ts"
+    "create-tokens-table": "tsx scripts/createTokensTable.ts",
+    "create-tokens-context-table": "tsx scripts/createTokensContextTable.ts"
   },
   "keywords": [],
   "author": "",
