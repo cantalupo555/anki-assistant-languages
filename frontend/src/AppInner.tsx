@@ -10,8 +10,9 @@ import ReactMarkdown from 'react-markdown';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import LanguageSelector from './components/LanguageSelector';
-import Modal from './components/Modal';
 import Notifications from './components/Notifications';
+import DialogueModal from './components/DialogueModal';
+import FrequencyAnalysisModal from './components/FrequencyAnalysisModal';
 
 // Context imports
 import { useAppContext } from './context/selectionContext';
@@ -56,9 +57,9 @@ const AppInner: React.FC = () => {
     const [translation, setTranslation] = useState<string | null>(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [frequencyAnalysis, setFrequencyAnalysis] = useState<FrequencyAnalysis | null>(null);
-    const [isFrequencyModalOpen, setIsFrequencyModalOpen] = useState(false); // State to control the frequency analysis modal
     const [dialogue, setDialogue] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
-    const [isDialogueModalOpen, setIsDialogueModalOpen] = useState(false); // State to control the dialogue modal
+    const [isDialogueModalOpen, setIsDialogueModalOpen] = useState(false);
+    const [isFrequencyModalOpen, setIsFrequencyModalOpen] = useState(false);
 
     // Effect to load saved items and authentication state from localStorage on component mount
     useEffect(() => {
@@ -529,39 +530,16 @@ const AppInner: React.FC = () => {
                     showClearAllNotification={showClearAllNotification}
                     showGenerateNotification={showGenerateNotification}
                 />
-
-                {/* Render the modal for generated dialogue */}
-                <Modal
+                <DialogueModal
                     isOpen={isDialogueModalOpen}
                     onClose={() => setIsDialogueModalOpen(false)}
-                    title="Generated Dialogue"
-                    contentType="dialogue"
-                >
-                    {dialogue ? (
-                        <div className="dialogue">
-                            <ReactMarkdown>{dialogue.text}</ReactMarkdown>
-                        </div>
-                    ) : (
-                        <p>No dialogue data available.</p>
-                    )}
-                </Modal>
-
-                {/* Render the modal for frequency analysis */}
-                <Modal
+                    dialogue={dialogue}
+                />
+                <FrequencyAnalysisModal
                     isOpen={isFrequencyModalOpen}
                     onClose={() => setIsFrequencyModalOpen(false)}
-                    title="Frequency Analysis"
-                    contentType="analysis"
-                >
-                    {frequencyAnalysis ? (
-                        <div className="frequency-analysis">
-                            <ReactMarkdown>{frequencyAnalysis.text}</ReactMarkdown>
-                        </div>
-                    ) : (
-                        <p>No analysis data available.</p>
-                    )}
-                </Modal>
-
+                    frequencyAnalysis={frequencyAnalysis}
+                />
                 {/* Render the footer */}
                 <Footer />
             </>
