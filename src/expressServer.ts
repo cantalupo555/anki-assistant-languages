@@ -55,7 +55,7 @@ const supportedLanguages = [
 ];
 
 // Registration route
-app.post('/register', async (req: Request, res: Response) => {
+app.post('/register', async (req: Request, res: Response): Promise<void> => {
     try {
         const { username, email, password } = req.body;
 
@@ -99,7 +99,7 @@ app.post('/register', async (req: Request, res: Response) => {
 });
 
 // Login route
-app.post('/login', async (req: Request, res: Response) => {
+app.post('/login', async (req: Request, res: Response): Promise<void> => {
     try {
         const { username, password } = req.body;
         const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
@@ -131,7 +131,7 @@ app.get('/user', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // Logout route
-app.post('/logout', authenticateToken, (req, res) => {
+app.post('/logout', authenticateToken, (req: Request, res: Response) => {
     // Invalidate the token on the client side by removing it from storage
     res.status(200).json({ message: 'Logout successful' });
 });
@@ -190,7 +190,7 @@ app.post('/user/change-password', authenticateToken, async (req: Request, res: R
 });
 
 // Route to handle the generation of definitions
-app.post('/generate/definitions', authenticateToken, async (req, res) => {
+app.post('/generate/definitions', authenticateToken, async (req: Request, res: Response) => {
     try {
         // Get the word, target language, API service, and llm from the request body
         const { word, language: targetLanguage, apiService, llm } = req.body;
@@ -242,7 +242,7 @@ app.post('/generate/definitions', authenticateToken, async (req, res) => {
 });
 
 // Route to handle the generation of sentences
-app.post('/generate/sentences', authenticateToken, async (req, res) => {
+app.post('/generate/sentences', authenticateToken, async (req: Request, res: Response) => {
     try {
         // Get the word, target language, API service, and llm from the request body
         const { word, language: targetLanguage, apiService, llm } = req.body;
@@ -301,7 +301,7 @@ app.post('/generate/sentences', authenticateToken, async (req, res) => {
 });
 
 // Route to handle the translation request
-app.post('/translate', authenticateToken, async (req, res) => {
+app.post('/translate', authenticateToken, async (req: Request, res: Response) => {
     try {
         const { text: inputSentence, targetLanguage, nativeLanguage, apiService, llm } = req.body;
 
@@ -351,7 +351,7 @@ app.post('/translate', authenticateToken, async (req, res) => {
 });
 
 // Route to handle the generation of a dialogue
-app.post('/generate/dialogue', authenticateToken, async (req, res) => {
+app.post('/generate/dialogue', authenticateToken, async (req: Request, res: Response) => {
     try {
         // Get the word, target language, native language, API service, and llm from the request body
         const { word, targetLanguage, nativeLanguage, apiService, llm } = req.body;
@@ -405,7 +405,7 @@ app.post('/generate/dialogue', authenticateToken, async (req, res) => {
 });
 
 // Route to handle the word frequency analysis request
-app.post('/analyze/frequency', authenticateToken, async (req, res) => {
+app.post('/analyze/frequency', authenticateToken, async (req: Request, res: Response) => {
     try {
         const { word, targetLanguage, nativeLanguage, apiService, llm } = req.body;
 
@@ -453,7 +453,7 @@ app.post('/analyze/frequency', authenticateToken, async (req, res) => {
 });
 
 // Route to handle token sum
-app.post('/token/sum', authenticateToken, (req, res) => {
+app.post('/token/sum', authenticateToken, (req: Request, res: Response) => {
     try {
         const { definitionsTokens, sentencesTokens, translationTokens } = req.body;
 
@@ -471,7 +471,7 @@ app.post('/token/sum', authenticateToken, (req, res) => {
 });
 
 // Route to handle TTS requests
-app.post('/tts', authenticateToken, async (req, res) => {
+app.post('/tts', authenticateToken, async (req: Request, res: Response) => {
     try {
         // Get the text, voice, language code, and TTS service from the request body
         const { text, voice, languageCode, ttsService } = req.body;
