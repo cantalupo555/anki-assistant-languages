@@ -31,12 +31,18 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     const token = authHeader && authHeader.split(' ')[1];
 
     // If no token is found, send a 401 Unauthorized response
-    if (token == null) return res.sendStatus(401);
+    if (token == null) {
+        res.sendStatus(401);
+        return;
+    }
 
     // Verify the token using the JWT secret key
     jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
         // If the token is invalid, send a 403 Forbidden response
-        if (err) return res.sendStatus(403);
+        if (err) {
+            res.sendStatus(403);
+            return;
+        }
         // If the token is valid, add the user information to the request object
         (req as any).user = user;
         // Call the next middleware function in the stack
