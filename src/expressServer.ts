@@ -1,7 +1,7 @@
 // Import necessary dependencies and utility functions
 // express: Web framework for handling HTTP requests and responses
 // cors: Middleware to enable Cross-Origin Resource Sharing (CORS)
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -61,13 +61,15 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
 
         // Validate input
         if (!username || !email || !password) {
-            return res.status(400).json({ error: 'All fields are required' });
+            res.status(400).json({ error: 'All fields are required' });
+            return;
         }
 
         // Validate email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            return res.status(400).json({ error: 'Invalid email' });
+            res.status(400).json({ error: 'Invalid email' });
+            return;
         }
 
         // Check if user or email already exists
@@ -77,12 +79,14 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
         );
 
         if (existingUser.rows.length > 0) {
-            return res.status(409).json({ error: 'User or email already registered' });
+            res.status(409).json({ error: 'User or email already registered' });
+            return;
         }
 
         // Validate password strength
         if (password.length < 8) {
-            return res.status(400).json({ error: 'Password must be at least 8 characters' });
+            res.status(400).json({ error: 'Password must be at least 8 characters' });
+            return;
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -104,11 +108,13 @@ app.post('/login', async (req: Request, res: Response): Promise<void> => {
         const { username, password } = req.body;
         const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
         if (user.rows.length === 0) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            res.status(401).json({ error: 'Invalid credentials' });
+            return;
         }
         const passwordMatch = await bcrypt.compare(password, user.rows[0].password_hash);
         if (!passwordMatch) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            res.status(401).json({ error: 'Invalid credentials' });
+            return;
         }
         const token = jwt.sign({ userId: user.rows[0].id }, JWT_SECRET, { expiresIn: '1h' });
         res.status(200).json({ message: 'Login successful', token });
@@ -143,7 +149,8 @@ app.put('/user/profile', authenticateToken, async (req: Request, res: Response) 
 
         // Validations
         if (!username || !email) {
-            return res.status(400).json({ error: 'All fields are required' });
+            res.status(400).json({ error: 'All fields are required' });
+            return;
         }
 
         const updateResult = await pool.query(
@@ -170,12 +177,14 @@ app.post('/user/change-password', authenticateToken, async (req: Request, res: R
         // Verify current password
         const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
         if (!isCurrentPasswordValid) {
-            return res.status(400).json({ error: 'Incorrect current password' });
+            res.status(400).json({ error: 'Incorrect current password' });
+            return;
         }
 
         // Validate new password
         if (newPassword.length < 8) {
-            return res.status(400).json({ error: 'New password must be at least 8 characters' });
+            res.status(400).json({ error: 'New password must be at least 8 characters' });
+            return;
         }
 
         // Update password
