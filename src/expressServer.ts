@@ -13,12 +13,11 @@ import { textToSpeech as azureTextToSpeech } from './azureTTS';
 import { authenticateToken } from './middlewares/authMiddleware';
 
 interface RequestParams {
-    word?: string;
-    language?: string;
-    targetLanguage?: string;
-    nativeLanguage?: string;
-    apiService?: string;
-    llm?: string;
+    word: string;
+    targetLanguage: string;
+    nativeLanguage: string;
+    apiService: string;
+    llm: string;
 }
 
 /**
@@ -28,13 +27,15 @@ interface RequestParams {
  * @throws {Error} If any parameter is invalid.
  */
 function validateRequestParams(req: Request): RequestParams {
-    const { word, language, targetLanguage, nativeLanguage, apiService, llm } = req.body;
+    const { word, language, nativeLanguage, apiService, llm } = req.body;
+    const targetLanguage = language; // Map 'language' to 'targetLanguage'
+    console.log('Received targetLanguage:', targetLanguage); // Debug log
 
     if (!word || typeof word !== 'string' || word.trim() === '') {
         throw new Error('Valid word is required');
     }
-    if (!language || typeof language !== 'string' || !supportedLanguages.includes(language)) {
-        throw new Error('Valid language is required');
+    if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
+        throw new Error('Valid target language is required');
     }
     if (!apiService || !['anthropic', 'openrouter', 'google'].includes(apiService)) {
         throw new Error('Valid API service (anthropic, openrouter, or google) is required');
@@ -42,14 +43,21 @@ function validateRequestParams(req: Request): RequestParams {
     if (!llm || typeof llm !== 'string') {
         throw new Error('Valid llm is required');
     }
-    if (targetLanguage && !supportedLanguages.includes(targetLanguage)) {
+    if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
+        console.error('Invalid target language:', targetLanguage); // Additional debug log
         throw new Error('Valid target language is required');
     }
-    if (nativeLanguage && !supportedLanguages.includes(nativeLanguage)) {
+    if (!nativeLanguage || typeof nativeLanguage !== 'string' || !supportedLanguages.includes(nativeLanguage)) {
         throw new Error('Valid native language is required');
     }
 
-    return { word, language, targetLanguage, nativeLanguage, apiService, llm };
+    return { 
+        word, 
+        targetLanguage, 
+        nativeLanguage, 
+        apiService, 
+        llm 
+    };
 }
 
 /**
@@ -106,6 +114,7 @@ function validateText(text: string): void {
 
 // Create an Express application instance
 const app = express();
+app.use(cors()); // Enable CORS middleware
 // Get the port number from the environment variable 'PORT'
 const port = process.env.PORT || 5000;
 
@@ -124,7 +133,10 @@ const pool = new Pool({
 });
 
 // Enable CORS middleware
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true
+}));
 // Parse incoming JSON requests with increased size limit
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
@@ -189,7 +201,8 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
         res.status(201).json({ message: 'User registered successfully', token });
     } catch (error) {
         console.error('Error registering user:', error);
-        res.status(500).json({ error: 'Error registering user' });
+        const errorMessage = error instanceof Error ? error.message : 'Error registering user';
+        res.status(500).json({ error: errorMessage });
     }
 });
 
@@ -211,7 +224,8 @@ app.post('/login', async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({ message: 'Login successful', token });
     } catch (error) {
         console.error('Error logging in:', error);
-        res.status(500).json({ error: 'Error logging in' });
+        const errorMessage = error instanceof Error ? error.message : 'Error logging in';
+        res.status(500).json({ error: errorMessage });
     }
 });
 
@@ -223,7 +237,8 @@ app.get('/user', authenticateToken, async (req: Request, res: Response) => {
         res.status(200).json(user.rows[0]);
     } catch (error) {
         console.error('Error fetching user:', error);
-        res.status(500).json({ error: 'Error fetching user' });
+        const errorMessage = error instanceof Error ? error.message : 'Error fetching user';
+        res.status(500).json({ error: errorMessage });
     }
 });
 
@@ -252,7 +267,8 @@ app.put('/user/profile', authenticateToken, async (req: Request, res: Response) 
         res.status(200).json(updateResult.rows[0]);
     } catch (error) {
         console.error('Error updating profile:', error);
-        res.status(500).json({ error: 'Error updating profile' });
+        const errorMessage = error instanceof Error ? error.message : 'Error updating profile';
+        res.status(500).json({ error: errorMessage });
     }
 });
 
@@ -285,7 +301,8 @@ app.post('/user/change-password', authenticateToken, async (req: Request, res: R
         res.status(200).json({ message: 'Password changed successfully' });
     } catch (error) {
         console.error('Error changing password:', error);
-        res.status(500).json({ error: 'Error changing password' });
+        const errorMessage = error instanceof Error ? error.message : 'Error changing password';
+        res.status(500).json({ error: errorMessage });
     }
 });
 
@@ -295,20 +312,45 @@ app.post('/user/change-password', authenticateToken, async (req: Request, res: R
  * @param res - Express response object.
  */
 app.post('/generate/definitions', authenticateToken, async (req: Request, res: Response) => {
-    const { word, language: targetLanguage, apiService, llm } = validateRequestParams(req);
+    try {
+        console.log('Request body:', req.body); // Debug log
+        const { word, targetLanguage, apiService, llm } = validateRequestParams(req);
+        console.log('Validated params:', { word, targetLanguage, apiService, llm }); // Debug log
 
-    let definitions = '';
-    let definitionsTokens = initializeTokenCount();
+        let definitions = '';
+        let definitionsTokens = initializeTokenCount();
 
-    if (apiService === 'anthropic') {
-        [definitions, definitionsTokens] = await getDefinitionsAnthropicClaude(word, targetLanguage, llm);
-    } else if (apiService === 'openrouter') {
-        [definitions, definitionsTokens] = await getDefinitionsOpenRouter(word, targetLanguage, llm);
-    } else if (apiService === 'google') {
-        [definitions, definitionsTokens] = await getDefinitionsGoogleGemini(word, targetLanguage, llm);
+        console.log(`Calling ${apiService} API for definitions...`);
+        
+        if (apiService === 'anthropic') {
+            [definitions, definitionsTokens] = await getDefinitionsAnthropicClaude(word, targetLanguage, llm);
+        } else if (apiService === 'openrouter') {
+            [definitions, definitionsTokens] = await getDefinitionsOpenRouter(word, targetLanguage, llm);
+        } else if (apiService === 'google') {
+            [definitions, definitionsTokens] = await getDefinitionsGoogleGemini(word, targetLanguage, llm);
+        }
+
+        console.log('Definitions generated successfully:', {
+            definitions: definitions.substring(0, 100) + '...', // Log the first 100 characters
+            tokenCount: definitionsTokens
+        });
+
+        res.json({ definitions: { text: definitions, tokenCount: definitionsTokens } });
+    } catch (error) {
+        console.error('Error in /generate/definitions:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the request';
+        
+        // Log detailed error information
+        console.error('Error details:', {
+            message: errorMessage,
+            stack: error instanceof Error ? error.stack : 'No stack trace available'
+        });
+        
+        res.status(500).json({ 
+            error: errorMessage,
+            details: 'Check server logs for more information'
+        });
     }
-
-    res.json({ definitions: { text: definitions, tokenCount: definitionsTokens } });
 });
 
 // Route to handle the generation of sentences
@@ -366,7 +408,8 @@ app.post('/generate/sentences', authenticateToken, async (req: Request, res: Res
         });
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ error: 'An error occurred while processing the request' });
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the request';
+        res.status(500).json({ error: errorMessage });
     }
 });
 
@@ -416,7 +459,8 @@ app.post('/translate', authenticateToken, async (req: Request, res: Response) =>
         res.json({ translation, tokenCount });
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ error: 'An error occurred while processing the translation request' });
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the translation request';
+        res.status(500).json({ error: errorMessage });
     }
 });
 
@@ -470,7 +514,8 @@ app.post('/generate/dialogue', authenticateToken, async (req: Request, res: Resp
         res.json({ dialogue, tokenCount });
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ error: 'An error occurred while processing the dialogue request' });
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the dialogue request';
+        res.status(500).json({ error: errorMessage });
     }
 });
 
@@ -518,7 +563,8 @@ app.post('/analyze/frequency', authenticateToken, async (req: Request, res: Resp
         res.json({ analysis, tokenCount });
     } catch (error) {
         console.error('Error in /analyze/frequency:', error);
-        res.status(500).json({ error: 'An error occurred while processing the frequency analysis request' });
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the frequency analysis request';
+        res.status(500).json({ error: errorMessage });
     }
 });
 
@@ -536,7 +582,8 @@ app.post('/token/sum', authenticateToken, (req: Request, res: Response) => {
         res.json(totalTokenCount);
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ error: 'An error occurred while processing the request' });
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the request';
+        res.status(500).json({ error: errorMessage });
     }
 });
 
