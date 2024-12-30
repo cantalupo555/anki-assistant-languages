@@ -1,17 +1,108 @@
 // Import necessary dependencies and utility functions
-// express: Web framework for handling HTTP requests and responses
-// cors: Middleware to enable Cross-Origin Resource Sharing (CORS)
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
+import { TokenCount } from '../frontend/src/utils/Types';
 import { getDefinitionsAnthropicClaude, getSentencesAnthropicClaude, translateSentenceAnthropicClaude, getDialogueAnthropicClaude, analyzeFrequencyAnthropicClaude } from './anthropicClaude';
 import { getDefinitionsGoogleGemini, getSentencesGoogleGemini, translateSentenceGoogleGemini, getDialogueGoogleGemini, analyzeFrequencyGoogleGemini } from './googleGemini';
 import { getDefinitionsOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter, getDialogueOpenRouter, analyzeFrequencyOpenRouter } from './openRouter';
 import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
 import { textToSpeech as azureTextToSpeech } from './azureTTS';
 import { authenticateToken } from './middlewares/authMiddleware';
+
+interface RequestParams {
+    word?: string;
+    language?: string;
+    targetLanguage?: string;
+    nativeLanguage?: string;
+    apiService?: string;
+    llm?: string;
+}
+
+/**
+ * Validates and extracts common parameters from the request.
+ * @param req - Express request object.
+ * @returns Validated parameters.
+ * @throws {Error} If any parameter is invalid.
+ */
+function validateRequestParams(req: Request): RequestParams {
+    const { word, language, targetLanguage, nativeLanguage, apiService, llm } = req.body;
+
+    if (!word || typeof word !== 'string' || word.trim() === '') {
+        throw new Error('Valid word is required');
+    }
+    if (!language || typeof language !== 'string' || !supportedLanguages.includes(language)) {
+        throw new Error('Valid language is required');
+    }
+    if (!apiService || !['anthropic', 'openrouter', 'google'].includes(apiService)) {
+        throw new Error('Valid API service (anthropic, openrouter, or google) is required');
+    }
+    if (!llm || typeof llm !== 'string') {
+        throw new Error('Valid llm is required');
+    }
+    if (targetLanguage && !supportedLanguages.includes(targetLanguage)) {
+        throw new Error('Valid target language is required');
+    }
+    if (nativeLanguage && !supportedLanguages.includes(nativeLanguage)) {
+        throw new Error('Valid native language is required');
+    }
+
+    return { word, language, targetLanguage, nativeLanguage, apiService, llm };
+}
+
+/**
+ * Validates parameters related to TTS.
+ * @param ttsService - TTS service (google or azure).
+ * @param languageCode - Supported language code.
+ * @param voice - Selected voice.
+ * @throws {Error} If any parameter is invalid.
+ */
+function validateTTSParams(ttsService: string, languageCode: string, voice: string): void {
+    const supportedLanguageCodes = ['en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 'ja-JP', 'ko-KR'];
+
+    if (!ttsService || !['google', 'azure'].includes(ttsService)) {
+        throw new Error('Valid TTS service (google or azure) is required');
+    }
+    if (!languageCode || !supportedLanguageCodes.includes(languageCode)) {
+        throw new Error('Invalid language code');
+    }
+    if (!voice || !voice.startsWith(languageCode)) {
+        throw new Error('Voice does not match the language code');
+    }
+}
+
+/**
+ * Middleware for error handling.
+ * @param err - Captured error.
+ * @param req - Express request object.
+ * @param res - Express response object.
+ * @param next - Function to pass control to the next middleware.
+ */
+function errorHandler(err: Error, req: Request, res: Response, next: NextFunction): void {
+    console.error('Error:', err);
+    res.status(500).json({ error: err.message || 'An error occurred while processing the request' });
+}
+
+/**
+ * Initializes a `TokenCount` object with default values.
+ * @returns Initialized `TokenCount` object.
+ */
+function initializeTokenCount(): TokenCount {
+    return { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
+}
+
+/**
+ * Validates the `text` parameter.
+ * @param text - Text to be validated.
+ * @throws {Error} If the text is invalid.
+ */
+function validateText(text: string): void {
+    if (!text || typeof text !== 'string' || text.trim() === '') {
+        throw new Error('Valid text is required');
+    }
+}
 
 // Create an Express application instance
 const app = express();
@@ -198,56 +289,26 @@ app.post('/user/change-password', authenticateToken, async (req: Request, res: R
     }
 });
 
-// Route to handle the generation of definitions
+/**
+ * Route to generate word definitions.
+ * @param req - Express request object.
+ * @param res - Express response object.
+ */
 app.post('/generate/definitions', authenticateToken, async (req: Request, res: Response) => {
-    try {
-        // Get the word, target language, API service, and llm from the request body
-        const { word, language: targetLanguage, apiService, llm } = req.body;
-        // Validate the word, target language, API service, and llm
-        if (!word || typeof word !== 'string' || word.trim() === '') {
-            res.status(400).json({ error: 'Valid word is required' });
-            return;
-        }
-        if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
-            res.status(400).json({ error: 'Valid target language is required' });
-            return;
-        }
-        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter' && apiService !== 'google')) {
-            res.status(400).json({ error: 'Valid API service (anthropic, openrouter, or google) is required' });
-            return;
-        }
-        if (!llm || typeof llm !== 'string') {
-            res.status(400).json({ error: 'Valid llm is required' });
-            return;
-        }
+    const { word, language: targetLanguage, apiService, llm } = validateRequestParams(req);
 
-        let definitions = '';
-        let definitionsTokens: { inputTokens: number; outputTokens: number; totalTokens: number } = {
-            inputTokens: 0,
-            outputTokens: 0,
-            totalTokens: 0
-        };
+    let definitions = '';
+    let definitionsTokens = initializeTokenCount();
 
-        // Get the definitions for the word using the selected API service and llm
-        if (apiService === 'anthropic') {
-            [definitions, definitionsTokens] = await getDefinitionsAnthropicClaude(word, targetLanguage, llm);
-        } else if (apiService === 'openrouter') {
-            [definitions, definitionsTokens] = await getDefinitionsOpenRouter(word, targetLanguage, llm);
-        } else if (apiService === 'google') {
-            [definitions, definitionsTokens] = await getDefinitionsGoogleGemini(word, targetLanguage, llm);
-        }
-
-        // Log the definitions result
-        console.log('Definitions result:', definitions, definitionsTokens);
-
-        // Return the result as a JSON response
-        res.json({
-            definitions: { text: definitions, tokenCount: definitionsTokens }
-        });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'An error occurred while processing the request' });
+    if (apiService === 'anthropic') {
+        [definitions, definitionsTokens] = await getDefinitionsAnthropicClaude(word, targetLanguage, llm);
+    } else if (apiService === 'openrouter') {
+        [definitions, definitionsTokens] = await getDefinitionsOpenRouter(word, targetLanguage, llm);
+    } else if (apiService === 'google') {
+        [definitions, definitionsTokens] = await getDefinitionsGoogleGemini(word, targetLanguage, llm);
     }
+
+    res.json({ definitions: { text: definitions, tokenCount: definitionsTokens } });
 });
 
 // Route to handle the generation of sentences
@@ -479,70 +540,30 @@ app.post('/token/sum', authenticateToken, (req: Request, res: Response) => {
     }
 });
 
-// Route to handle TTS requests
+/**
+ * Route to generate audio using TTS.
+ * @param req - Express request object.
+ * @param res - Express response object.
+ */
 app.post('/tts', authenticateToken, async (req: Request, res: Response) => {
-    try {
-        // Get the text, voice, language code, and TTS service from the request body
-        const { text, voice, languageCode, ttsService } = req.body;
+    const { text, voice, languageCode, ttsService } = req.body;
 
-        // Validate the text, voice, language code, and TTS service
-        if (!text || typeof text !== 'string' || text.trim() === '') {
-            res.status(400).json({ error: 'Valid text is required' });
-            return;
-        }
-        if (!voice || typeof voice !== 'string') {
-            res.status(400).json({ error: 'Valid voice is required' });
-            return;
-        }
-        if (!languageCode || typeof languageCode !== 'string') {
-            res.status(400).json({ error: 'Valid language code is required' });
-            return;
-        }
-        if (!ttsService || (ttsService !== 'google' && ttsService !== 'azure')) {
-            res.status(400).json({ error: 'Valid TTS service (google or azure) is required' });
-            return;
-        }
+    validateText(text);
+    validateTTSParams(ttsService, languageCode, voice);
 
-        let audioBuffer;
-
-        if (ttsService === 'google') {
-            // Google Cloud TTS
-            // Check for supported language codes for Google Cloud TTS
-            if (!['en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 'ja-JP', 'ko-KR'].includes(languageCode)) {
-                res.status(400).json({ error: 'Invalid language code for Google Cloud TTS' });
-                return;
-            }
-            // Check if the voice matches the language code for Google Cloud TTS
-            if (!voice.startsWith(languageCode)) {
-                res.status(400).json({ error: 'Voice does not match the language code for Google Cloud TTS' });
-                return;
-            }
-            audioBuffer = await googleTextToSpeech(text, voice, languageCode);
-        } else {
-            // Azure TTS
-            // Check for supported language codes for Azure TTS
-            if (!['en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'zh-CN', 'ja-JP', 'ko-KR'].includes(languageCode)) {
-                res.status(400).json({ error: 'Invalid language code for Azure TTS' });
-                return;
-            }
-            // Check if the voice matches the language code for Azure TTS
-            if (!voice.startsWith(languageCode)) {
-                res.status(400).json({ error: 'Voice does not match the language code for Azure TTS' });
-                return;
-            }
-            audioBuffer = await azureTextToSpeech(text, voice, languageCode);
-        }
-
-        // Set the response content type to audio/wav
-        res.set('Content-Type', 'audio/wav');
-
-        // Send the audio buffer as the response
-        res.send(audioBuffer);
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'An error occurred while processing the TTS request' });
+    let audioBuffer;
+    if (ttsService === 'google') {
+        audioBuffer = await googleTextToSpeech(text, voice, languageCode);
+    } else {
+        audioBuffer = await azureTextToSpeech(text, voice, languageCode);
     }
+
+    res.set('Content-Type', 'audio/wav');
+    res.send(audioBuffer);
 });
+
+// Add the error handling middleware
+app.use(errorHandler);
 
 // Start the server
 app.listen(port, () => {
