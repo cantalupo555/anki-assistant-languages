@@ -9,7 +9,8 @@
     "check-db-connection": "tsx scripts/checkDatabaseConnection.ts",
     "create-users-table": "tsx scripts/createUsersTable.ts",
     "create-tokens-table": "tsx scripts/createTokensTable.ts",
-    "create-tokens-context-table": "tsx scripts/createTokensContextTable.ts"
+    "create-tokens-context-table": "tsx scripts/createTokensContextTable.ts",
+    "create-user-settings-table": "tsx scripts/createUserSettingsTable.ts"
   },
   "keywords": [],
   "author": "",
