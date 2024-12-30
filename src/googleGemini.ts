@@ -3,6 +3,7 @@
 // dotenv: Used to load environment variables from a .env file
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import dotenv from "dotenv";
+import { TokenCount } from '../frontend/src/utils/Types';
 
 // Load environment variables from .env file
 dotenv.config();

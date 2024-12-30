@@ -3,6 +3,7 @@
 // dotenv: Used to load environment variables from a .env file
 import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
+import { TokenCount } from '../frontend/src/utils/Types';
 
 // Load environment variables from .env file
 dotenv.config();
