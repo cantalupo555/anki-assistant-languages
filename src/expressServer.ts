@@ -137,7 +137,7 @@ app.get('/user', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // Logout route
-app.post('/logout', authenticateToken, (req: Request, res: Response) => {
+app.post('/logout', authenticateToken, (_req: Request, res: Response) => {
     // Invalidate the token on the client side by removing it from storage
     res.status(200).json({ message: 'Logout successful' });
 });
