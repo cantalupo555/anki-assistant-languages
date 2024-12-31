@@ -24,13 +24,31 @@ const createTokensContextTable = async () => {
         // Create the tokens_context table
         await client.query(`
             CREATE TABLE IF NOT EXISTS tokens_context (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                target_language VARCHAR(255),
-                api_service VARCHAR(255)
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique context ID
+                target_language VARCHAR(255), -- Target language for token usage
+                api_service VARCHAR(255) -- API service used for token consumption
             );
         `);
 
-        console.log('tokens_context table created successfully!');
+        // Create index on target_language
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_tokens_context_target_language
+            ON tokens_context(target_language);
+        `);
+
+        // Create index on api_service
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_tokens_context_api_service
+            ON tokens_context(api_service);
+        `);
+
+        // Create composite index on target_language and api_service
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_tokens_context_target_language_api_service
+            ON tokens_context(target_language, api_service);
+        `);
+
+        console.log('tokens_context table and indexes created successfully!');
     } catch (error) {
         console.error('Error creating tokens_context table:', error);
     } finally {

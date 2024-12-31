@@ -25,20 +25,38 @@ const createTokensTable = async () => {
         // Execute a SQL query to create the 'user_tokens' table if it does not exist.
         await client.query(`
             CREATE TABLE IF NOT EXISTS user_tokens (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                user_id UUID NOT NULL,
-                input_tokens INTEGER NOT NULL DEFAULT 0,
-                output_tokens INTEGER NOT NULL DEFAULT 0,
-                total_tokens INTEGER NOT NULL DEFAULT 0,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                tokens_context_id UUID NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users(id),
-                FOREIGN KEY (tokens_context_id) REFERENCES tokens_context(id)
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique token record ID
+                user_id UUID NOT NULL, -- Reference to the user
+                input_tokens INTEGER NOT NULL DEFAULT 0, -- Number of input tokens consumed
+                output_tokens INTEGER NOT NULL DEFAULT 0, -- Number of output tokens consumed
+                total_tokens INTEGER NOT NULL DEFAULT 0, -- Total tokens consumed (input + output)
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- Timestamp of token usage
+                tokens_context_id UUID NOT NULL, -- Reference to the token context
+                FOREIGN KEY (user_id) REFERENCES users(id), -- Foreign key to users table
+                FOREIGN KEY (tokens_context_id) REFERENCES tokens_context(id) -- Foreign key to tokens_context table
             );
         `);
 
+        // Create index on user_id
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_user_tokens_user_id
+            ON user_tokens(user_id);
+        `);
+
+        // Create index on tokens_context_id
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_user_tokens_tokens_context_id
+            ON user_tokens(tokens_context_id);
+        `);
+
+        // Create composite index on user_id and tokens_context_id
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_user_tokens_user_id_tokens_context_id
+            ON user_tokens(user_id, tokens_context_id);
+        `);
+
         // Log a success message to the console.
-        console.log('user_tokens table created successfully!');
+        console.log('user_tokens table and indexes created successfully!');
     } catch (error) {
         // Log an error message to the console if there is an issue creating the table.
         console.error('Error creating user_tokens table:', error);

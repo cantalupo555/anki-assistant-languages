@@ -27,14 +27,20 @@ const createUsersTable = async () => {
         // Create the users table
         await client.query(`
             CREATE TABLE IF NOT EXISTS users (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                username VARCHAR(255) UNIQUE NOT NULL,
-                email VARCHAR(255) UNIQUE NOT NULL,
-                password_hash VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                role VARCHAR(50) DEFAULT 'user'
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique user ID
+                username VARCHAR(255) UNIQUE NOT NULL, -- User's unique username
+                email VARCHAR(255) UNIQUE NOT NULL, -- User's unique email
+                password_hash VARCHAR(255) NOT NULL, -- Hashed password for security
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of user creation
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of last update
+                role VARCHAR(50) DEFAULT 'user' -- User role (e.g., 'user', 'admin')
             );
+        `);
+
+        // Create index on role
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_users_role
+            ON users(role);
         `);
 
         // Create the function to update the updated_at field
@@ -56,9 +62,9 @@ const createUsersTable = async () => {
             EXECUTE FUNCTION update_updated_at_column();
         `);
 
-        console.log('Users table and trigger created successfully!');
+        console.log('Users table, index on role, and trigger created successfully!');
     } catch (error) {
-        console.error('Error creating users table and trigger:', error);
+        console.error('Error creating users table, index on role, and trigger:', error);
     } finally {
         client.release();
         await pool.end();

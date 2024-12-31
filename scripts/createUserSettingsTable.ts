@@ -22,8 +22,8 @@ const createUserSettingsTable = async () => {
         // Create the user_settings table
         await client.query(`
             CREATE TABLE IF NOT EXISTS user_settings (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                user_id UUID NOT NULL,
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique settings ID
+                user_id UUID NOT NULL, -- Reference to the user
                 preferred_language VARCHAR(50) DEFAULT 'english', -- Default interface language
                 theme VARCHAR(50) DEFAULT 'light' CHECK (theme IN ('light', 'dark')), -- Interface theme
                 native_language VARCHAR(255), -- User's native language
@@ -32,9 +32,9 @@ const createUserSettingsTable = async () => {
                 selected_tts_service VARCHAR(255), -- Selected TTS service
                 selected_llm VARCHAR(255), -- Selected LLM model
                 selected_voice VARCHAR(255), -- Selected TTS voice
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of settings creation
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of last update
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Foreign key to users table
             );
         `);
 
