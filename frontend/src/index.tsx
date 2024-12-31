@@ -7,6 +7,39 @@ import reportWebVitals from './reportWebVitals';
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
+const checkStylesLoaded = () => {
+  const styles = document.styleSheets;
+  for (let i = 0; i < styles.length; i++) {
+    if (styles[i].href && !styles[i].cssRules) {
+      return false; // Stylesheet ainda não carregado
+    }
+  }
+  return true; // Todos os estilos carregados
+};
+
+const waitForStyles = () => {
+  return new Promise<void>((resolve) => {
+    const interval = setInterval(() => {
+      if (checkStylesLoaded()) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 100);
+  });
+};
+
+window.addEventListener('load', async () => {
+  await waitForStyles(); // Espera todos os estilos carregarem
+  const preloader = document.getElementById('preloader');
+  if (preloader) {
+    preloader.classList.add('loaded');
+    setTimeout(() => {
+      preloader.remove();
+    }, 500);
+  }
+});
+
 root.render(
   <React.StrictMode>
     <App />
