@@ -6,15 +6,20 @@ import AuthWrapper from './components/AuthWrapper';
 import AppInner from './AppInner';
 import { AppProvider } from './context/selectionContext';
 
+// Import styles
+import * as S from './styles/AppStyles';
+
 // Define the main App component
 const App: React.FC = () => {
     // Wrap the AppInner component with the AuthWrapper to provide authentication
     return (
-        <AppProvider> {/* Wrap AuthWrapper with AppProvider */}
-            <AuthWrapper>
-                <AppInner />
-            </AuthWrapper>
-        </AppProvider>
+        <S.GlobalStyles> {/* Apply global styles */}
+            <AppProvider> {/* Wrap AuthWrapper with AppProvider */}
+                <AuthWrapper>
+                    <AppInner />
+                </AuthWrapper>
+            </AppProvider>
+        </S.GlobalStyles>
     );
 };
 
