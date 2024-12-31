@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { AppHeader } from './HeaderStyles';
 
 export const GlobalStyles = styled.div`
   --primary-color: #007bff;
@@ -33,38 +34,6 @@ export const AppContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-`;
-
-export const AppHeader = styled.header`
-  background-color: var(--primary-color);
-  color: white;
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: var(--box-shadow);
-
-  h1 {
-    font-size: 1.8rem;
-    font-weight: bold;
-  }
-
-  nav ul {
-    list-style-type: none;
-    display: flex;
-    gap: 1.5rem;
-  }
-
-  nav a {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    transition: opacity var(--hover-transition);
-
-    &:hover {
-      opacity: 0.8;
-    }
-  }
 `;
 
 export const MainContent = styled.main`
@@ -411,15 +380,6 @@ export const ScrollToTop = styled.button`
     background-color: #0056b3;
     transform: translateY(-3px);
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  }
-`;
-
-export const LogoutButton = styled(Button)`
-  background-color: var(--remove-color);
-  margin-left: 1rem;
-
-  &:hover {
-    background-color: #c82333;
   }
 `;
 

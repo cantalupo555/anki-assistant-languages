@@ -1,11 +1,12 @@
 import React from 'react';
 import useAuth from '../utils/useAuth';
+import * as S from '../styles/HeaderStyles';
 
 const Header: React.FC = () => {
   const { isAuthenticated, handleLogout } = useAuth();
 
   return (
-    <header className="app-header">
+    <S.AppHeader>
       <h1>📚📖🔖 Anki Assistant Languages</h1>
       <nav>
         <ul>
@@ -14,9 +15,9 @@ const Header: React.FC = () => {
         </ul>
       </nav>
       {isAuthenticated && (
-        <button className="logout-button" onClick={handleLogout}>Logout</button>
+        <S.LogoutButton onClick={handleLogout}>Logout</S.LogoutButton>
       )}
-    </header>
+    </S.AppHeader>
   );
 };
 
