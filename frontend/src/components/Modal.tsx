@@ -1,7 +1,7 @@
 // Import necessary libraries
 // React: Core library for building user interfaces
 import React from 'react';
-import '../styles/Modal.css';
+import * as S from '../styles/ModalStyles';
 import { ModalProps } from '../utils/Types';
 
 // Define the Modal component
@@ -13,18 +13,18 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, content
 
     // Return the modal structure
     return (
-        <div className="modal-overlay">
-            <div className="modal-container">
-                <div className="modal-header">
-                    <h2 className="modal-title">{title}</h2>
-                    <span className="modal-close-icon" onClick={onClose}>&times;</span>
-                </div>
-                <div className={contentClass}>
+        <S.ModalOverlay>
+            <S.ModalContainer>
+                <S.ModalHeader>
+                    <S.ModalTitle>{title}</S.ModalTitle>
+                    <S.ModalCloseIcon onClick={onClose}>&times;</S.ModalCloseIcon>
+                </S.ModalHeader>
+                <S.ModalContent className={contentClass}>
                     {children} {/* Content of the modal */}
-                </div>
-                <button className="modal-close-button" onClick={onClose}>Close</button>
-            </div>
-        </div>
+                </S.ModalContent>
+                <S.ModalCloseButton onClick={onClose}>Close</S.ModalCloseButton>
+            </S.ModalContainer>
+        </S.ModalOverlay>
     );
 };
 

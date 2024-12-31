@@ -1,7 +1,7 @@
 // Import necessary libraries
 // React: Core library for building user interfaces
 import React, { useState } from 'react';
-import '../styles/Login.css';
+import * as S from '../styles/LoginStyles';
 import { LoginProps } from '../utils/Types';
 
 // Define the Login component
@@ -52,11 +52,11 @@ const Login: React.FC<LoginProps & { onRegisterClick: () => void }> = ({ onLogin
 
     // Render the login form
     return (
-        <div className="login-container">
-            <div className="login-form">
+        <S.LoginContainer>
+            <S.LoginForm>
                 <h2>Log in</h2>
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group">
+                    <S.FormGroup>
                         <label htmlFor="username">Username:</label>
                         <input
                             type="text"
@@ -65,8 +65,8 @@ const Login: React.FC<LoginProps & { onRegisterClick: () => void }> = ({ onLogin
                             onChange={(e) => setUsername(e.target.value)} // Update the username state on input change
                             required
                         />
-                    </div>
-                    <div className="form-group">
+                    </S.FormGroup>
+                    <S.FormGroup>
                         <label htmlFor="password">Password:</label>
                         <input
                             type="password"
@@ -75,13 +75,13 @@ const Login: React.FC<LoginProps & { onRegisterClick: () => void }> = ({ onLogin
                             onChange={(e) => setPassword(e.target.value)} // Update the password state on input change
                             required
                         />
-                    </div>
-                    {error && <div className="error">{error}</div>} {/* Display the error message if it exists */}
-                    <button type="submit" className="login-button">Log in</button>
+                    </S.FormGroup>
+                    {error && <S.ErrorMessage>{error}</S.ErrorMessage>} {/* Display the error message if it exists */}
+                    <S.LoginButton type="submit">Log in</S.LoginButton>
                 </form>
-                <button type="button" className="register-button" onClick={handleRegisterClick}>Register</button> {/* Add the register button */}
-            </div>
-        </div>
+                <S.RegisterButton type="button" onClick={handleRegisterClick}>Register</S.RegisterButton> {/* Add the register button */}
+            </S.LoginForm>
+        </S.LoginContainer>
     );
 };
 

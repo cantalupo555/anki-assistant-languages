@@ -2,7 +2,7 @@
 // React: Core library for building user interfaces
 // useState: React hook for managing state
 import React, { useState } from 'react';
-import '../styles/Login.css';
+import * as S from '../styles/LoginStyles';
 import { RegisterProps } from '../utils/Types';
 import useAuth from '../utils/useAuth';
 
@@ -43,11 +43,11 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-form">
+        <S.LoginContainer>
+            <S.LoginForm>
                 <h2>Register</h2>
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group">
+                    <S.FormGroup>
                         <label htmlFor="register-username">Username:</label>
                         <input
                             type="text"
@@ -56,8 +56,8 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
                             onChange={(e) => setUsername(e.target.value)}
                             required
                         />
-                    </div>
-                    <div className="form-group">
+                    </S.FormGroup>
+                    <S.FormGroup>
                         <label htmlFor="register-email">Email:</label>
                         <input
                             type="email"
@@ -66,8 +66,8 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
                             onChange={(e) => setEmail(e.target.value)}
                             required
                         />
-                    </div>
-                    <div className="form-group">
+                    </S.FormGroup>
+                    <S.FormGroup>
                         <label htmlFor="register-password">Password:</label>
                         <input
                             type="password"
@@ -76,8 +76,8 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
-                    </div>
-                    <div className="form-group">
+                    </S.FormGroup>
+                    <S.FormGroup>
                         <label htmlFor="register-confirm-password">Confirm Password:</label>
                         <input
                             type="password"
@@ -86,12 +86,12 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
                         />
-                    </div>
-                    {error && <div className="error">{error}</div>}
-                    <button type="submit" className="login-button">Register</button>
+                    </S.FormGroup>
+                    {error && <S.ErrorMessage>{error}</S.ErrorMessage>}
+                    <S.LoginButton type="submit">Register</S.LoginButton>
                 </form>
-            </div>
-        </div>
+            </S.LoginForm>
+        </S.LoginContainer>
     );
 };
 

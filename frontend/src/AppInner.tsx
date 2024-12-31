@@ -18,7 +18,7 @@ import FrequencyAnalysisModal from './components/FrequencyAnalysisModal';
 import { useAppContext } from './context/selectionContext';
 
 // Style imports
-import './styles/App.css';
+import * as S from './styles/AppStyles';
 
 // Utility function imports
 import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
@@ -298,119 +298,129 @@ const AppInner: React.FC = () => {
     };
 
     return (
-        <div className="app-container">
+        <S.AppContainer>
             <>
                 <Header />
 
-                <main>
+                <S.MainContent>
                     {/* Render the card generator section */}
-                    <section id="card-generator">
+                    <S.Section id="card-generator">
                         <h2>Card Generator</h2>
-                        <form onSubmit={(e) => handleSubmit(e, setDefinitions, setSentences, setTotalTokenCount, setError, setIsGenerateLoading, setCurrentPage, updateTotalTokenCount, setShowGenerateNotification, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM, TTS_URL)}> {/* Update the onSubmit prop */}
+                        <S.Form onSubmit={(e) => handleSubmit(e, setDefinitions, setSentences, setTotalTokenCount, setError, setIsGenerateLoading, setCurrentPage, updateTotalTokenCount, setShowGenerateNotification, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM, TTS_URL)}> {/* Update the onSubmit prop */}
                             {/* API service selection dropdown */}
-                            <label htmlFor="api-service-select">AI Provider:</label>
-                            <select
-                                id="api-service-select"
-                                value={selectedAPIService.value}
-                                onChange={(e) => setSelectedAPIService(apiServiceOptions.find(option => option.value === e.target.value) || apiServiceOptions[0])}
-                                required
-                            >
-                                {apiServiceOptions.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <S.FormGroup>
+                                <label htmlFor="api-service-select">AI Provider:</label>
+                                <select
+                                    id="api-service-select"
+                                    value={selectedAPIService.value}
+                                    onChange={(e) => setSelectedAPIService(apiServiceOptions.find(option => option.value === e.target.value) || apiServiceOptions[0])}
+                                    required
+                                >
+                                    {apiServiceOptions.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </S.FormGroup>
 
                             {/* LLM selection dropdown */}
-                            <label htmlFor="llm-select">AI Model:</label>
-                            <select
-                                id="llm-select"
-                                value={selectedLLM.value}
-                                onChange={handleLLMChange}
-                                required
-                            >
-                                {llmOptions[selectedAPIService.value]?.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <S.FormGroup>
+                                <label htmlFor="llm-select">AI Model:</label>
+                                <select
+                                    id="llm-select"
+                                    value={selectedLLM.value}
+                                    onChange={handleLLMChange}
+                                    required
+                                >
+                                    {llmOptions[selectedAPIService.value]?.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </S.FormGroup>
 
                             {/* Render the LanguageSelector component */}
                             <LanguageSelector />
 
                             {/* TTS service selection dropdown */}
-                            <label htmlFor="tts-select">TTS Service:</label>
-                            <select
-                                id="tts-select"
-                                value={selectedTTS.value}
-                                onChange={(e) => setSelectedTTS(ttsOptions.find(option => option.value === e.target.value) || ttsOptions[0])}
-                                required
-                            >
-                                {ttsOptions.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <S.FormGroup>
+                                <label htmlFor="tts-select">TTS Service:</label>
+                                <select
+                                    id="tts-select"
+                                    value={selectedTTS.value}
+                                    onChange={(e) => setSelectedTTS(ttsOptions.find(option => option.value === e.target.value) || ttsOptions[0])}
+                                    required
+                                >
+                                    {ttsOptions.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </S.FormGroup>
 
                             {/* Voice selection dropdown */}
                             {(targetLanguage === 'English (United States)' || targetLanguage === 'Italian (Italy)' || targetLanguage === 'German (Germany)' || targetLanguage === 'French (France)' || targetLanguage === 'Spanish (Spain)' || targetLanguage === 'Portuguese (Brazil)' || targetLanguage === 'Dutch (Netherlands)' || targetLanguage === 'Polish (Poland)' || targetLanguage === 'Russian (Russia)' || targetLanguage === 'Mandarin (China)' || targetLanguage === 'Japanese (Japan)' || targetLanguage === 'Korean (Korea)') && (
                                 <>
-                                    <label htmlFor="voice-select">Select Voice:</label>
-                                    <select
-                                        id="voice-select"
-                                        value={selectedVoice.value}
-                                        onChange={handleVoiceChange}
-                                    >
-                                        {voiceOptions
-                                            .filter((voice) => voice.language === targetLanguage && voice.ttsService === selectedTTS.value)
-                                            .map((voice) => (
-                                                <option key={voice.value} value={voice.value}>
-                                                    {voice.name}
-                                                </option>
-                                            ))}
-                                    </select>
+                                    <S.FormGroup>
+                                        <label htmlFor="voice-select">Select Voice:</label>
+                                        <select
+                                            id="voice-select"
+                                            value={selectedVoice.value}
+                                            onChange={handleVoiceChange}
+                                        >
+                                            {voiceOptions
+                                                .filter((voice) => voice.language === targetLanguage && voice.ttsService === selectedTTS.value)
+                                                .map((voice) => (
+                                                    <option key={voice.value} value={voice.value}>
+                                                        {voice.name}
+                                                    </option>
+                                                ))}
+                                        </select>
+                                    </S.FormGroup>
                                 </>
                             )}
 
-                            <label htmlFor="word-input">Enter a word or expression:</label>
-                            <input
-                                id="word-input"
-                                type="text"
-                                value={word}
-                                onChange={(e) => setWord(e.target.value)}
-                                placeholder={`Enter a ${targetLanguage} word`}
-                                required
-                            />
-                            <div className="button-container">
-                                <button type="submit" className="generate-button" disabled={isGenerateLoading}>
+                            <S.FormGroup>
+                                <label htmlFor="word-input">Enter a word or expression:</label>
+                                <input
+                                    id="word-input"
+                                    type="text"
+                                    value={word}
+                                    onChange={(e) => setWord(e.target.value)}
+                                    placeholder={`Enter a ${targetLanguage} word`}
+                                    required
+                                />
+                            </S.FormGroup>
+                            <S.ButtonContainer>
+                                <S.GenerateButton type="submit" disabled={isGenerateLoading}>
                                     {isGenerateLoading ? 'Generating...' : 'Generate'}
-                                </button>
-                                <button type="button" className="dialogue-button" onClick={() => handleGenerateDialogue(setDialogue, setIsDialogueLoading, setError, updateTotalTokenCount, setIsDialogueModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM)}
+                                </S.GenerateButton>
+                                <S.DialogueButton type="button" onClick={() => handleGenerateDialogue(setDialogue, setIsDialogueLoading, setError, updateTotalTokenCount, setIsDialogueModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM)}
                                         disabled={isDialogueLoading}>
                                     {isDialogueLoading ? 'Generating...' : 'Generate Dialogue'}
-                                </button>
-                                <button type="button" className="analyze-button" onClick={() => handleAnalyzeFrequency(setFrequencyAnalysis, setIsAnalyzeLoading, setError, updateTotalTokenCount, setIsFrequencyModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word)}
+                                </S.DialogueButton>
+                                <S.AnalyzeButton type="button" onClick={() => handleAnalyzeFrequency(setFrequencyAnalysis, setIsAnalyzeLoading, setError, updateTotalTokenCount, setIsFrequencyModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word)}
                                         disabled={isAnalyzeLoading}>
                                     {isAnalyzeLoading ? 'Analyzing...' : 'Analyze Frequency'}
-                                </button>
-                            </div>
-                        </form>
+                                </S.AnalyzeButton>
+                            </S.ButtonContainer>
+                        </S.Form>
 
-                        {error && <div className="error" role="alert">{error}</div>}
+                        {error && <S.Error role="alert">{error}</S.Error>}
 
                         {definitions && sentences && (
-                            <div className="result-container">
+                            <S.ResultContainer>
                                 <h3>Results for: {word}</h3>
-                                <div className="result-section">
+                                <S.ResultSection>
                                     <h4>Definitions:</h4>
                                     <ReactMarkdown>{definitions.text}</ReactMarkdown>
-                                </div>
-                                <div className="result-section">
+                                </S.ResultSection>
+                                <S.ResultSection>
                                     <h4>Select 1 Sentence:</h4>
-                                    <ul className="sentence-list">
+                                    <S.SentenceList>
                                         {getCurrentPageSentences().map((sentence, index) => (
                                             <li
                                                 key={index}
@@ -420,42 +430,41 @@ const AppInner: React.FC = () => {
                                                 <ReactMarkdown>{sentence}</ReactMarkdown>
                                                 {/* TTS listen button */}
                                                 {(targetLanguage === 'English (United States)' || targetLanguage === 'Italian (Italy)' || targetLanguage === 'German (Germany)' || targetLanguage === 'French (France)' || targetLanguage === 'Spanish (Spain)' || targetLanguage === 'Portuguese (Brazil)' || targetLanguage === 'Dutch (Netherlands)' || targetLanguage === 'Polish (Poland)' || targetLanguage === 'Russian (Russia)' || targetLanguage === 'Mandarin (China)' || targetLanguage === 'Japanese (Japan)' || targetLanguage === 'Korean (Korea)') && (
-                                                    <button onClick={() => handleTTS(sentence)} className="listen-button">
+                                                    <S.Button onClick={() => handleTTS(sentence)}>
                                                         Listen
-                                                    </button>
+                                                    </S.Button>
                                                 )}
                                             </li>
                                         ))}
-                                    </ul>
+                                    </S.SentenceList>
 
-                                    <div className="pagination">
-                                        <button
+                                    <S.Pagination>
+                                        <S.Button
                                             onClick={() => handlePageChange(currentPage - 1)}
                                             disabled={currentPage === 1}
                                         >
                                             Previous
-                                        </button>
+                                        </S.Button>
                                         <span>Page {currentPage} of {sentences.totalPages}</span>
-                                        <button
+                                        <S.Button
                                             onClick={() => handlePageChange(currentPage + 1)}
                                             disabled={currentPage === sentences.totalPages}
                                         >
                                             Next
-                                        </button>
-                                    </div>
+                                        </S.Button>
+                                    </S.Pagination>
 
                                     {selectedSentence && (
                                         <div className="selected-sentence">
                                             <h4>Selected Sentence:</h4>
                                             <ReactMarkdown>{selectedSentence}</ReactMarkdown>
-                                            <button onClick={handleSaveItem}>Save Sentence</button>
-                                            <button
-                                                className={`translate-button ${isTranslateLoading ? 'loading' : ''}`}
+                                            <S.Button onClick={handleSaveItem}>Save Sentence</S.Button>
+                                            <S.TranslateButton
                                                 disabled={isTranslateLoading}
                                                 onClick={() => handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading, nativeLanguage, targetLanguage, selectedAPIService.value, selectedLLM.value)}
                                             >
                                                 {isTranslateLoading ? 'Translating...' : 'Translate this sentence'}
-                                            </button>
+                                            </S.TranslateButton>
                                             {translation && (
                                                 <div className="translation">
                                                     <h4>Translation:</h4>
@@ -464,29 +473,29 @@ const AppInner: React.FC = () => {
                                             )}
                                         </div>
                                     )}
-                                </div>
+                                </S.ResultSection>
 
-                                <div className="token-info">
+                                <S.TokenInfo>
                                     <h4>Total Tokens:</h4>
                                     <p>
                                         Input: {totalTokenCount?.inputTokens}<br />
                                         Output: {totalTokenCount?.outputTokens}<br />
                                         Total: {totalTokenCount?.totalTokens}
                                     </p>
-                                </div>
-                            </div>
+                                </S.TokenInfo>
+                            </S.ResultContainer>
                         )}
-                    </section>
+                    </S.Section>
 
                     {/* Render the saved items section */}
-                    <section id="saved-items">
+                    <S.Section id="saved-items">
                         <h2>Saved Items</h2>
                         {savedItems.length > 0 ? (
                             <>
-                                <ul className="saved-items-list">
+                                <S.SavedItemsList>
                                     {savedItems.map((item, index) => (
                                         <li key={index}>
-                                            <div className="saved-item-content">
+                                            <S.SavedItemContent>
                                                 <ReactMarkdown>{item.sentence}</ReactMarkdown>
                                                 <ReactMarkdown>{item.definition}</ReactMarkdown>
                                                 {item.translation && (
@@ -495,31 +504,31 @@ const AppInner: React.FC = () => {
                                                     </div>
                                                 )}
                                                 {item.audioKey && audioData[item.audioKey] && (
-                                                    <button onClick={() => playSavedAudio(item.audioKey!)}>
+                                                    <S.Button onClick={() => playSavedAudio(item.audioKey!)}>
                                                         Play Audio
-                                                    </button>
+                                                    </S.Button>
                                                 )}
-                                            </div>
-                                            <button onClick={() => handleRemoveSavedItem(item)}>Remove</button>
+                                            </S.SavedItemContent>
+                                            <S.Button onClick={() => handleRemoveSavedItem(item)}>Remove</S.Button>
                                         </li>
                                     ))}
-                                </ul>
-                                <div className="action-buttons">
-                                    <button onClick={handleExportClick} className="export-button">Export</button>
-                                    <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
-                                </div>
+                                </S.SavedItemsList>
+                                <S.ActionButtons>
+                                    <S.ExportButton onClick={handleExportClick}>Export</S.ExportButton>
+                                    <S.ClearAllButton onClick={handleClearAll}>Clear All</S.ClearAllButton>
+                                </S.ActionButtons>
                             </>
                         ) : (
                             <p>No saved items yet. Generate some words and save sentences to see them here!</p>
                         )}
-                    </section>
-                </main>
+                    </S.Section>
+                </S.MainContent>
 
                 {/* Scroll-to-top button */}
                 {showScrollTop && (
-                    <button onClick={scrollToTop} className="scroll-to-top">
+                    <S.ScrollToTop onClick={scrollToTop}>
                         ↑
-                    </button>
+                    </S.ScrollToTop>
                 )}
 
                 {/* Render the notification messages */}
@@ -541,9 +550,9 @@ const AppInner: React.FC = () => {
                     frequencyAnalysis={frequencyAnalysis}
                 />
                 {/* Render the footer */}
-                <Footer />
+                <Footer/>
             </>
-        </div>
+        </S.AppContainer>
     );
 };
 
