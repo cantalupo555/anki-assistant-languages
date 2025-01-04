@@ -29,7 +29,13 @@ export const handleGenerateDefinitions = async (setDefinitions: Dispatch<SetStat
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
       },
-      body: JSON.stringify({ word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
+      body: JSON.stringify({
+        word: word,
+        language: targetLanguage,
+        nativeLanguage: nativeLanguage,
+        apiService: selectedAPIService.value,
+        llm: selectedLLM.value
+      }),
     });
 
     // Log response status for debugging

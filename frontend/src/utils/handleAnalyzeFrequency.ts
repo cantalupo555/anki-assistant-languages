@@ -31,7 +31,13 @@ export const handleAnalyzeFrequency = async (setFrequencyAnalysis: Dispatch<SetS
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
       },
-      body: JSON.stringify({ word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value }),
+      body: JSON.stringify({
+        word: word,
+        targetLanguage: targetLanguage,
+        nativeLanguage: nativeLanguage,
+        apiService: selectedAPIService.value,
+        llm: selectedLLM.value
+      }),
     });
 
     // Log response status for debugging
