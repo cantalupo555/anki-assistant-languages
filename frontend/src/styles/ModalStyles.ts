@@ -1,4 +1,16 @@
 import styled from 'styled-components';
+import { Button } from './ButtonStyles';
+
+export const ModalCloseButton = styled(Button)`
+  padding: 15px;
+  background: #f44336;
+  border-radius: 0 0 12px 12px;
+  width: 100%;
+
+  &:hover {
+    background: #d32f2f;
+  }
+`;
 
 export const ModalOverlay = styled.div`
   position: fixed;
@@ -131,21 +143,6 @@ export const ModalContent = styled.div`
 
   &::-webkit-scrollbar-thumb:hover {
     background: #555;
-  }
-`;
-
-export const ModalCloseButton = styled.button`
-  padding: 15px;
-  background: #f44336;
-  color: white;
-  border: none;
-  border-radius: 0 0 12px 12px;
-  cursor: pointer;
-  font-size: 1em;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background: #d32f2f;
   }
 `;
 

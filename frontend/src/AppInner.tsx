@@ -19,6 +19,7 @@ import { useAppContext } from './context/selectionContext';
 
 // Style imports
 import * as S from './styles/AppStyles';
+import { Button, GenerateButton, DialogueButton, AnalyzeButton } from './styles/ButtonStyles';
 
 // Utility function imports
 import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
@@ -395,17 +396,17 @@ const AppInner: React.FC = () => {
                                 />
                             </S.FormGroup>
                             <S.ButtonContainer>
-                                <S.GenerateButton type="submit" disabled={isGenerateLoading}>
+                                <GenerateButton type="submit" disabled={isGenerateLoading}>
                                     {isGenerateLoading ? 'Generating...' : 'Generate'}
-                                </S.GenerateButton>
-                                <S.DialogueButton type="button" onClick={() => handleGenerateDialogue(setDialogue, setIsDialogueLoading, setError, updateTotalTokenCount, setIsDialogueModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM)}
+                                </GenerateButton>
+                                <DialogueButton type="button" onClick={() => handleGenerateDialogue(setDialogue, setIsDialogueLoading, setError, updateTotalTokenCount, setIsDialogueModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM)}
                                         disabled={isDialogueLoading}>
                                     {isDialogueLoading ? 'Generating...' : 'Generate Dialogue'}
-                                </S.DialogueButton>
-                                <S.AnalyzeButton type="button" onClick={() => handleAnalyzeFrequency(setFrequencyAnalysis, setIsAnalyzeLoading, setError, updateTotalTokenCount, setIsFrequencyModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word)}
+                                </DialogueButton>
+                                <AnalyzeButton type="button" onClick={() => handleAnalyzeFrequency(setFrequencyAnalysis, setIsAnalyzeLoading, setError, updateTotalTokenCount, setIsFrequencyModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word)}
                                         disabled={isAnalyzeLoading}>
                                     {isAnalyzeLoading ? 'Analyzing...' : 'Analyze Frequency'}
-                                </S.AnalyzeButton>
+                                </AnalyzeButton>
                             </S.ButtonContainer>
                         </S.Form>
 
@@ -430,35 +431,35 @@ const AppInner: React.FC = () => {
                                                 <ReactMarkdown>{sentence}</ReactMarkdown>
                                                 {/* TTS listen button */}
                                                 {(targetLanguage === 'English (United States)' || targetLanguage === 'Italian (Italy)' || targetLanguage === 'German (Germany)' || targetLanguage === 'French (France)' || targetLanguage === 'Spanish (Spain)' || targetLanguage === 'Portuguese (Brazil)' || targetLanguage === 'Dutch (Netherlands)' || targetLanguage === 'Polish (Poland)' || targetLanguage === 'Russian (Russia)' || targetLanguage === 'Mandarin (China)' || targetLanguage === 'Japanese (Japan)' || targetLanguage === 'Korean (Korea)') && (
-                                                    <S.Button onClick={() => handleTTS(sentence)}>
+                                                    <Button onClick={() => handleTTS(sentence)}>
                                                         Listen
-                                                    </S.Button>
+                                                    </Button>
                                                 )}
                                             </li>
                                         ))}
                                     </S.SentenceList>
 
                                     <S.Pagination>
-                                        <S.Button
+                                        <Button
                                             onClick={() => handlePageChange(currentPage - 1)}
                                             disabled={currentPage === 1}
                                         >
                                             Previous
-                                        </S.Button>
+                                        </Button>
                                         <span>Page {currentPage} of {sentences.totalPages}</span>
-                                        <S.Button
+                                        <Button
                                             onClick={() => handlePageChange(currentPage + 1)}
                                             disabled={currentPage === sentences.totalPages}
                                         >
                                             Next
-                                        </S.Button>
+                                        </Button>
                                     </S.Pagination>
 
                                     {selectedSentence && (
                                         <div className="selected-sentence">
                                             <h4>Selected Sentence:</h4>
                                             <ReactMarkdown>{selectedSentence}</ReactMarkdown>
-                                            <S.Button onClick={handleSaveItem}>Save Sentence</S.Button>
+                                            <Button onClick={handleSaveItem}>Save Sentence</Button>
                                             <S.TranslateButton
                                                 disabled={isTranslateLoading}
                                                 onClick={() => handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading, nativeLanguage, targetLanguage, selectedAPIService.value, selectedLLM.value)}
@@ -504,12 +505,12 @@ const AppInner: React.FC = () => {
                                                     </div>
                                                 )}
                                                 {item.audioKey && audioData[item.audioKey] && (
-                                                    <S.Button onClick={() => playSavedAudio(item.audioKey!)}>
+                                                    <Button onClick={() => playSavedAudio(item.audioKey!)}>
                                                         Play Audio
-                                                    </S.Button>
+                                                    </Button>
                                                 )}
                                             </S.SavedItemContent>
-                                            <S.Button onClick={() => handleRemoveSavedItem(item)}>Remove</S.Button>
+                                            <Button onClick={() => handleRemoveSavedItem(item)}>Remove</Button>
                                         </li>
                                     ))}
                                 </S.SavedItemsList>

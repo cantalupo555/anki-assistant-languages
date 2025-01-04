@@ -2,6 +2,7 @@
 // React: Core library for building user interfaces
 import React from 'react';
 import * as S from '../styles/ModalStyles';
+import { ModalCloseButton } from '../styles/ButtonStyles';
 import { ModalProps } from '../utils/Types';
 
 // Define the Modal component
@@ -22,7 +23,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, content
                 <S.ModalContent className={contentClass}>
                     {children} {/* Content of the modal */}
                 </S.ModalContent>
-                <S.ModalCloseButton onClick={onClose}>Close</S.ModalCloseButton>
+                <ModalCloseButton onClick={onClose}>Close</ModalCloseButton>
             </S.ModalContainer>
         </S.ModalOverlay>
     );

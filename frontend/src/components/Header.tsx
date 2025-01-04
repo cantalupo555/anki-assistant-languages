@@ -1,6 +1,7 @@
 import React from 'react';
 import useAuth from '../utils/useAuth';
 import * as S from '../styles/HeaderStyles';
+import { LogoutButton } from '../styles/ButtonStyles';
 
 const Header: React.FC = () => {
   const { isAuthenticated, handleLogout } = useAuth();
@@ -15,7 +16,7 @@ const Header: React.FC = () => {
         </ul>
       </nav>
       {isAuthenticated && (
-        <S.LogoutButton onClick={handleLogout}>Logout</S.LogoutButton>
+        <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
       )}
     </S.AppHeader>
   );

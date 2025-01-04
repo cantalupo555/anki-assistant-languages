@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { Button } from '../styles/AppStyles'; // Import the base Button style
 
 export const AppHeader = styled.header`
   background-color: var(--primary-color);
@@ -33,11 +32,3 @@ export const AppHeader = styled.header`
   }
 `;
 
-export const LogoutButton = styled(Button)`
-  background-color: var(--remove-color);
-  margin-left: 1rem;
-
-  &:hover {
-    background-color: #c82333;
-  }
-`;

@@ -1,4 +1,19 @@
 import styled from 'styled-components';
+import { Button } from './ButtonStyles';
+
+export const LoginButton = styled(Button)`
+  width: 100%;
+`;
+
+export const RegisterButton = styled(Button)`
+  background-color: var(--secondary-color);
+  width: 100%;
+  margin-top: 1rem;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
 
 export const LoginContainer = styled.div`
   display: flex;
@@ -48,46 +63,6 @@ export const ErrorMessage = styled.div`
   border-radius: 4px;
   padding: 0.75rem 1.25rem;
   margin-bottom: 1rem;
-`;
-
-export const LoginButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color var(--hover-transition);
-  width: 100%;
-  font-size: 1rem;
-  font-weight: 600;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-
-  &:disabled {
-    background-color: var(--secondary-color);
-    cursor: not-allowed;
-  }
-`;
-
-export const RegisterButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  background-color: var(--secondary-color);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color var(--hover-transition);
-  width: 100%;
-  font-size: 1rem;
-  font-weight: 600;
-  margin-top: 1rem;
-
-  &:hover {
-    background-color: #0056b3;
-  }
 `;
 
 export const AuthSwitch = styled.div`

@@ -3,6 +3,7 @@
 // useState: React hook for managing state
 import React, { useState } from 'react';
 import * as S from '../styles/LoginStyles';
+import { LoginButton } from '../styles/ButtonStyles';
 import { RegisterProps } from '../utils/Types';
 import useAuth from '../utils/useAuth';
 
@@ -88,7 +89,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
                         />
                     </S.FormGroup>
                     {error && <S.ErrorMessage>{error}</S.ErrorMessage>}
-                    <S.LoginButton type="submit">Register</S.LoginButton>
+                    <LoginButton type="submit">Register</LoginButton>
                 </form>
             </S.LoginForm>
         </S.LoginContainer>

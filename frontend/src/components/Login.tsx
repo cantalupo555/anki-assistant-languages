@@ -2,6 +2,7 @@
 // React: Core library for building user interfaces
 import React, { useState } from 'react';
 import * as S from '../styles/LoginStyles';
+import { LoginButton, RegisterButton } from '../styles/ButtonStyles';
 import { LoginProps } from '../utils/Types';
 
 // Define the Login component
@@ -77,9 +78,9 @@ const Login: React.FC<LoginProps & { onRegisterClick: () => void }> = ({ onLogin
                         />
                     </S.FormGroup>
                     {error && <S.ErrorMessage>{error}</S.ErrorMessage>} {/* Display the error message if it exists */}
-                    <S.LoginButton type="submit">Log in</S.LoginButton>
+                    <LoginButton type="submit">Log in</LoginButton>
                 </form>
-                <S.RegisterButton type="button" onClick={handleRegisterClick}>Register</S.RegisterButton> {/* Add the register button */}
+                <RegisterButton type="button" onClick={handleRegisterClick}>Register</RegisterButton> {/* Add the register button */}
             </S.LoginForm>
         </S.LoginContainer>
     );

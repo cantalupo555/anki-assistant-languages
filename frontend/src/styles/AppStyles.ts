@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { AppHeader } from './HeaderStyles';
+import { Button } from './ButtonStyles';
 
 export const GlobalStyles = styled.div`
   --primary-color: #007bff;
@@ -79,26 +80,6 @@ export const FormGroup = styled.div`
   }
 `;
 
-export const Button = styled.button`
-  padding: 0.75rem 1.5rem;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color var(--hover-transition);
-  font-size: 1rem;
-  font-weight: 600;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-
-  &:disabled {
-    background-color: var(--secondary-color);
-    cursor: not-allowed;
-  }
-`;
 
 export const ButtonContainer = styled.div`
   display: flex;
@@ -108,35 +89,6 @@ export const ButtonContainer = styled.div`
   gap: 1rem;
 `;
 
-export const GenerateButton = styled(Button)`
-  background-color: var(--primary-color);
-  flex: 0 0 auto;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-`;
-
-export const DialogueButton = styled(Button)`
-  background-color: var(--generate-color);
-
-  &:hover {
-    background-color: #096259;
-  }
-
-  &:disabled {
-    background-color: var(--secondary-color);
-  }
-`;
-
-export const AnalyzeButton = styled(Button)`
-  background-color: var(--primary-color);
-  flex: 0 0 auto;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-`;
 
 export const TranslateButton = styled(Button)`
   background-color: var(--translate-color);
@@ -425,7 +377,7 @@ export const ResponsiveStyles = styled.div`
       align-items: stretch;
     }
 
-    ${GenerateButton}, ${AnalyzeButton}, ${TranslateButton} {
+    ${Button} {
       width: 100%;
       margin-bottom: 0.5rem;
     }
