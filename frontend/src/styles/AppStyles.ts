@@ -2,20 +2,10 @@ import styled from 'styled-components';
 import { AppHeader } from './HeaderStyles';
 import { Button } from './ButtonStyles';
 
+import { cssVariables } from './CssVariables';
+
 export const GlobalStyles = styled.div`
-  --primary-color: #007bff;
-  --secondary-color: #6c757d;
-  --background-color: #f8f9fa;
-  --text-color: #333;
-  --border-color: #dee2e6;
-  --save-color: #28a745;
-  --export-color: #17a2b8;
-  --remove-color: #dc3545;
-  --clear-color: #ffc107;
-  --generate-color: #0b7e73;
-  --translate-color: #007bff;
-  --hover-transition: 0.3s ease;
-  --box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  ${cssVariables}
 
   * {
     box-sizing: border-box;
@@ -31,6 +21,7 @@ export const GlobalStyles = styled.div`
   }
 `;
 
+// Layout Components
 export const AppContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
@@ -53,6 +44,7 @@ export const Section = styled.section`
   }
 `;
 
+// Form Components
 export const Form = styled.form`
   background-color: white;
   padding: 2rem;
@@ -80,7 +72,7 @@ export const FormGroup = styled.div`
   }
 `;
 
-
+// Button Components
 export const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-start;
@@ -88,7 +80,6 @@ export const ButtonContainer = styled.div`
   margin-top: 1rem;
   gap: 1rem;
 `;
-
 
 export const TranslateButton = styled(Button)`
   background-color: var(--translate-color);
@@ -115,6 +106,7 @@ export const TranslateButton = styled(Button)`
   }
 `;
 
+// Result Components
 export const ResultContainer = styled.div`
   background-color: white;
   border-radius: 8px;
