@@ -205,10 +205,12 @@ const AppInner: React.FC = () => {
     // Function to generate TTS
     const generateTTS = async (sentence: string): Promise<Blob> => {
         const strippedSentence = stripMarkdown(sentence);
+        const token = localStorage.getItem('token'); // Get the token from localStorage
         const response = await fetch(TTS_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
             },
             body: JSON.stringify({
                 text: strippedSentence,
