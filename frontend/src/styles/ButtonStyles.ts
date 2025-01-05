@@ -84,3 +84,63 @@ export const LogoutButton = styled(Button)`
     background-color: #c82333;
   }
 `;
+
+export const ListenButton = styled(Button)`
+  background-color: var(--primary-color);
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+export const PaginationButton = styled(Button)`
+  background-color: var(--secondary-color);
+  padding: 0.5rem 1rem;
+  min-width: 80px;
+
+  &:hover {
+    background-color: #5a6268;
+  }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+`;
+
+export const SaveButton = styled(Button)`
+  background-color: var(--save-color);
+  margin-top: 1rem;
+
+  &:hover {
+    background-color: #218838;
+  }
+`;
+
+export const TranslateButton = styled(Button)`
+  background-color: var(--translate-color);
+  margin-top: 1rem;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+
+  &:disabled {
+    background-color: var(--secondary-color);
+    opacity: 0.7;
+  }
+
+  &.translating {
+    background-color: #17a2b8;
+    cursor: wait;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+`;

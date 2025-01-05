@@ -19,7 +19,16 @@ import { useAppContext } from './context/selectionContext';
 
 // Style imports
 import * as S from './styles/AppStyles';
-import { Button, GenerateButton, DialogueButton, AnalyzeButton } from './styles/ButtonStyles';
+import { 
+    Button, 
+    GenerateButton, 
+    DialogueButton, 
+    AnalyzeButton,
+    ListenButton,
+    PaginationButton,
+    SaveButton,
+    TranslateButton as StyledTranslateButton
+} from './styles/ButtonStyles';
 
 // Utility function imports
 import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
@@ -431,41 +440,41 @@ const AppInner: React.FC = () => {
                                                 <ReactMarkdown>{sentence}</ReactMarkdown>
                                                 {/* TTS listen button */}
                                                 {(targetLanguage === 'English (United States)' || targetLanguage === 'Italian (Italy)' || targetLanguage === 'German (Germany)' || targetLanguage === 'French (France)' || targetLanguage === 'Spanish (Spain)' || targetLanguage === 'Portuguese (Brazil)' || targetLanguage === 'Dutch (Netherlands)' || targetLanguage === 'Polish (Poland)' || targetLanguage === 'Russian (Russia)' || targetLanguage === 'Mandarin (China)' || targetLanguage === 'Japanese (Japan)' || targetLanguage === 'Korean (Korea)') && (
-                                                    <Button onClick={() => handleTTS(sentence)}>
+                                                    <ListenButton onClick={() => handleTTS(sentence)}>
                                                         Listen
-                                                    </Button>
+                                                    </ListenButton>
                                                 )}
                                             </li>
                                         ))}
                                     </S.SentenceList>
 
                                     <S.Pagination>
-                                        <Button
+                                        <PaginationButton
                                             onClick={() => handlePageChange(currentPage - 1)}
                                             disabled={currentPage === 1}
                                         >
                                             Previous
-                                        </Button>
+                                        </PaginationButton>
                                         <span>Page {currentPage} of {sentences.totalPages}</span>
-                                        <Button
+                                        <PaginationButton
                                             onClick={() => handlePageChange(currentPage + 1)}
                                             disabled={currentPage === sentences.totalPages}
                                         >
                                             Next
-                                        </Button>
+                                        </PaginationButton>
                                     </S.Pagination>
 
                                     {selectedSentence && (
                                         <div className="selected-sentence">
                                             <h4>Selected Sentence:</h4>
                                             <ReactMarkdown>{selectedSentence}</ReactMarkdown>
-                                            <Button onClick={handleSaveItem}>Save Sentence</Button>
-                                            <S.TranslateButton
+                                            <SaveButton onClick={handleSaveItem}>Save Sentence</SaveButton>
+                                            <StyledTranslateButton
                                                 disabled={isTranslateLoading}
                                                 onClick={() => handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading, nativeLanguage, targetLanguage, selectedAPIService.value, selectedLLM.value)}
                                             >
                                                 {isTranslateLoading ? 'Translating...' : 'Translate this sentence'}
-                                            </S.TranslateButton>
+                                            </StyledTranslateButton>
                                             {translation && (
                                                 <div className="translation">
                                                     <h4>Translation:</h4>
