@@ -36,13 +36,10 @@ import { handleGenerateDialogue } from './utils/handleGenerateDialogue';
 import { handleSubmit } from './utils/handleSubmit';
 import { handleTranslation } from './utils/handleTranslation';
 import { handleExport } from './utils/languageCardExporter';
-import { stripMarkdown } from './utils/markdownStripper';
 import { apiServiceOptions, llmOptions, ttsOptions } from './utils/Options';
 import { voiceOptions } from './utils/voiceOptions';
+import { handleGenerateTTS } from './utils/handleGenerateTTS';
 import { TokenCount, SavedItem, FrequencyAnalysis } from './utils/Types';
-
-// Define the TTS URL, using environment variables
-const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 
 const AppInner: React.FC = () => {
     const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice, selectedLLM, setSelectedLLM } = useAppContext();
@@ -166,7 +163,8 @@ const AppInner: React.FC = () => {
         if (selectedSentence && definitions && sentences) {
             try {
                 // Always generate new TTS for the selected sentence
-                const audioBlob = await generateTTS(selectedSentence);
+                const token = localStorage.getItem('token');
+                const audioBlob = await handleGenerateTTS(selectedSentence, selectedVoice, selectedTTS, token);
                 const translation = await handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading, nativeLanguage, targetLanguage, selectedAPIService.value, selectedLLM.value);
 
                 const audioKey = `audio_${Date.now()}`; // Generate a unique key for the audio
@@ -200,31 +198,6 @@ const AppInner: React.FC = () => {
                 setError('An error occurred while generating audio. The item will be saved without audio.');
             }
         }
-    };
-
-    // Function to generate TTS
-    const generateTTS = async (sentence: string): Promise<Blob> => {
-        const strippedSentence = stripMarkdown(sentence);
-        const token = localStorage.getItem('token'); // Get the token from localStorage
-        const response = await fetch(TTS_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
-            },
-            body: JSON.stringify({
-                text: strippedSentence,
-                voice: selectedVoice.value,
-                languageCode: selectedVoice.languageCode,
-                ttsService: selectedTTS.value // Include the selected TTS service
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        return await response.blob();
     };
 
     // Function to remove a saved item
@@ -268,7 +241,8 @@ const AppInner: React.FC = () => {
     // Function to handle TTS request
     const handleTTS = async (sentence: string) => {
         try {
-            const audioBlob = await generateTTS(sentence);
+            const token = localStorage.getItem('token');
+            const audioBlob = await handleGenerateTTS(sentence, selectedVoice, selectedTTS, token);
             const audioUrl = URL.createObjectURL(audioBlob);
             const audio = new Audio(audioUrl);
             audio.play();
@@ -318,7 +292,7 @@ const AppInner: React.FC = () => {
                     {/* Render the card generator section */}
                     <S.Section id="card-generator">
                         <h2>Card Generator</h2>
-                        <S.Form onSubmit={(e) => handleSubmit(e, setDefinitions, setSentences, setTotalTokenCount, setError, setIsGenerateLoading, setCurrentPage, updateTotalTokenCount, setShowGenerateNotification, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM, TTS_URL)}> {/* Update the onSubmit prop */}
+                        <S.Form onSubmit={(e) => handleSubmit(e, setDefinitions, setSentences, setTotalTokenCount, setError, setIsGenerateLoading, setCurrentPage, updateTotalTokenCount, setShowGenerateNotification, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM)}> {/* Update the onSubmit prop */}
                             {/* API service selection dropdown */}
                             <S.FormGroup>
                                 <label htmlFor="api-service-select">AI Provider:</label>
