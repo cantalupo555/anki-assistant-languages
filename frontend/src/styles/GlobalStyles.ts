@@ -1,5 +1,7 @@
+// Import createGlobalStyle from styled-components for creating global styles
 import { createGlobalStyle } from 'styled-components';
 
+// Global styles for the application
 export const GlobalStyles = createGlobalStyle`
   body {
     margin: 0;

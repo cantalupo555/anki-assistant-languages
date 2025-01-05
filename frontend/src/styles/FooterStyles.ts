@@ -1,5 +1,7 @@
+// Import styled-components for creating styled components
 import styled from 'styled-components';
 
+// Styled component for the application footer
 export const AppFooter = styled.footer`
   background-color: var(--primary-color);
   color: white;
@@ -7,6 +9,7 @@ export const AppFooter = styled.footer`
   margin-top: 2rem;
 `;
 
+// Styled component for the footer content container
 export const FooterContent = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -15,6 +18,7 @@ export const FooterContent = styled.div`
   margin: 0 auto;
 `;
 
+// Styled component for a section within the footer
 export const FooterSection = styled.div`
   flex: 1;
   margin-bottom: 1rem;
@@ -45,6 +49,7 @@ export const FooterSection = styled.div`
   }
 `;
 
+// Styled component for the bottom section of the footer
 export const FooterBottom = styled.div`
   text-align: center;
   margin-top: 2rem;

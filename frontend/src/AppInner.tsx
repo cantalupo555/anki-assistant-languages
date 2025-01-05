@@ -6,16 +6,16 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 
+// Context imports
+import { useAppContext } from './context/selectionContext';
+
 // Internal component imports
+import DialogueModal from './components/DialogueModal';
 import Footer from './components/Footer';
+import FrequencyAnalysisModal from './components/FrequencyAnalysisModal';
 import Header from './components/Header';
 import LanguageSelector from './components/LanguageSelector';
 import Notifications from './components/Notifications';
-import DialogueModal from './components/DialogueModal';
-import FrequencyAnalysisModal from './components/FrequencyAnalysisModal';
-
-// Context imports
-import { useAppContext } from './context/selectionContext';
 
 // Style imports
 import * as S from './styles/AppStyles';
@@ -31,14 +31,14 @@ import {
 } from './styles/ButtonStyles';
 
 // Utility function imports
-import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
-import { handleGenerateDialogue } from './utils/handleGenerateDialogue';
-import { handleSubmit } from './utils/handleSubmit';
-import { handleTranslation } from './utils/handleTranslation';
-import { handleExport } from './utils/languageCardExporter';
 import { apiServiceOptions, llmOptions, ttsOptions } from './utils/Options';
-import { voiceOptions } from './utils/voiceOptions';
+import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
+import { handleExport } from './utils/languageCardExporter';
+import { handleGenerateDialogue } from './utils/handleGenerateDialogue';
 import { handleGenerateTTS } from './utils/handleGenerateTTS';
+import { handleTranslation } from './utils/handleTranslation';
+import { handleSubmit } from './utils/handleSubmit';
+import { voiceOptions } from './utils/voiceOptions';
 import { TokenCount, SavedItem, FrequencyAnalysis } from './utils/Types';
 
 const AppInner: React.FC = () => {

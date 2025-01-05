@@ -1,5 +1,7 @@
+// Import styled-components for creating styled components
 import styled from 'styled-components';
 
+// Styled component for the application header
 export const AppHeader = styled.header`
   background-color: var(--primary-color);
   color: white;

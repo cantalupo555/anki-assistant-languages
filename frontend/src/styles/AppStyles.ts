@@ -1,9 +1,13 @@
+// Import styled-components for creating styled components
 import styled from 'styled-components';
+// Import the AppHeader component from HeaderStyles
 import { AppHeader } from './HeaderStyles';
+// Import the Button component from ButtonStyles
 import { Button } from './ButtonStyles';
-
+// Import CSS variables from CssVariables
 import { cssVariables } from './CssVariables';
 
+// Global styles for the application
 export const GlobalStyles = styled.div`
   ${cssVariables}
 
@@ -22,16 +26,19 @@ export const GlobalStyles = styled.div`
 `;
 
 // Layout Components
+// Container for the entire application
 export const AppContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 `;
 
+// Main content area of the application
 export const MainContent = styled.main`
   padding: 2rem 0;
 `;
 
+// Section component for grouping content
 export const Section = styled.section`
   margin-bottom: 2rem;
 
@@ -45,6 +52,7 @@ export const Section = styled.section`
 `;
 
 // Form Components
+// Form container
 export const Form = styled.form`
   background-color: white;
   padding: 2rem;
@@ -53,6 +61,7 @@ export const Form = styled.form`
   margin-bottom: 2rem;
 `;
 
+// Form group for labels and inputs
 export const FormGroup = styled.div`
   margin-bottom: 1rem;
 
@@ -73,6 +82,7 @@ export const FormGroup = styled.div`
 `;
 
 // Button Components
+// Container for buttons
 export const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-start;
@@ -81,6 +91,7 @@ export const ButtonContainer = styled.div`
   gap: 1rem;
 `;
 
+// Translate button
 export const TranslateButton = styled(Button)`
   background-color: var(--translate-color);
 
@@ -107,6 +118,7 @@ export const TranslateButton = styled(Button)`
 `;
 
 // Result Components
+// Container for results
 export const ResultContainer = styled.div`
   background-color: white;
   border-radius: 8px;
@@ -115,6 +127,7 @@ export const ResultContainer = styled.div`
   box-shadow: var(--box-shadow);
 `;
 
+// Section for results
 export const ResultSection = styled.div`
   margin-bottom: 2rem;
 
@@ -125,6 +138,7 @@ export const ResultSection = styled.div`
   }
 `;
 
+// List of sentences
 export const SentenceList = styled.ul`
   list-style-type: none;
 
@@ -147,6 +161,7 @@ export const SentenceList = styled.ul`
   }
 `;
 
+// Pagination container
 export const Pagination = styled.div`
   display: flex;
   justify-content: center;
@@ -163,6 +178,7 @@ export const Pagination = styled.div`
   }
 `;
 
+// List of saved items
 export const SavedItemsList = styled.ul`
   background-color: white;
   border-radius: 8px;
@@ -182,24 +198,29 @@ export const SavedItemsList = styled.ul`
   }
 `;
 
+// Content of a saved item
 export const SavedItemContent = styled.div`
   flex-grow: 1;
 `;
 
+// Container for action buttons
 export const ActionButtons = styled.div`
   margin-top: 2rem;
   display: flex;
   gap: 1rem;
 `;
 
+// Export button
 export const ExportButton = styled(Button)`
   background-color: var(--export-color);
 `;
 
+// Clear all button
 export const ClearAllButton = styled(Button)`
   background-color: var(--clear-color);
 `;
 
+// Token information display
 export const TokenInfo = styled.div`
   background-color: #e9ecef;
   border-radius: 4px;
@@ -212,6 +233,7 @@ export const TokenInfo = styled.div`
   }
 `;
 
+// Footer styles
 export const AppFooter = styled.footer`
   background-color: var(--primary-color);
   color: white;
@@ -219,6 +241,7 @@ export const AppFooter = styled.footer`
   margin-top: 2rem;
 `;
 
+// Footer content container
 export const FooterContent = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -227,6 +250,7 @@ export const FooterContent = styled.div`
   margin: 0 auto;
 `;
 
+// Footer section
 export const FooterSection = styled.div`
   flex: 1;
   margin-bottom: 1rem;
@@ -257,6 +281,7 @@ export const FooterSection = styled.div`
   }
 `;
 
+// Footer bottom section
 export const FooterBottom = styled.div`
   text-align: center;
   margin-top: 2rem;
@@ -264,6 +289,7 @@ export const FooterBottom = styled.div`
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 `;
 
+// Error message display
 export const Error = styled.div`
   color: #721c24;
   background-color: #f8d7da;
@@ -273,6 +299,7 @@ export const Error = styled.div`
   margin-bottom: 1rem;
 `;
 
+// Notification message display
 export const Notification = styled.div`
   position: fixed;
   top: 20px;
@@ -302,6 +329,7 @@ export const Notification = styled.div`
   }
 `;
 
+// Scroll to top button
 export const ScrollToTop = styled.button`
   position: fixed;
   bottom: 30px;

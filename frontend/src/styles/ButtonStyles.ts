@@ -1,5 +1,7 @@
+// Import styled-components for creating styled components
 import styled from 'styled-components';
 
+// Base button style
 export const Button = styled.button`
   padding: 0.75rem 1.5rem;
   background-color: var(--primary-color);
@@ -21,6 +23,7 @@ export const Button = styled.button`
   }
 `;
 
+// Button for generating content
 export const GenerateButton = styled(Button)`
   background-color: var(--primary-color);
   flex: 0 0 auto;
@@ -30,6 +33,7 @@ export const GenerateButton = styled(Button)`
   }
 `;
 
+// Button for generating dialogue
 export const DialogueButton = styled(Button)`
   background-color: var(--generate-color);
 
@@ -42,6 +46,7 @@ export const DialogueButton = styled(Button)`
   }
 `;
 
+// Button for analyzing frequency
 export const AnalyzeButton = styled(Button)`
   background-color: var(--primary-color);
   flex: 0 0 auto;
@@ -51,10 +56,12 @@ export const AnalyzeButton = styled(Button)`
   }
 `;
 
+// Button for login
 export const LoginButton = styled(Button)`
   width: 100%;
 `;
 
+// Button for register
 export const RegisterButton = styled(Button)`
   background-color: var(--secondary-color);
   width: 100%;
@@ -65,6 +72,7 @@ export const RegisterButton = styled(Button)`
   }
 `;
 
+// Button for closing modal
 export const ModalCloseButton = styled(Button)`
   padding: 15px;
   background: #f44336;
@@ -76,6 +84,7 @@ export const ModalCloseButton = styled(Button)`
   }
 `;
 
+// Button for logout
 export const LogoutButton = styled(Button)`
   background-color: var(--remove-color);
   margin-left: 1rem;
@@ -85,6 +94,7 @@ export const LogoutButton = styled(Button)`
   }
 `;
 
+// Button for listening to TTS
 export const ListenButton = styled(Button)`
   background-color: var(--primary-color);
   padding: 0.5rem 1rem;
@@ -95,6 +105,7 @@ export const ListenButton = styled(Button)`
   }
 `;
 
+// Button for pagination
 export const PaginationButton = styled(Button)`
   background-color: var(--secondary-color);
   padding: 0.5rem 1rem;
@@ -110,6 +121,7 @@ export const PaginationButton = styled(Button)`
   }
 `;
 
+// Button for saving items
 export const SaveButton = styled(Button)`
   background-color: var(--save-color);
   margin-top: 1rem;
@@ -119,6 +131,7 @@ export const SaveButton = styled(Button)`
   }
 `;
 
+// Button for translating text
 export const TranslateButton = styled(Button)`
   background-color: var(--translate-color);
   margin-top: 1rem;

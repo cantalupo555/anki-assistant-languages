@@ -1,6 +1,9 @@
+// Import styled-components for creating styled components
 import styled from 'styled-components';
+// Import the Button component from ButtonStyles
 import { Button } from './ButtonStyles';
 
+// Styled component for the modal close button
 export const ModalCloseButton = styled(Button)`
   padding: 15px;
   background: #f44336;
@@ -12,6 +15,7 @@ export const ModalCloseButton = styled(Button)`
   }
 `;
 
+// Styled component for the modal overlay
 export const ModalOverlay = styled.div`
   position: fixed;
   inset: 0;
@@ -29,6 +33,7 @@ export const ModalOverlay = styled.div`
   }
 `;
 
+// Styled component for the modal container
 export const ModalContainer = styled.div`
   background: #ffffff;
   border-radius: 12px;
@@ -46,6 +51,7 @@ export const ModalContainer = styled.div`
   }
 `;
 
+// Styled component for the modal header
 export const ModalHeader = styled.div`
   background: #2196F3;
   color: white;
@@ -57,6 +63,7 @@ export const ModalHeader = styled.div`
   text-align: center;
 `;
 
+// Styled component for the modal title
 export const ModalTitle = styled.h2`
   font-size: 1.4em;
   font-weight: 600;
@@ -66,6 +73,7 @@ export const ModalTitle = styled.h2`
   flex-grow: 1;
 `;
 
+// Styled component for the modal close icon
 export const ModalCloseIcon = styled.span`
   cursor: pointer;
   font-size: 1.5em;
@@ -76,6 +84,7 @@ export const ModalCloseIcon = styled.span`
   }
 `;
 
+// Styled component for the modal content
 export const ModalContent = styled.div`
   padding: 30px;
   overflow-y: auto;
@@ -146,6 +155,7 @@ export const ModalContent = styled.div`
   }
 `;
 
+// Styled component for responsive modal
 export const ResponsiveModal = styled.div`
   @media (max-width: 768px) {
     ${ModalContainer} {

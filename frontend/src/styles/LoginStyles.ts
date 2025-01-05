@@ -1,10 +1,14 @@
+// Import styled-components for creating styled components
 import styled from 'styled-components';
+// Import the Button component from ButtonStyles
 import { Button } from './ButtonStyles';
 
+// Styled component for the login button
 export const LoginButton = styled(Button)`
   width: 100%;
 `;
 
+// Styled component for the register button
 export const RegisterButton = styled(Button)`
   background-color: var(--secondary-color);
   width: 100%;
@@ -15,6 +19,7 @@ export const RegisterButton = styled(Button)`
   }
 `;
 
+// Styled component for the login container
 export const LoginContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -23,6 +28,7 @@ export const LoginContainer = styled.div`
   background-color: var(--background-color);
 `;
 
+// Styled component for the login form
 export const LoginForm = styled.div`
   background-color: white;
   padding: 2rem;
@@ -38,6 +44,7 @@ export const LoginForm = styled.div`
   }
 `;
 
+// Styled component for a form group
 export const FormGroup = styled.div`
   margin-bottom: 1rem;
 
@@ -56,6 +63,7 @@ export const FormGroup = styled.div`
   }
 `;
 
+// Styled component for displaying error messages
 export const ErrorMessage = styled.div`
   color: #721c24;
   background-color: #f8d7da;
@@ -65,6 +73,7 @@ export const ErrorMessage = styled.div`
   margin-bottom: 1rem;
 `;
 
+// Styled component for the authentication switch
 export const AuthSwitch = styled.div`
   display: flex;
   justify-content: center;
