@@ -233,6 +233,25 @@ export const TokenInfo = styled.div`
   }
 `;
 
+export const StatsSection = styled(Section)`
+  background-color: #f8f9fa;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+  
+  h2 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 1.5rem;
+  }
+`;
+
 // Footer styles
 export const AppFooter = styled.footer`
   background-color: var(--primary-color);

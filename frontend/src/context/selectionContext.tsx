@@ -5,7 +5,7 @@
 // useEffect: Hook to perform side effects in functional components
 // useContext: Hook to consume a context within a functional component
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { APIServiceOption, TTSOption, VoiceOption, LLMOption } from '../utils/Types';
+import { APIServiceOption, TTSOption, VoiceOption, LLMOption, TokenCount } from '../utils/Types';
 import { voiceOptions } from '../utils/voiceOptions'; // Import the voiceOptions array
 
 // Define the shape of the context
@@ -22,6 +22,8 @@ interface AppContextType {
     setSelectedVoice: React.Dispatch<React.SetStateAction<VoiceOption>>;
     selectedLLM: LLMOption;
     setSelectedLLM: React.Dispatch<React.SetStateAction<LLMOption>>;
+    totalTokenCount: TokenCount | null;
+    setTotalTokenCount: React.Dispatch<React.SetStateAction<TokenCount | null>>;
 }
 
 // Create the context with an initial value of undefined
@@ -66,6 +68,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         return { name: 'Select AI', value: '' }; // Default to first option if nothing is saved
     });
+
+    const [totalTokenCount, setTotalTokenCount] = useState<TokenCount | null>(null);
 
     // Effect to save the state to localStorage whenever it changes
     useEffect(() => {
@@ -119,7 +123,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             selectedVoice,
             setSelectedVoice,
             selectedLLM,
-            setSelectedLLM
+            setSelectedLLM,
+            totalTokenCount,
+            setTotalTokenCount
         }}>
             {children}
         </AppContext.Provider>

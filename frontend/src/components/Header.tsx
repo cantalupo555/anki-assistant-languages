@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import useAuth from '../utils/useAuth';
 import * as S from '../styles/HeaderStyles';
 import { LogoutButton } from '../styles/ButtonStyles';
@@ -11,8 +12,9 @@ const Header: React.FC = () => {
       <h1>📚📖🔖 Anki Assistant Languages</h1>
       <nav>
         <ul>
-          <li><a href="#card-generator">Card Generator</a></li>
-          <li><a href="#saved-items">Saved Items</a></li>
+          <li><Link to="/">Card Generator</Link></li>
+          <li><Link to="/">Saved Items</Link></li>
+          <li><Link to="/stats">Stats</Link></li>
         </ul>
       </nav>
       {isAuthenticated && (

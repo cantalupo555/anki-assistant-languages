@@ -1,5 +1,6 @@
 // Import necessary React hooks and components
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // Import internal components
 import AuthWrapper from './components/AuthWrapper';
@@ -15,9 +16,14 @@ const App: React.FC = () => {
     return (
         <S.GlobalStyles> {/* Apply global styles */}
             <AppProvider> {/* Wrap AuthWrapper with AppProvider */}
-                <AuthWrapper>
-                    <AppInner />
-                </AuthWrapper>
+                <Router>
+                    <AuthWrapper>
+                        <Routes>
+                            <Route path="/" element={<AppInner />} />
+                            <Route path="/stats" element={<AppInner showStats={true} />} />
+                        </Routes>
+                    </AuthWrapper>
+                </Router>
             </AppProvider>
         </S.GlobalStyles>
     );

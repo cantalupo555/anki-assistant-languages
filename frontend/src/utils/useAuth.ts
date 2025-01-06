@@ -1,5 +1,5 @@
 // Import necessary libraries
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 // Define the backend API URL, using environment variables or a default value
 const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000';
@@ -72,7 +72,7 @@ const useAuth = () => {
     };
 
     // Function to fetch user data
-    const fetchUser = async () => {
+    const fetchUser = useCallback(async () => {
         const token = localStorage.getItem('token');
         if (token) {
             try {
@@ -93,7 +93,7 @@ const useAuth = () => {
                 handleLogout();
             }
         }
-    };
+    }, []);
 
     // Function to handle logout
     const handleLogout = () => {
@@ -106,21 +106,22 @@ const useAuth = () => {
     };
 
     // Effect to load authentication state from localStorage on component mount
-    useEffect(() => {
-        const checkAuth = async () => {
-            // Get the authentication state from localStorage
-            const isAuthenticatedFromStorage = localStorage.getItem('isAuthenticated');
-            const token = localStorage.getItem('token');
+    const checkAuth = useCallback(async () => {
+        // Get the authentication state from localStorage
+        const isAuthenticatedFromStorage = localStorage.getItem('isAuthenticated');
+        const token = localStorage.getItem('token');
 
-            // If the authentication state is true, set the authentication status to true
-            if (isAuthenticatedFromStorage === 'true' && token) {
-                setIsAuthenticated(true);
-                await fetchUser();
-            }
-            setIsCheckingAuth(false); // Set checking auth to false after loading state
-        };
+        // If the authentication state is true, set the authentication status to true
+        if (isAuthenticatedFromStorage === 'true' && token) {
+            setIsAuthenticated(true);
+            await fetchUser();
+        }
+        setIsCheckingAuth(false); // Set checking auth to false after loading state
+    }, [fetchUser]);
+
+    useEffect(() => {
         checkAuth();
-    }, []);
+    }, [checkAuth]);
 
     // Return the authentication state and functions
     return {

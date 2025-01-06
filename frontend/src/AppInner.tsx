@@ -4,6 +4,7 @@
 // ReactMarkdown: Component to render Markdown as React components
 // External library imports
 import React, { useState, useEffect } from 'react';
+import Stats from './components/Stats';
 import ReactMarkdown from 'react-markdown';
 
 // Context imports
@@ -41,7 +42,11 @@ import { handleSubmit } from './utils/handleSubmit';
 import { voiceOptions } from './utils/voiceOptions';
 import { TokenCount, SavedItem, FrequencyAnalysis } from './utils/Types';
 
-const AppInner: React.FC = () => {
+interface AppInnerProps {
+    showStats?: boolean;
+}
+
+const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
     const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice, selectedLLM, setSelectedLLM } = useAppContext();
     const [word, setWord] = useState('');
     const [definitions, setDefinitions] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
@@ -290,6 +295,7 @@ const AppInner: React.FC = () => {
 
                 <S.MainContent>
                     {/* Render the card generator section */}
+                    {!showStats && (
                     <S.Section id="card-generator">
                         <h2>Card Generator</h2>
                         <S.Form onSubmit={(e) => handleSubmit(e, setDefinitions, setSentences, setTotalTokenCount, setError, setIsGenerateLoading, setCurrentPage, updateTotalTokenCount, setShowGenerateNotification, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM)}> {/* Update the onSubmit prop */}
@@ -471,7 +477,13 @@ const AppInner: React.FC = () => {
                                 </S.TokenInfo>
                             </S.ResultContainer>
                         )}
-                    </S.Section>
+                    </S.Section>)}
+                    
+                    {showStats && (
+                        <S.Section id="stats">
+                            <Stats totalTokenCount={totalTokenCount} />
+                        </S.Section>
+                    )}
 
                     {/* Render the saved items section */}
                     <S.Section id="saved-items">
