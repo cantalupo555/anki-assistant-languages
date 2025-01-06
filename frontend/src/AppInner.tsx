@@ -4,7 +4,6 @@
 // ReactMarkdown: Component to render Markdown as React components
 // External library imports
 import React, { useState, useEffect } from 'react';
-import Stats from './components/Stats';
 import ReactMarkdown from 'react-markdown';
 
 // Context imports
@@ -17,6 +16,7 @@ import FrequencyAnalysisModal from './components/FrequencyAnalysisModal';
 import Header from './components/Header';
 import LanguageSelector from './components/LanguageSelector';
 import Notifications from './components/Notifications';
+import Stats from './components/Stats';
 
 // Style imports
 import * as S from './styles/AppStyles';
