@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import useAuth from '../utils/useAuth';
 import * as S from '../styles/HeaderStyles';
-import { LogoutButton } from '../styles/ButtonStyles';
+import { LogoutButton, HomeButton } from '../styles/ButtonStyles';
 
 const Header: React.FC = () => {
   const { isAuthenticated, handleLogout } = useAuth();
@@ -10,6 +10,9 @@ const Header: React.FC = () => {
   return (
     <S.AppHeader>
       <h1>📚📖🔖 Anki Assistant Languages</h1>
+      {isAuthenticated && (
+        <HomeButton as={Link} to="/">Home</HomeButton>
+      )}
       <nav>
         <ul>
           <li><Link to="/">Card Generator</Link></li>

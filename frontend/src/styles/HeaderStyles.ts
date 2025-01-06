@@ -20,6 +20,7 @@ export const AppHeader = styled.header`
     list-style-type: none;
     display: flex;
     gap: 1.5rem;
+    margin: 0 1rem; /* Add spacing around nav items */
   }
 
   nav a {

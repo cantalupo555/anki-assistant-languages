@@ -24,6 +24,8 @@ export const cssVariables = css`
   --generate-color: #0b7e73;
   /* Color for translate buttons */
   --translate-color: #007bff;
+  /* Color for home button */
+  --home-color: #007bff;
   /* Transition for hover effects */
   --hover-transition: 0.3s ease;
   /* Box shadow for elements */

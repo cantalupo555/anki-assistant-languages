@@ -157,3 +157,13 @@ export const TranslateButton = styled(Button)`
     100% { opacity: 1; }
   }
 `;
+
+// Button for navigating to the home page
+export const HomeButton = styled(Button)`
+  background-color: var(--home-color);
+  margin-right: 0.5rem;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
