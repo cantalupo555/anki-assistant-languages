@@ -1,4 +1,6 @@
 // Import necessary dependencies
+// Pool: Manages database connections
+// dotenv: Loads environment variables from a .env file
 import { Pool } from 'pg';
 import * as dotenv from 'dotenv';
 
@@ -19,15 +21,36 @@ const createUserSettingsTable = async () => {
     const client = await pool.connect();
 
     try {
+        // Enable pgcrypto extension
+        await client.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+
+        // Check if users table exists
+        const usersTableRes = await client.query(`SELECT EXISTS (SELECT FROM pg_tables WHERE tablename = 'users');`);
+        if (!usersTableRes.rows[0].exists) {
+            console.error('Required table "users" does not exist');
+            process.exit(1);
+        }
+
+        // Start transaction
+        await client.query('BEGIN');
+
+        // Check if user_settings table already exists
+        const userSettingsTableRes = await client.query(`SELECT EXISTS (SELECT FROM pg_tables WHERE tablename = 'user_settings');`);
+        if (userSettingsTableRes.rows[0].exists) {
+            console.log('Table user_settings already exists');
+            await client.query('COMMIT'); // Commit the transaction before returning
+            return;
+        }
+
         // Create the user_settings table
         await client.query(`
             CREATE TABLE IF NOT EXISTS user_settings (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique settings ID
                 user_id UUID NOT NULL, -- Reference to the user
-                preferred_language VARCHAR(50) DEFAULT 'english', -- Default interface language
+                preferred_language VARCHAR(50) DEFAULT 'english' CHECK (preferred_language IN ('english', 'spanish', 'french')), -- Default interface language
                 theme VARCHAR(50) DEFAULT 'light' CHECK (theme IN ('light', 'dark')), -- Interface theme
-                native_language VARCHAR(255), -- User's native language
-                target_language VARCHAR(255), -- User's target learning language
+                native_language VARCHAR(255) CHECK (native_language ~ '^[A-Za-z ]+$'), -- User's native language
+                target_language VARCHAR(255) CHECK (target_language ~ '^[A-Za-z ]+$'), -- User's target learning language
                 selected_api_service VARCHAR(255), -- Selected API service
                 selected_tts_service VARCHAR(255), -- Selected TTS service
                 selected_llm VARCHAR(255), -- Selected LLM model
@@ -38,10 +61,11 @@ const createUserSettingsTable = async () => {
             );
         `);
 
-        // Create index for user_id to improve query performance
+        // Create indexes
         await client.query(`
-            CREATE INDEX IF NOT EXISTS idx_user_settings_user_id
-            ON user_settings(user_id);
+            CREATE INDEX IF NOT EXISTS idx_user_settings_user_id ON user_settings(user_id);
+            CREATE INDEX IF NOT EXISTS idx_user_settings_native_language ON user_settings(native_language);
+            CREATE INDEX IF NOT EXISTS idx_user_settings_target_language ON user_settings(target_language);
         `);
 
         // Create function to update the updated_at field
@@ -63,9 +87,15 @@ const createUserSettingsTable = async () => {
             EXECUTE FUNCTION update_updated_at_column_user_settings();
         `);
 
+        // Commit transaction
+        await client.query('COMMIT');
+
         console.log('user_settings table and trigger created successfully!');
     } catch (error) {
+        // Rollback transaction in case of error
+        await client.query('ROLLBACK');
         console.error('Error creating user_settings table and trigger:', error);
+        process.exit(1);
     } finally {
         client.release();
         await pool.end();
