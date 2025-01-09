@@ -1,8 +1,10 @@
 // Import necessary dependencies
 // Pool: Manages database connections
 // dotenv: Loads environment variables from a .env file
+// readline: Enables interactive command-line input
 import { Pool } from 'pg';
 import * as dotenv from 'dotenv';
+import * as readline from 'readline';
 
 // Load environment variables
 dotenv.config();
@@ -22,27 +24,36 @@ const createUserSettingsTable = async () => {
 
     try {
         // Enable pgcrypto extension
+        console.log('Enabling pgcrypto extension...');
         await client.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+        console.log('pgcrypto extension enabled.');
 
         // Check if users table exists
+        console.log('Checking if users table exists...');
         const usersTableRes = await client.query(`SELECT EXISTS (SELECT FROM pg_tables WHERE tablename = 'users');`);
         if (!usersTableRes.rows[0].exists) {
             console.error('Required table "users" does not exist');
             process.exit(1);
         }
+        console.log('Users table exists.');
 
         // Start transaction
+        console.log('Starting transaction...');
         await client.query('BEGIN');
+        console.log('Transaction started.');
 
         // Check if user_settings table already exists
+        console.log('Checking if user_settings table already exists...');
         const userSettingsTableRes = await client.query(`SELECT EXISTS (SELECT FROM pg_tables WHERE tablename = 'user_settings');`);
         if (userSettingsTableRes.rows[0].exists) {
             console.log('Table user_settings already exists');
             await client.query('COMMIT'); // Commit the transaction before returning
             return;
         }
+        console.log('user_settings table does not exist. Proceeding with creation.');
 
         // Create the user_settings table
+        console.log('Creating user_settings table...');
         await client.query(`
             CREATE TABLE IF NOT EXISTS user_settings (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique settings ID
@@ -60,15 +71,36 @@ const createUserSettingsTable = async () => {
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Foreign key to users table
             );
         `);
+        console.log('user_settings table created.');
+
+        // Add comments to columns
+        console.log('Adding comments to columns...');
+        await client.query(`
+            COMMENT ON COLUMN user_settings.user_id IS 'Reference to the user';
+            COMMENT ON COLUMN user_settings.preferred_language IS 'Default interface language';
+            COMMENT ON COLUMN user_settings.theme IS 'Interface theme';
+            COMMENT ON COLUMN user_settings.native_language IS 'User\'s native language';
+            COMMENT ON COLUMN user_settings.target_language IS 'User\'s target learning language';
+            COMMENT ON COLUMN user_settings.selected_api_service IS 'Selected API service';
+            COMMENT ON COLUMN user_settings.selected_tts_service IS 'Selected TTS service';
+            COMMENT ON COLUMN user_settings.selected_llm IS 'Selected LLM model';
+            COMMENT ON COLUMN user_settings.selected_voice IS 'Selected TTS voice';
+            COMMENT ON COLUMN user_settings.created_at IS 'Timestamp of settings creation';
+            COMMENT ON COLUMN user_settings.updated_at IS 'Timestamp of last update';
+        `);
+        console.log('Comments added to columns.');
 
         // Create indexes
+        console.log('Creating indexes...');
         await client.query(`
             CREATE INDEX IF NOT EXISTS idx_user_settings_user_id ON user_settings(user_id);
             CREATE INDEX IF NOT EXISTS idx_user_settings_native_language ON user_settings(native_language);
             CREATE INDEX IF NOT EXISTS idx_user_settings_target_language ON user_settings(target_language);
         `);
+        console.log('Indexes created.');
 
         // Create function to update the updated_at field
+        console.log('Creating function to update updated_at field...');
         await client.query(`
             CREATE OR REPLACE FUNCTION update_updated_at_column_user_settings()
             RETURNS TRIGGER AS $$
@@ -78,23 +110,28 @@ const createUserSettingsTable = async () => {
             END;
             $$ language 'plpgsql';
         `);
+        console.log('Function to update updated_at field created.');
 
         // Create trigger to automatically update the updated_at field
+        console.log('Creating trigger to update updated_at field...');
         await client.query(`
             CREATE TRIGGER update_user_settings_updated_at
             BEFORE UPDATE ON user_settings
             FOR EACH ROW
             EXECUTE FUNCTION update_updated_at_column_user_settings();
         `);
+        console.log('Trigger to update updated_at field created.');
 
         // Commit transaction
+        console.log('Committing transaction...');
         await client.query('COMMIT');
+        console.log('Transaction committed.');
 
         console.log('user_settings table and trigger created successfully!');
     } catch (error) {
         // Rollback transaction in case of error
-        await client.query('ROLLBACK');
         console.error('Error creating user_settings table and trigger:', error);
+        await client.query('ROLLBACK');
         process.exit(1);
     } finally {
         client.release();
@@ -102,5 +139,18 @@ const createUserSettingsTable = async () => {
     }
 };
 
-// Execute the function to create the table
-createUserSettingsTable();
+// Interactive confirmation
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
+
+rl.question('Are you sure you want to create the user_settings table? (yes/no) ', (answer) => {
+    if (answer.toLowerCase() === 'yes') {
+        createUserSettingsTable();
+    } else {
+        console.log('Operation cancelled.');
+        process.exit(0);
+    }
+    rl.close();
+});
