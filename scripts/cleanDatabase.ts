@@ -53,19 +53,26 @@ const cleanDatabase = async (dryRun: boolean = false) => {
             await client.query(`DROP TABLE IF EXISTS ${table} CASCADE;`);
         }
 
+        // Drop the pgcrypto extension
+        console.log('Dropping extension: pgcrypto');
+        await client.query('DROP EXTENSION IF EXISTS pgcrypto CASCADE;');
+
         // Drop all custom functions
         const functionsRes = await client.query(`
-            SELECT routine_name
-            FROM information_schema.routines
-            WHERE routine_schema = 'public'
-              AND routine_type = 'FUNCTION';
+            SELECT p.proname as routine_name, pg_get_function_identity_arguments(p.oid) as args
+            FROM pg_proc p
+            JOIN pg_namespace n ON p.pronamespace = n.oid
+            WHERE n.nspname = 'public'
         `);
 
-        const functions = functionsRes.rows.map(row => row.routine_name);
+        const functions = functionsRes.rows.map(row => ({
+            name: row.routine_name,
+            args: row.args
+        }));
 
         for (const func of functions) {
-            console.log(`Dropping function: ${func}`);
-            await client.query(`DROP FUNCTION IF EXISTS ${func} CASCADE;`);
+            console.log(`Dropping function: ${func.name}(${func.args})`);
+            await client.query(`DROP FUNCTION IF EXISTS ${func.name}(${func.args}) CASCADE;`);
         }
 
         // Drop all triggers
@@ -85,10 +92,14 @@ const cleanDatabase = async (dryRun: boolean = false) => {
             await client.query(`DROP TRIGGER IF EXISTS ${trigger.name} ON ${trigger.table} CASCADE;`);
         }
 
+        // Recreate the pgcrypto extension
+        console.log('Recreating extension: pgcrypto');
+        await client.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+
         // Commit transaction
         await client.query('COMMIT');
         console.log('Database cleaned successfully!');
-    } catch (error) {
+    }   catch (error) {
         // Rollback transaction in case of error
         await client.query('ROLLBACK');
         console.error('Error cleaning database:', error);
