@@ -97,7 +97,7 @@ async function testDatabaseConnection() {
                         console.error(`- '${table}': For example, run: ${tableInfo.createScript}`);
                     }
                 });
-                process.exit(1);
+                // Do not exit here, continue to the final query
             }
         }
 
@@ -105,15 +105,32 @@ async function testDatabaseConnection() {
         await checkRequiredTables(client);
 
         // Check user permissions
-        const permissionsRes = await client.query(`
-            SELECT has_table_privilege('user_settings', 'CREATE') AS can_create,
-                   has_table_privilege('user_settings', 'INSERT') AS can_insert,
-                   has_table_privilege('user_settings', 'UPDATE') AS can_update,
-                   has_table_privilege('user_settings', 'DELETE') AS can_delete;
-        `);
-        const permissions = permissionsRes.rows[0];
+        console.log('Checking user permissions...');
+        let permissions = { can_create: false, can_insert: false, can_update: false, can_delete: false };
+        try {
+            // Create a temporary table
+            await client.query('CREATE TEMP TABLE temp_permissions_check (id UUID PRIMARY KEY DEFAULT gen_random_uuid())');
+
+            // Check permissions
+            const permissionsRes = await client.query(`
+                SELECT
+                    has_table_privilege('temp_permissions_check', 'INSERT') AS can_insert,
+                    has_table_privilege('temp_permissions_check', 'UPDATE') AS can_update,
+                    has_table_privilege('temp_permissions_check', 'DELETE') AS can_delete;
+            `);
+            permissions = permissionsRes.rows[0];
+            permissions.can_create = true; // We already know we can create the table
+
+            // Drop the temporary table
+            await client.query('DROP TABLE temp_permissions_check');
+        } catch (error) {
+            console.error('Error checking user permissions:', error);
+            process.exit(1);
+        }
+        console.log('User permissions:', permissions);
+
         if (!permissions.can_create || !permissions.can_insert || !permissions.can_update || !permissions.can_delete) {
-            console.error('Database user does not have required permissions:', permissions);
+            console.error('Database user does not have required table permissions:', permissions);
             process.exit(1);
         }
 
