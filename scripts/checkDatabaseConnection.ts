@@ -57,20 +57,52 @@ async function testDatabaseConnection() {
         for (const extension of requiredExtensions) {
             const res = await client.query(`SELECT * FROM pg_extension WHERE extname = '${extension}';`);
             if (res.rows.length === 0) {
-                console.error(`Required extension '${extension}' is not installed`);
+                console.log(`Required extension '${extension}' is not installed. Attempting to install...`);
+                try {
+                    await client.query(`CREATE EXTENSION ${extension};`);
+                    console.log(`Extension '${extension}' installed successfully.`);
+                } catch (error) {
+                    console.error(`Error installing extension '${extension}':`, error);
+                    console.error(`Please ensure you have the necessary permissions to install extensions.`);
+                    process.exit(1);
+                }
+            } else {
+                console.log(`Extension '${extension}' is installed.`);
+            }
+        }
+
+        async function checkRequiredTables(client: Client) {
+            const requiredTables = [
+                { name: 'users', createScript: 'yarn create-users-table' },
+                { name: 'user_settings', createScript: 'yarn create-user-settings-table' },
+                { name: 'tokens_context', createScript: 'yarn create-tokens-context-table' },
+                { name: 'user_tokens', createScript: 'yarn create-tokens-table' },
+            ];
+            const missingTables: string[] = [];
+
+            for (const table of requiredTables) {
+                const res = await client.query(`SELECT EXISTS (SELECT FROM pg_tables WHERE tablename = '${table.name}');`);
+                if (!res.rows[0].exists) {
+                    missingTables.push(table.name);
+                }
+            }
+
+            if (missingTables.length > 0) {
+                console.error('The following required tables do not exist:');
+                console.error('These tables are necessary for the project to function correctly.');
+                console.error('Please run the corresponding scripts to create them.');
+                missingTables.forEach(table => {
+                    const tableInfo = requiredTables.find(t => t.name === table);
+                    if (tableInfo) {
+                        console.error(`- '${table}': For example, run: ${tableInfo.createScript}`);
+                    }
+                });
                 process.exit(1);
             }
         }
 
         // Check required tables
-        const requiredTables = ['users', 'user_tokens', 'tokens_context', 'user_settings'];
-        for (const table of requiredTables) {
-            const res = await client.query(`SELECT EXISTS (SELECT FROM pg_tables WHERE tablename = '${table}');`);
-            if (!res.rows[0].exists) {
-                console.error(`Required table '${table}' does not exist`);
-                process.exit(1);
-            }
-        }
+        await checkRequiredTables(client);
 
         // Check user permissions
         const permissionsRes = await client.query(`
