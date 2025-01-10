@@ -9,81 +9,112 @@ anki-assistant-languages/
 │
 ├── frontend/                         # Frontend application built with React
 │   ├── public/
-│   │   └── assets/                         # Directory for downloadable assets
-│   │       └── AnkiAssistantLanguages.apkg # Anki note type file for importing cards
+│   │   ├── assets/                   # Directory for downloadable assets
+│   │   │   └── AnkiAssistantLanguages.apkg # Anki note type file for importing cards
+│   │   ├── favicon.ico               # Website favicon
+│   │   ├── index.html                # Main HTML template
+│   │   ├── logo192.png               # Application logo (192x192)
+│   │   ├── logo512.png               # Application logo (512x512)
+│   │   ├── manifest.json             # PWA manifest
+│   │   └── robots.txt                # Robots exclusion file
 │   ├── src/
 │   │   ├── components/               # Reusable UI components
-│   │   │   ├── Footer.tsx            # Footer component for the application
-│   │   │   ├── Header.tsx            # Header component for the application
-│   │   │   ├── LanguageSelector.tsx  # Component for selecting native and target languages
-│   │   │   ├── Login.tsx             # Login component for user authentication
-│   │   │   ├── Modal.tsx             # Reusable modal component for displaying information
-│   │   │   └── Notifications.tsx     # Component for displaying notifications to the user
+│   │   │   ├── AuthWrapper.tsx       # Authentication wrapper component
+│   │   │   ├── DialogueModal.tsx     # Modal for displaying generated dialogues
+│   │   │   ├── Footer.tsx            # Footer component
+│   │   │   ├── FrequencyAnalysisModal.tsx # Modal for frequency analysis results
+│   │   │   ├── Header.tsx            # Header component
+│   │   │   ├── LanguageSelector.tsx  # Language selection component
+│   │   │   ├── Login.tsx             # Login form component
+│   │   │   ├── Modal.tsx             # Base modal component
+│   │   │   ├── Notifications.tsx     # Notification system
+│   │   │   ├── Preloader.tsx         # Loading indicator component
+│   │   │   ├── Register.tsx          # User registration form
+│   │   │   └── Stats.tsx             # Statistics display component
 │   │   ├── context/
-│   │   │   └── selectionContext.tsx  # Context API for managing application state (languages, API services, etc.)
-│   │   ├── styles/                   # CSS stylesheets
-│   │   │   ├── App.css               # Styles for the main application
-│   │   │   ├── Login.css             # Styles for the login component
-│   │   │   └── Modal.css             # Styles for the modal component
+│   │   │   └── selectionContext.tsx  # Context API for managing application state
+│   │   ├── styles/                   # Styled-components and CSS modules
+│   │   │   ├── AppStyles.ts          # Main application styles
+│   │   │   ├── ButtonStyles.ts       # Button component styles
+│   │   │   ├── CssVariables.ts       # CSS variables configuration
+│   │   │   ├── FooterStyles.ts       # Footer styles
+│   │   │   ├── GlobalStyles.ts       # Global styles
+│   │   │   ├── HeaderStyles.ts       # Header styles
+│   │   │   ├── LoginStyles.ts        # Login form styles
+│   │   │   └── ModalStyles.ts        # Modal styles
 │   │   ├── utils/                    # Utility functions and modules
-│   │   │   ├── handleAnalyzeFrequency.ts # Function to handle word frequency analysis
-│   │   │   ├── handleGenerateDialogue.ts # Function to handle generating dialogue
-│   │   │   ├── handleSubmit.ts         # Function to handle form submission
-│   │   │   ├── handleTranslation.ts    # Function to handle translation of sentences
-│   │   │   ├── languageCardExporter.ts # Exports language learning data to Anki format
-│   │   │   ├── markdownStripper.ts     # Removes Markdown formatting from text before TTS processing
-│   │   │   ├── Options.ts              # Configuration for available API services, LLM models, and TTS services
-│   │   │   ├── Types.ts                # Type definitions for the project
-│   │   │   ├── useAuth.ts              # Authentication logic and user session management
-│   │   │   └── voiceOptions.ts         # Configuration for available TTS voices
-│   │   └── App.tsx                   # Main React application component
-│   ├── package.json                  # Frontend dependencies (yarn)
-│   ├── tsconfig.json                 # TypeScript configuration
-│   └── ...
+│   │   │   ├── handleAnalyzeFrequency.ts # Word frequency analysis
+│   │   │   ├── handleGenerateDefinitions.ts # Definition generation
+│   │   │   ├── handleGenerateDialogue.ts # Dialogue generation
+│   │   │   ├── handleGenerateSentences.ts # Sentence generation
+│   │   │   ├── handleGenerateTTS.ts  # Text-to-speech generation
+│   │   │   ├── handleSubmit.ts       # Form submission handling
+│   │   │   ├── handleTranslation.ts  # Translation handling
+│   │   │   ├── languageCardExporter.ts # Anki card export
+│   │   │   ├── markdownStripper.ts   # Markdown formatting removal
+│   │   │   ├── Options.ts            # API service configurations
+│   │   │   ├── Types.ts              # Type definitions
+│   │   │   ├── useAuth.ts            # Authentication hooks
+│   │   │   └── voiceOptions.ts       # TTS voice configurations
+│   │   ├── App.tsx                   # Main application component
+│   │   ├── AppInner.tsx              # Inner application layout
+│   │   ├── index.tsx                 # Application entry point
+│   │   └── logo.svg                  # Application logo
+│   ├── package.json                  # Frontend dependencies
+│   └── tsconfig.json                 # TypeScript configuration
 │
-├── scripts/                          # Scripts for development and maintenance
-│   ├── checkDatabaseConnection.ts    # Script to check the database connection
-│   └── createUsersTable.ts           # Script to create the users table in the database
+├── scripts/                          # Database and maintenance scripts
+│   ├── checkDatabaseConnection.ts    # Database connection test
+│   ├── cleanDatabase.ts              # Database cleanup script
+│   ├── createAdminUser.ts            # Admin user creation
+│   ├── createTokensContextTable.ts   # Tokens context table creation
+│   ├── createTokensTable.ts          # Tokens table creation
+│   ├── createUserSettingsTable.ts    # User settings table creation
+│   ├── createUsersTable.ts           # Users table creation
+│   └── README.md                     # Documentation for database scripts
 │
-├── src/                              # Backend application built with Express.js and TypeScript
-│   ├── anthropicClaude.ts            # Handles interactions with the Anthropic Claude API
-│   ├── azureTTS.ts                   # Handles interactions with the Azure Text-to-Speech API
-│   ├── expressServer.ts              # Main Express.js server file
-│   ├── googleCloudTTS.ts             # Handles interactions with the Google Cloud Text-to-Speech API
-│   ├── googleGemini.ts               # Handles interactions with the Google Gemini API
-│   └── openRouter.ts                 # Handles interactions with the OpenRouter API
+├── src/                              # Backend application
+│   ├── middlewares/                  # Express middlewares
+│   │   └── authMiddleware.ts         # Authentication middleware
+│   ├── anthropicClaude.ts            # Anthropic Claude API handler
+│   ├── azureTTS.ts                   # Azure Text-to-Speech handler
+│   ├── expressServer.ts              # Express server configuration
+│   ├── googleCloudTTS.ts             # Google Cloud TTS handler
+│   ├── googleGemini.ts               # Google Gemini API handler
+│   └── openRouter.ts                 # OpenRouter API handler
 │
-├── .env                              # Environment variables (API keys, etc.) - NOT tracked in version control
-├── CONVENTIONS.md                    # Project code conventions
-├── package.json                      # Backend dependencies (yarn)
-├── README.md                         # Project overview and instructions
+├── .env.tmp                          # Environment variables template
+├── .gitignore                        # Git ignore rules
+├── CONVENTIONS.md                    # Code conventions
+├── package.json                      # Backend dependencies
+├── README.md                         # Project documentation
 ├── STRUCTURE.md                      # Project structure documentation
-├── TODO.md                           # Project task tracking list
-├── tsconfig.json                     # TypeScript configuration
-└── ...
+├── TODO.md                           # Task tracking
+└── tsconfig.json                     # TypeScript configuration
 </pre>
 
 ## Environment Variables
 
-The `.env` file contains sensitive information and should **not** be committed to version control.  The following environment variables are expected:
+The `.env` file (created from `.env.tmp`) contains sensitive information and should **not** be committed to version control. Required variables include:
 
-- `ANTHROPIC_CLAUDE_API_KEY`: Anthropic Claude API key.
-- `AZURE_SPEECH_REGION`: Azure Speech Region.
-- `AZURE_SPEECH_RESOURCE_KEY`: Azure Speech Resource Key.
-- `DB_DATABASE`: Name of the PostgreSQL database.
-- `DB_HOST`: Host address for the PostgreSQL database.
-- `DB_PASSWORD`: Password for the PostgreSQL database.
-- `DB_PORT`: Port number for the PostgreSQL database.
-- `DB_USER`: Username for the PostgreSQL database.
-- `GOOGLE_CLOUD_TTS_API_KEY`: Google Cloud Text-to-Speech API key.
-- `GOOGLE_GEMINI_API_KEY`: Google Cloud Gemini API Key.
-- `OPENROUTER_API_KEY`: OpenRouter API Key.
-- `OPENROUTER_YOUR_SITE_NAME`: OpenRouter Name of your site.
-- `OPENROUTER_YOUR_SITE_URL`: OpenRouter URL of your site.
+- `ANTHROPIC_CLAUDE_API_KEY`: Anthropic Claude API key
+- `AZURE_SPEECH_REGION`: Azure Speech Region
+- `AZURE_SPEECH_RESOURCE_KEY`: Azure Speech Resource Key
+- `DB_DATABASE`: PostgreSQL database name
+- `DB_HOST`: Database host address
+- `DB_PASSWORD`: Database password
+- `DB_PORT`: Database port
+- `DB_USER`: Database username
+- `GOOGLE_CLOUD_TTS_API_KEY`: Google Cloud TTS API key
+- `GOOGLE_GEMINI_API_KEY`: Google Gemini API key
+- `OPENROUTER_API_KEY`: OpenRouter API key
+- `OPENROUTER_YOUR_SITE_NAME`: OpenRouter site name
+- `OPENROUTER_YOUR_SITE_URL`: OpenRouter site URL
 
 ## Notes
 
-- **README.md**: The main documentation file for the project, providing an overview, setup instructions, and usage details.
-- **scripts/checkDatabaseConnection.ts**: A script to test the connection to the PostgreSQL database using the environment variables.
-- **scripts/createUsersTable.ts**: A script to create the users table in the database.
-- **todoList.md**: A list of tasks and features to be implemented in the project.
+- **Frontend**: Built with React using functional components and hooks. Uses Context API for state management and styled-components for styling.
+- **Backend**: Built with Express.js and TypeScript. Includes handlers for multiple AI APIs and TTS services.
+- **Database**: PostgreSQL with scripts for table creation and maintenance.
+- **Testing**: Follows the conventions outlined in CONVENTIONS.md for unit and integration tests.
+- **Documentation**: Maintained through README.md, CONVENTIONS.md, and STRUCTURE.md files.
