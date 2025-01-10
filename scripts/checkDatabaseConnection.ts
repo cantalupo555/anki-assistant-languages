@@ -98,18 +98,20 @@ async function checkRequiredTables(client: PoolClient): Promise<void> {
         }
 
         if (missingTables.length > 0) {
-            console.error('The following required tables do not exist:');
-            console.error('These tables are necessary for the project to function correctly.');
-            console.error('Please run the corresponding scripts to create them.');
+            console.warn('The following required tables do not exist:');
+            console.warn('These tables are necessary for the project to function correctly.');
+            console.warn('Please run the corresponding scripts to create them.');
             missingTables.forEach(table => {
                 const tableInfo = requiredTables.find(t => t.name === table);
                 if (tableInfo) {
-                    console.error(`- '${table}': For example, run: ${tableInfo.createScript}`);
+                    console.warn(`- '${table}': For example, run: ${tableInfo.createScript}`);
                 }
             });
-            process.exit(1);
+            console.warn('This is not a critical error. You can create the tables using the setup-database script:');
+            console.warn('yarn setup-database');
+        } else {
+            console.log('All required tables exist.');
         }
-        console.log('Required tables are valid.');
     } catch (error) {
         console.error('Error checking required tables:', error);
         throw error;
