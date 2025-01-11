@@ -194,15 +194,26 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = await pool.query(
-            'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email',
-            [username, email, hashedPassword]
+            `INSERT INTO users 
+            (username, email, password_hash, status, role) 
+            VALUES ($1, $2, $3, $4, $5) 
+            RETURNING id, username, email, status, role`,
+            [username, email, hashedPassword, 'active', 'user']
         );
+        
         const token = jwt.sign({ userId: newUser.rows[0].id }, JWT_SECRET, { expiresIn: '1h' });
-        res.status(201).json({ message: 'User registered successfully', token });
+        res.status(201).json({ 
+            message: 'User registered successfully', 
+            token,
+            user: newUser.rows[0]
+        });
     } catch (error) {
         console.error('Error registering user:', error);
         const errorMessage = error instanceof Error ? error.message : 'Error registering user';
-        res.status(500).json({ error: errorMessage });
+        res.status(500).json({ 
+            error: errorMessage,
+            details: error instanceof Error ? error.stack : undefined
+        });
     }
 });
 

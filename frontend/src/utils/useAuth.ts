@@ -50,24 +50,33 @@ const useAuth = () => {
     // Function to handle registration
     const handleRegister = async (username: string, email: string, password: string) => {
         try {
-            // Send a POST request to the backend to register the user
             const response = await fetch(`${BACKEND_API_URL}/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, email, password }),
+                body: JSON.stringify({ 
+                    username, 
+                    email, 
+                    password,
+                    status: 'active', // Adding default status
+                    role: 'user'      // Adding default role
+                }),
             });
 
             if (response.ok) {
-                // Registration successful, you might want to automatically log the user in
-                handleLogin(username, password);
-            } else {
-                console.error('Registration failed');
-                // Handle registration error (e.g., display error message)
-            }
+                 const data = await response.json();
+                 setIsAuthenticated(true);
+                 localStorage.setItem('isAuthenticated', 'true');
+                 localStorage.setItem('token', data.token);
+                 await fetchUser();
+             } else {
+                 const errorData = await response.json();
+                 throw new Error(errorData.error || 'Registration failed');
+             }
         } catch (error) {
             console.error('Error during registration:', error);
+            throw error;
         }
     };
 
