@@ -178,18 +178,26 @@ const createTokensContextTableMain = async () => {
     }
 };
 
-// Interactive confirmation
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-});
+// Check for non-interactive flag
+const nonInteractive = process.argv.includes('--non-interactive');
 
-rl.question('Are you sure you want to create the tokens_context table? (yes/no) ', (answer) => {
-    if (answer.toLowerCase() === 'yes') {
-        createTokensContextTableMain();
-    } else {
-        console.log('Operation cancelled.');
-        process.exit(0);
-    }
-    rl.close();
-});
+if (nonInteractive) {
+    // Run directly without confirmation
+    createTokensContextTableMain();
+} else {
+    // Interactive confirmation
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    rl.question('Are you sure you want to create the tokens_context table? (yes/no) ', (answer) => {
+        if (answer.toLowerCase() === 'yes') {
+            createTokensContextTableMain();
+        } else {
+            console.log('Operation cancelled.');
+            process.exit(0);
+        }
+        rl.close();
+    });
+}

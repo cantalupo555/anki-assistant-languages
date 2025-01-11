@@ -2,9 +2,11 @@
 // Pool: Manages database connections
 // dotenv: Loads environment variables from a .env file
 // bcrypt: For password hashing and security
+// readline: Enables interactive command-line input
 import { Pool, PoolClient } from 'pg';
 import * as dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import * as readline from 'readline';
 
 // Load environment variables
 dotenv.config();
@@ -116,5 +118,26 @@ const createAdminUser = async () => {
     }
 };
 
-// Execute the function
-createAdminUser();
+// Check for non-interactive flag
+const nonInteractive = process.argv.includes('--non-interactive');
+
+if (nonInteractive) {
+    // Run directly without confirmation
+    createAdminUser();
+} else {
+    // Interactive confirmation
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    rl.question('Are you sure you want to create the admin user? (yes/no) ', (answer) => {
+        if (answer.toLowerCase() === 'yes') {
+            createAdminUser();
+        } else {
+            console.log('Operation cancelled.');
+            process.exit(0);
+        }
+        rl.close();
+    });
+}

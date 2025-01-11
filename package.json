@@ -6,6 +6,7 @@
     "start": "tsx src/expressServer.ts",
     "dev": "tsx watch src/expressServer.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "setup-database": "tsx scripts/setupDatabase.ts",
     "check-db-connection": "tsx scripts/checkDatabaseConnection.ts",
     "create-users-table": "tsx scripts/createUsersTable.ts",
     "create-user-settings-table": "tsx scripts/createUserSettingsTable.ts",
