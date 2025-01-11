@@ -2,6 +2,30 @@
 
 This directory contains scripts to configure and initialize the project's database. Below is a description of each script and the correct execution order.
 
+## Table of Contents
+1. [Quick Start](#quick-start)
+2. [Available Scripts](#available-scripts)
+3. [Script Dependencies](#script-dependencies)
+4. [Script Options](#script-options)
+5. [CI/CD Note](#cicd-note)
+6. [Required Environment Variables](#required-environment-variables)
+7. [Usage Examples](#usage-examples)
+8. [Dependencies](#dependencies)
+9. [Troubleshooting](#troubleshooting)
+10. [Best Practices](#best-practices)
+11. [Security Considerations](#security-considerations)
+
+---
+
+## Quick Start
+
+To set up the database with default configurations, run:
+```bash
+yarn setup-database
+```
+
+This will execute all required scripts in the correct order without requiring manual confirmation.
+
 ---
 
 ## Available Scripts
@@ -90,56 +114,72 @@ This directory contains scripts to configure and initialize the project's databa
 
 ---
 
-## Recommended Execution Order
+## Script Dependencies
 
-Run the scripts in the following order:
+```plaintext
+check-db-connection
+       ↓
+create-users-table
+       ↓
+create-user-settings-table
+       ↓
+create-tokens-context-table
+       ↓
+create-tokens-table
+       ↓
+create-admin-user
+```
 
-1. **`check-db-connection`**: Verifies the database connection before proceeding with any operations.
-   ```bash
-   yarn check-db-connection
-   ```
+- **Independent Scripts**: `clean-database`, `setup-database`
 
-2. **`create-users-table`**: Creates the `users` table, which is the foundation for all other tables.
-   ```bash
-   yarn create-users-table
-   ```
+---
 
-3. **`create-user-settings-table`**: Creates the `user_settings` table, which depends only on the `users` table.
-   ```bash
-   yarn create-user-settings-table
-   ```
+## Script Options
 
-4. **`create-tokens-context-table`**: Creates the `tokens_context` table, which depends only on the `users` table.
-   ```bash
-   yarn create-tokens-context-table
-   ```
+### Non-Interactive Mode (`--non-interactive`)
+- **Purpose**: Automates script execution without requiring user confirmation.
+- **Use Case**: Ideal for CI/CD pipelines or automated environments.
+- **Example**:
+  ```bash
+  yarn create-users-table --non-interactive
+  ```
 
-5. **`create-tokens-table`**: Creates the `user_tokens` table, which depends on the `users` and `tokens_context` tables.
-   ```bash
-   yarn create-tokens-table
-   ```
+### Dry-Run Mode (`--dry-run`)
+- **Purpose**: Simulates script execution without making changes to the database.
+- **Use Case**: Useful for testing or verifying what changes would be made.
+- **Example**:
+  ```bash
+  yarn clean-database --dry-run
+  ```
 
-6. **`create-admin-user`**: Creates the default admin user, which depends on the `users` table.
-   ```bash
-   yarn create-admin-user
-   ```
+---
 
-7. **`clean-database`**: Use this script to reset the database during development. **Use with caution!**
-   ```bash
-   yarn clean-database
-   ```
+## CI/CD Note
 
-8. **`setup-database`**: Automates the complete setup process by running all scripts in the correct order.
-   ```bash
-   yarn setup-database
-   ```
+The `setupDatabase.ts` script is already prepared to run in CI/CD pipelines. 
+Just ensure that the necessary environment variables are configured in the CI/CD environment.
 
-For automated environments (CI/CD), use the `--non-interactive` flag:
+## Required Environment Variables
+
+Make sure to configure the following environment variables before running any script:
+
+- `DB_USER`
+- `DB_HOST`
+- `DB_DATABASE`
+- `DB_PASSWORD`
+- `DB_PORT`
+
+## Usage Examples
+
+### Manual Execution
+```bash
+yarn setup-database
+```
+
+### CI/CD Execution
 ```bash
 yarn setup-database --non-interactive
 ```
-
-After execution, you can use the `check-db-connection` script again to validate if everything was set up correctly.
 
 ---
 
@@ -152,6 +192,20 @@ Make sure to configure the following environment variables in the `.env` file be
 - `DB_DATABASE`: Database name.
 - `DB_PASSWORD`: Database password.
 - `DB_PORT`: Database port (default: `5432`).
+
+### Environment Variables Template
+
+Create a `.env` file from the following template:
+
+```env
+DB_USER=your_db_user
+DB_HOST=localhost
+DB_DATABASE=your_db_name
+DB_PASSWORD=your_db_password
+DB_PORT=5432
+```
+
+Ensure this file is not committed to version control by adding it to `.gitignore`.
 
 ---
 
@@ -176,12 +230,43 @@ Make sure to configure the following environment variables in the `.env` file be
 
 ---
 
-## Notes
+## Troubleshooting
 
-- **Production Environment**: In production, consider securing the admin user credentials and avoiding automatic execution of the `createAdminUser.ts` and `cleanDatabase.ts` scripts.
-- **Logs**: The admin user credentials are displayed in the log after running the `createAdminUser.ts` script. Make sure to log this information in a secure location.
-- **Clean Database**: Use the `cleanDatabase.ts` script only during development. It is a destructive operation and should not be used in production.
-- **Non-Interactive Mode**: Use the `--non-interactive` flag when running scripts in automated environments (CI/CD) to avoid confirmation prompts.
+### Database Connection Issues
+- **Error**: `Error: Connection refused`
+  - **Solution**: Verify that the database is running and that the connection details in `.env` are correct.
+
+### Missing Tables or Extensions
+- **Error**: `Error: relation "users" does not exist`
+  - **Solution**: Ensure the required tables are created by running the setup script:
+    ```bash
+    yarn setup-database
+    ```
+
+### Permission Denied Errors
+- **Error**: `Error: permission denied for table users`
+  - **Solution**: Verify that the database user has the necessary permissions (CREATE, INSERT, UPDATE, DELETE).
+
+---
+
+## Best Practices
+- **Environment Variables**: Always store sensitive information (e.g., database credentials) in `.env` files and ensure they are not committed to version control.
+- **Backups**: Before running destructive operations (e.g., `clean-database`), ensure you have a recent backup of your database.
+- **Testing**: Use the `--dry-run` flag to test scripts before executing them in production environments.
+- **Documentation**: Keep the README.md updated with any changes to the database schema or scripts.
+- **Version Control**: Commit database schema changes along with the corresponding code changes.
+
+## Security Considerations
+- **Admin User**: 
+  - Change the default admin credentials after initial setup
+  - Use strong, randomly generated passwords
+  - Enable two-factor authentication if possible
+- **Production Environment**: 
+  - Avoid running `clean-database` or `create-admin-user` in production unless absolutely necessary
+  - Restrict database access to only necessary IPs and users
+  - Regularly rotate database credentials
+  - Use SSL/TLS for database connections
+  - Implement proper user role permissions
 
 ---
 
