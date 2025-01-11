@@ -13,6 +13,8 @@ This directory contains scripts to configure and initialize the project's databa
   ```bash
   yarn check-db-connection
   ```
+- **Options**:
+  - `--non-interactive`: Runs without confirmation prompts
 
 ### 2. `createUsersTable.ts`
 - **Description**: Creates the `users` table and configures related indexes, triggers, and functions.
@@ -21,6 +23,8 @@ This directory contains scripts to configure and initialize the project's databa
   ```bash
   yarn create-users-table
   ```
+- **Options**:
+  - `--non-interactive`: Runs without confirmation prompts
 
 ### 3. `createUserSettingsTable.ts`
 - **Description**: Creates the `user_settings` table and configures indexes, triggers, and related functions.
@@ -29,6 +33,8 @@ This directory contains scripts to configure and initialize the project's databa
   ```bash
   yarn create-user-settings-table
   ```
+- **Options**:
+  - `--non-interactive`: Runs without confirmation prompts
 
 ### 4. `createTokensContextTable.ts`
 - **Description**: Creates the `tokens_context` table and configures indexes.
@@ -37,6 +43,8 @@ This directory contains scripts to configure and initialize the project's databa
   ```bash
   yarn create-tokens-context-table
   ```
+- **Options**:
+  - `--non-interactive`: Runs without confirmation prompts
 
 ### 5. `createTokensTable.ts`
 - **Description**: Creates the `user_tokens` table and configures indexes and foreign keys.
@@ -45,6 +53,8 @@ This directory contains scripts to configure and initialize the project's databa
   ```bash
   yarn create-tokens-table
   ```
+- **Options**:
+  - `--non-interactive`: Runs without confirmation prompts
 
 ### 6. `createAdminUser.ts`
 - **Description**: Creates the default admin user with random credentials.
@@ -53,6 +63,8 @@ This directory contains scripts to configure and initialize the project's databa
   ```bash
   yarn create-admin-user
   ```
+- **Options**:
+  - `--non-interactive`: Runs without confirmation prompts
 
 ### 7. `cleanDatabase.ts`
 - **Description**: Cleans the database by dropping all tables, functions, and triggers. Includes a dry-run mode for safety checks.
@@ -61,11 +73,20 @@ This directory contains scripts to configure and initialize the project's databa
   ```bash
   yarn clean-database
   ```
-  - **Dry-Run Mode**: Use the `--dry-run` flag to list what would be cleaned without executing the operations.
-    ```bash
-    yarn clean-database --dry-run
-    ```
-  - **Safety**: Prevents execution in production environments.
+- **Options**:
+  - `--dry-run`: Lists what would be cleaned without executing the operations
+  - `--non-interactive`: Runs without confirmation prompts
+- **Safety**: Prevents execution in production environments
+
+### 8. `setupDatabase.ts`
+- **Description**: Automates the complete database setup process by running all required scripts in the correct order.
+- **Dependencies**: None.
+- **Command**:
+  ```bash
+  yarn setup-database
+  ```
+- **Options**:
+  - `--non-interactive`: Runs all scripts without confirmation prompts
 
 ---
 
@@ -107,6 +128,16 @@ Run the scripts in the following order:
    ```bash
    yarn clean-database
    ```
+
+8. **`setup-database`**: Automates the complete setup process by running all scripts in the correct order.
+   ```bash
+   yarn setup-database
+   ```
+
+For automated environments (CI/CD), use the `--non-interactive` flag:
+```bash
+yarn setup-database --non-interactive
+```
 
 After execution, you can use the `check-db-connection` script again to validate if everything was set up correctly.
 
@@ -150,6 +181,7 @@ Make sure to configure the following environment variables in the `.env` file be
 - **Production Environment**: In production, consider securing the admin user credentials and avoiding automatic execution of the `createAdminUser.ts` and `cleanDatabase.ts` scripts.
 - **Logs**: The admin user credentials are displayed in the log after running the `createAdminUser.ts` script. Make sure to log this information in a secure location.
 - **Clean Database**: Use the `cleanDatabase.ts` script only during development. It is a destructive operation and should not be used in production.
+- **Non-Interactive Mode**: Use the `--non-interactive` flag when running scripts in automated environments (CI/CD) to avoid confirmation prompts.
 
 ---
 
