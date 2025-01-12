@@ -1,51 +1,133 @@
-// Import necessary modules from the 'express' library for handling requests, responses, and middleware
+// Import necessary dependencies and utility functions
 import { Request, Response, NextFunction } from 'express';
-// Import the 'jsonwebtoken' library for handling JSON Web Tokens (JWT)
 import jwt from 'jsonwebtoken';
+import { Pool } from 'pg';
 
-// Get the JWT secret key from environment variables
+// PostgreSQL pool configuration
+const pool = new Pool({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_DATABASE,
+    password: process.env.DB_PASSWORD,
+    port: parseInt(process.env.DB_PORT || '5432'),
+});
+
 const JWT_SECRET = process.env.JWT_SECRET;
-
-// Check if the JWT_SECRET environment variable is set
 if (!JWT_SECRET) {
-    // If not set, log an error message and exit the process
-    console.error('JWT_SECRET environment variable is not set. Exiting.');
+    console.error('JWT_SECRET environment variable not configured. Exiting.');
     process.exit(1);
 }
 
+interface JwtPayload {
+    userId: string;
+    role: string;
+}
+
 /**
- * Middleware function to authenticate requests using JWT.
- *
- * This middleware checks for a valid JWT in the Authorization header of the request.
- * If a valid token is found, it adds the user information to the request object.
- * If the token is missing or invalid, it sends an appropriate error response.
- *
- * @param {Request} req - The Express request object.
- * @param {Response} res - The Express response object.
- * @param {NextFunction} next - The next middleware function in the stack.
+ * Middleware to authenticate JWT tokens
+ * 
+ * This middleware:
+ * 1. Extracts the token from the Authorization header
+ * 2. Verifies the token using the JWT_SECRET
+ * 3. Checks for required token payload (userId and role)
+ * 4. Validates the user role against allowed roles
+ * 5. Attaches user information to the request object
+ * 
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Next middleware function
  */
 export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-    // Get the authorization header from the request
+    // Extract token from Authorization header (format: Bearer <token>)
     const authHeader = req.headers['authorization'];
-    // Extract the token from the authorization header (format: "Bearer <token>")
     const token = authHeader && authHeader.split(' ')[1];
 
-    // If no token is found, send a 401 Unauthorized response
-    if (token == null) {
-        res.sendStatus(401);
-        return;
+    // Return 401 if no token is provided
+    if (!token) {
+        return res.status(401).json({ error: 'Authentication token not provided' });
     }
 
-    // Verify the token using the JWT secret key
-    jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-        // If the token is invalid, send a 403 Forbidden response
+    // Verify the JWT token
+    jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
+        // Handle invalid or expired tokens
         if (err) {
-            res.sendStatus(403);
-            return;
+            return res.status(403).json({ error: 'Invalid or expired token' });
         }
-        // If the token is valid, add the user information to the request object
-        (req as any).user = user;
-        // Call the next middleware function in the stack
+
+        // Validate token payload structure
+        if (!decoded.userId || !decoded.role) {
+            return res.status(403).json({ error: 'Malformed token' });
+        }
+
+        // Attach user information to request object
+        (req as any).user = {
+            userId: decoded.userId,
+            role: decoded.role
+        };
+
+        // Validate user role against allowed roles
+        const allowedRoles = ['user', 'admin'];
+        if (!allowedRoles.includes(decoded.role)) {
+            return res.status(403).json({ error: 'Unauthorized access' });
+        }
+
+        // Proceed to next middleware/route handler
         next();
     });
+};
+
+/**
+ * Middleware to restrict access to admin users only
+ * 
+ * This middleware:
+ * 1. Checks if the authenticated user has the 'admin' role
+ * 2. Returns 403 Forbidden if user is not an admin
+ * 
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Next middleware function
+ */
+export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as any).user;
+    
+    // Check if user has admin role
+    if (user?.role !== 'admin') {
+        return res.status(403).json({ error: 'Access restricted to administrators' });
+    }
+    
+    // Proceed to next middleware/route handler
+    next();
+};
+
+/**
+ * Middleware to verify if user account is active
+ * 
+ * This middleware:
+ * 1. Checks the user's status in the database
+ * 2. Returns 403 Forbidden if user is not active
+ * 3. Handles database errors appropriately
+ * 
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Next middleware function
+ */
+export const isActiveUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = (req as any).user.userId;
+        
+        // Query database for user status
+        const user = await pool.query('SELECT status FROM users WHERE id = $1', [userId]);
+
+        // Check if user exists and is active
+        if (user.rows.length === 0 || user.rows[0].status !== 'active') {
+            return res.status(403).json({ error: 'Inactive user or user not found' });
+        }
+
+        // Proceed to next middleware/route handler
+        next();
+    } catch (error) {
+        // Handle database errors
+        console.error('Error verifying user status:', error);
+        res.status(500).json({ error: 'Error verifying user status' });
+    }
 };

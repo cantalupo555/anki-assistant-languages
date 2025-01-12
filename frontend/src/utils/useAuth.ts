@@ -16,32 +16,46 @@ const useAuth = () => {
     // Function to handle login
     const handleLogin = async (username: string, password: string) => {
         try {
-            // Send a POST request to the backend to login the user
             const response = await fetch(`${BACKEND_API_URL}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ 
+                    username, 
+                    password 
+                }),
             });
 
             if (response.ok) {
                 const data = await response.json();
-                setIsAuthenticated(true); // Set the authentication status to true
-                localStorage.setItem('isAuthenticated', 'true'); // Store the authentication state in localStorage
-                localStorage.setItem('token', data.token); // Store the token in localStorage
-                await fetchUser(); // Fetch user data after login
+                setIsAuthenticated(true);
+                
+                // Store authentication information
+                localStorage.setItem('isAuthenticated', 'true');
+                localStorage.setItem('token', data.token);
+                
+                // Store user information
+                localStorage.setItem('user', JSON.stringify({
+                    id: data.user.id,
+                    username: data.user.username,
+                    email: data.user.email,
+                    role: data.user.role,
+                    status: data.user.status
+                }));
+
+                await fetchUser();
             } else {
-                console.error('Login failed');
-                setIsAuthenticated(false);
-                localStorage.removeItem('isAuthenticated');
-                localStorage.removeItem('token');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Credenciais inválidas');
             }
         } catch (error) {
-            console.error('Error during login:', error);
+            console.error('Erro durante o login:', error);
             setIsAuthenticated(false);
             localStorage.removeItem('isAuthenticated');
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            throw error;
         } finally {
             setIsCheckingAuth(false);
         }

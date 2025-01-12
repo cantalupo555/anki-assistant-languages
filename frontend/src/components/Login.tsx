@@ -14,35 +14,52 @@ const Login: React.FC<LoginProps & { onRegisterClick: () => void }> = ({ onLogin
     // Function to handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Validate the username and password inputs
+        
+        // Basic field validation
         if (!username || !password) {
-            setError('Please fill in both username and password.'); // Set an error message if inputs are empty
+            setError('Please fill in both username and password fields.');
             return;
         }
 
         try {
-            // Send a POST request to the backend to login the user
-            const response = await fetch('http://localhost:5000/login', { // Use the correct backend URL
-                method: 'POST',
+            // Make a POST request to the login endpoint
+            const response = await fetch('http://localhost:5000/login', {
+                method: 'POST', // Use POST method for login
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json', // Set content type to JSON
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ 
+                    username, // Send username from form
+                    password  // Send password from form
+                }),
             });
 
             if (response.ok) {
                 const data = await response.json();
-                // Call the onLogin function passed as a prop with the username and password
+                
+                // Store authentication information
+                localStorage.setItem('isAuthenticated', 'true');
+                localStorage.setItem('token', data.token);
+                
+                // Store user information
+                localStorage.setItem('user', JSON.stringify({
+                    id: data.user.id,
+                    username: data.user.username,
+                    email: data.user.email,
+                    role: data.user.role,
+                    status: data.user.status
+                }));
+
+                // Call login function with required information
                 onLogin(username, password);
-                localStorage.setItem('isAuthenticated', 'true'); // Store the authentication state in localStorage
-                localStorage.setItem('token', data.token); // Store the token in localStorage
+                
             } else {
                 const errorData = await response.json();
-                setError(errorData.error || 'Login failed. Please try again.'); // Set an error message if login fails
+                setError(errorData.error || 'Login failed. Please check your credentials.');
             }
         } catch (error) {
             console.error('Error during login:', error);
-            setError('Login failed. Please try again.'); // Set a generic error message if an error occurs
+            setError('An error occurred during login. Please try again.');
         }
     };
 

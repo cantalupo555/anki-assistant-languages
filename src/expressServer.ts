@@ -221,21 +221,53 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
 app.post('/login', async (req: Request, res: Response): Promise<void> => {
     try {
         const { username, password } = req.body;
-        const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        
+        // Fetch user including status and role
+        const user = await pool.query(
+            'SELECT id, username, email, password_hash, status, role FROM users WHERE username = $1', 
+            [username]
+        );
+
         if (user.rows.length === 0) {
-            res.status(401).json({ error: 'Invalid credentials' });
+            res.status(401).json({ error: 'Credenciais inválidas' });
             return;
         }
-        const passwordMatch = await bcrypt.compare(password, user.rows[0].password_hash);
+
+        const userData = user.rows[0];
+
+        // Verify user status
+        if (userData.status !== 'active') {
+            res.status(403).json({ error: 'Sua conta está inativa' });
+            return;
+        }
+
+        // Verify password
+        const passwordMatch = await bcrypt.compare(password, userData.password_hash);
         if (!passwordMatch) {
-            res.status(401).json({ error: 'Invalid credentials' });
+            res.status(401).json({ error: 'Credenciais inválidas' });
             return;
         }
-        const token = jwt.sign({ userId: user.rows[0].id }, JWT_SECRET, { expiresIn: '1h' });
-        res.status(200).json({ message: 'Login successful', token });
+
+        // Generate JWT token with user information
+        const token = jwt.sign({ 
+            userId: userData.id,
+            role: userData.role
+        }, JWT_SECRET, { expiresIn: '1h' });
+
+        res.status(200).json({ 
+            message: 'Login bem-sucedido',
+            token,
+            user: {
+                id: userData.id,
+                username: userData.username,
+                email: userData.email,
+                role: userData.role,
+                status: userData.status
+            }
+        });
     } catch (error) {
-        console.error('Error logging in:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Error logging in';
+        console.error('Erro durante o login:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Erro durante o login';
         res.status(500).json({ error: errorMessage });
     }
 });
