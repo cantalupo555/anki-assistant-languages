@@ -69,7 +69,13 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
             onRegister(username, email, password);
         } catch (error: any) {
             console.error('Error during registration:', error);
-            setError(error.message || 'Registration failed. Please try again.');
+            if (error.code === 'USER_INACTIVE') {
+                setError('Your account is inactive. Please contact support.');
+            } else if (error.code === 'USER_NOT_FOUND') {
+                setError('Account not found. Please check your credentials.');
+            } else {
+                setError(error.message || 'Registration failed. Please try again.');
+            }
         }
     };
 

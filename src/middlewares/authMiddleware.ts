@@ -116,18 +116,36 @@ export const isActiveUser = async (req: Request, res: Response, next: NextFuncti
         const userId = (req as any).user.userId;
         
         // Query database for user status
-        const user = await pool.query('SELECT status FROM users WHERE id = $1', [userId]);
+        const user = await pool.query(
+            'SELECT id, status FROM users WHERE id = $1', 
+            [userId]
+        );
 
-        // Check if user exists and is active
-        if (user.rows.length === 0 || user.rows[0].status !== 'active') {
-            return res.status(403).json({ error: 'Inactive user or user not found' });
+        // Check if user exists
+        if (user.rows.length === 0) {
+            return res.status(404).json({ 
+                error: 'User not found',
+                code: 'USER_NOT_FOUND'
+            });
         }
 
-        // Proceed to next middleware/route handler
+        // Check if user is active
+        if (user.rows[0].status !== 'active') {
+            return res.status(403).json({ 
+                error: 'Your account is inactive. Please contact support.',
+                code: 'USER_INACTIVE'
+            });
+        }
+
+        // Attach user ID to request for easier access in routes
+        (req as any).userId = user.rows[0].id;
+
         next();
     } catch (error) {
-        // Handle database errors
         console.error('Error verifying user status:', error);
-        res.status(500).json({ error: 'Error verifying user status' });
+        res.status(500).json({ 
+            error: 'Internal server error while verifying account status',
+            code: 'SERVER_ERROR'
+        });
     }
 };

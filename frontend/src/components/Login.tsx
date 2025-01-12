@@ -55,7 +55,13 @@ const Login: React.FC<LoginProps & { onRegisterClick: () => void }> = ({ onLogin
                 
             } else {
                 const errorData = await response.json();
-                setError(errorData.error || 'Login failed. Please check your credentials.');
+                if (errorData.code === 'USER_INACTIVE') {
+                    setError('Your account is inactive. Please contact support.');
+                } else if (errorData.code === 'USER_NOT_FOUND') {
+                    setError('Account not found. Please check your credentials.');
+                } else {
+                    setError(errorData.error || 'Login failed. Please check your credentials.');
+                }
             }
         } catch (error) {
             console.error('Error during login:', error);
