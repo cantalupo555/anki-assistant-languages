@@ -1,6 +1,7 @@
-// Import necessary libraries
-// React: Core library for building user interfaces
+// Import necessary React components
 import React from 'react';
+
+// Import internal context
 import { useAppContext } from '../context/selectionContext';
 
 // Interface to define the props for the LanguageSelector component

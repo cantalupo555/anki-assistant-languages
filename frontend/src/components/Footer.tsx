@@ -1,4 +1,7 @@
+// Import necessary React components
 import React from 'react';
+
+// Import styled components
 import * as S from '../styles/FooterStyles';
 
 const Footer: React.FC = () => {

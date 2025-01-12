@@ -1,10 +1,10 @@
 // Import necessary React hooks and components
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 // Import internal components
-import AuthWrapper from './components/AuthWrapper';
 import AppInner from './AppInner';
+import AuthWrapper from './components/AuthWrapper';
 import UserSettings from './components/UserSettings';
 import { AppProvider } from './context/selectionContext';
 

@@ -1,8 +1,13 @@
+// Import necessary React hooks and components
 import React from 'react';
 import { Link } from 'react-router-dom';
-import useAuth from '../utils/useAuth';
+
+// Import styled components
 import * as S from '../styles/HeaderStyles';
-import { LogoutButton, HomeButton } from '../styles/ButtonStyles';
+import { HomeButton, LogoutButton } from '../styles/ButtonStyles';
+
+// Import internal utility functions
+import useAuth from '../utils/useAuth';
 
 // Define the Header component
 const Header: React.FC = () => {

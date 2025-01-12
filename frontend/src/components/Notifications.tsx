@@ -1,3 +1,4 @@
+// Import necessary React components
 import React from 'react';
 
 // Define the props interface for the Notifications component

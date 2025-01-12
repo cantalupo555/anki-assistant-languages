@@ -1,4 +1,7 @@
+// Import necessary React hooks and components
 import React, { useEffect, useState } from 'react';
+
+// Import styled components
 import styled, { keyframes } from 'styled-components';
 
 const spin = keyframes`

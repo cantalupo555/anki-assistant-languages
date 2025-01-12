@@ -1,12 +1,11 @@
 // Import necessary libraries
-// React: Core library for building user interfaces
-// createContext: Function to create a context object for state management
-// useState: Hook to add state to functional components
-// useEffect: Hook to perform side effects in functional components
-// useContext: Hook to consume a context within a functional component
 import React, { createContext, useState, useEffect, useContext } from 'react';
+
+// Import type definitions
 import { APIServiceOption, TTSOption, VoiceOption, LLMOption, TokenCount } from '../utils/Types';
-import { voiceOptions } from '../utils/voiceOptions'; // Import the voiceOptions array
+
+// Import internal utility functions
+import { voiceOptions } from '../utils/voiceOptions';
 
 // Define the shape of the context
 interface AppContextType {

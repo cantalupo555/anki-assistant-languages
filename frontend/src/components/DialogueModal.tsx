@@ -1,11 +1,13 @@
-// Import necessary libraries
-// React: Core library for building user interfaces
+// Import necessary React components
 import React from 'react';
-// Modal: Reusable modal component
+
+// Import internal components
 import Modal from './Modal';
-// ReactMarkdown: Component to render Markdown as React components
+
+// Import external libraries
 import ReactMarkdown from 'react-markdown';
-// TokenCount: Type definition for token count data
+
+// Import type definitions
 import { TokenCount } from '../utils/Types';
 
 // Define the props for the DialogueModal component

@@ -1,8 +1,11 @@
-// Import necessary libraries
-// React: Core library for building user interfaces
+// Import necessary React components
 import React from 'react';
+
+// Import styled components
 import * as S from '../styles/ModalStyles';
 import { ModalCloseButton } from '../styles/ButtonStyles';
+
+// Import type definitions
 import { ModalProps } from '../utils/Types';
 
 // Define the Modal component

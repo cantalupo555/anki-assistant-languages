@@ -1,5 +1,5 @@
 // Import necessary dependencies and utility functions
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
 

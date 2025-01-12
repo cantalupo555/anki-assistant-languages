@@ -1,6 +1,4 @@
 // Import necessary modules and dependencies
-// React: Core library for building user interfaces
-// useState: React hook for managing state
 import React, { useState } from 'react';
 
 // Style imports

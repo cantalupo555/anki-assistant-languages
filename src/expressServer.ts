@@ -1,16 +1,24 @@
 // Import necessary dependencies and utility functions
-import express, { Request, Response, NextFunction } from 'express';
-import cors from 'cors';
 import bcrypt from 'bcrypt';
+import cors from 'cors';
+import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
-import { TokenCount } from '../frontend/src/utils/Types';
-import { getDefinitionsAnthropicClaude, getSentencesAnthropicClaude, translateSentenceAnthropicClaude, getDialogueAnthropicClaude, analyzeFrequencyAnthropicClaude } from './anthropicClaude';
-import { getDefinitionsGoogleGemini, getSentencesGoogleGemini, translateSentenceGoogleGemini, getDialogueGoogleGemini, analyzeFrequencyGoogleGemini } from './googleGemini';
-import { getDefinitionsOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter, getDialogueOpenRouter, analyzeFrequencyOpenRouter } from './openRouter';
-import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
-import { textToSpeech as azureTextToSpeech } from './azureTTS';
+
+// Import API handlers
+import { analyzeFrequencyAnthropicClaude, getDefinitionsAnthropicClaude, getDialogueAnthropicClaude, getSentencesAnthropicClaude, translateSentenceAnthropicClaude } from './anthropicClaude';
+import { analyzeFrequencyGoogleGemini, getDefinitionsGoogleGemini, getDialogueGoogleGemini, getSentencesGoogleGemini, translateSentenceGoogleGemini } from './googleGemini';
+import { analyzeFrequencyOpenRouter, getDefinitionsOpenRouter, getDialogueOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter } from './openRouter';
+
+// Import middlewares
 import { authenticateToken, isActiveUser } from './middlewares/authMiddleware';
+
+// Import TTS handlers
+import { textToSpeech as azureTextToSpeech } from './azureTTS';
+import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
+
+// Import type definitions
+import { TokenCount } from '../frontend/src/utils/Types';
 
 interface RequestParams {
     word: string;

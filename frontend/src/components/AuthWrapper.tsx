@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 // Import internal components
 import Login from './Login';
 import Register from './Register';
+
+// Import internal utility functions
 import useAuth from '../utils/useAuth';
 
 // Define the props for the AuthWrapper component

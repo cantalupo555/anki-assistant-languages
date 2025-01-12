@@ -1,6 +1,11 @@
+// Import necessary React hooks and components
 import React, { useState, useEffect } from 'react';
+
+// Import styled components
 import * as S from '../styles/AppStyles';
 import { Button } from '../styles/ButtonStyles';
+
+// Import internal utility functions
 import useAuth from '../utils/useAuth';
 import { apiServiceOptions, llmOptions, ttsOptions } from '../utils/Options';
 import { voiceOptions } from '../utils/voiceOptions';

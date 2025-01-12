@@ -1,8 +1,4 @@
 // Import necessary dependencies and utility functions
-// React: Core library for building user interfaces
-// useState, useEffect: React hooks for managing state and side effects
-// ReactMarkdown: Component to render Markdown as React components
-// External library imports
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 
@@ -20,16 +16,7 @@ import Stats from './components/Stats';
 
 // Style imports
 import * as S from './styles/AppStyles';
-import { 
-    Button, 
-    GenerateButton, 
-    DialogueButton, 
-    AnalyzeButton,
-    ListenButton,
-    PaginationButton,
-    SaveButton,
-    TranslateButton as StyledTranslateButton
-} from './styles/ButtonStyles';
+import { AnalyzeButton, Button, DialogueButton, GenerateButton, ListenButton, PaginationButton, SaveButton, TranslateButton as StyledTranslateButton } from './styles/ButtonStyles';
 
 // Utility function imports
 import { apiServiceOptions, llmOptions, ttsOptions } from './utils/Options';
@@ -40,12 +27,13 @@ import { handleGenerateTTS } from './utils/handleGenerateTTS';
 import { handleTranslation } from './utils/handleTranslation';
 import { handleSubmit } from './utils/handleSubmit';
 import { voiceOptions } from './utils/voiceOptions';
-import { TokenCount, SavedItem, FrequencyAnalysis } from './utils/Types';
+import { FrequencyAnalysis, SavedItem, TokenCount } from './utils/Types';
 
 interface AppInnerProps {
     showStats?: boolean;
 }
 
+// Main component that renders the application's inner layout and functionality
 const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
     const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice, selectedLLM, setSelectedLLM } = useAppContext();
     const [word, setWord] = useState('');

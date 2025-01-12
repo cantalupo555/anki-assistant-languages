@@ -1,5 +1,10 @@
+// Import necessary modules and dependencies
 import React from 'react';
+
+// Import styled components
 import * as S from '../styles/AppStyles';
+
+// Import type definitions
 import { TokenCount } from '../utils/Types';
 
 interface StatsProps {

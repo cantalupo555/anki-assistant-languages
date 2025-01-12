@@ -1,8 +1,11 @@
-// Import necessary libraries
-// React: Core library for building user interfaces
+// Import necessary React hooks and components
 import React, { useState } from 'react';
+
+// Import styled components
 import * as S from '../styles/LoginStyles';
 import { LoginButton, RegisterButton } from '../styles/ButtonStyles';
+
+// Import type definitions
 import { LoginProps } from '../utils/Types';
 
 // Define the Login component
