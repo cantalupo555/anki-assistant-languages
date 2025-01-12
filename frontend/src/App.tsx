@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // Import internal components
 import AuthWrapper from './components/AuthWrapper';
 import AppInner from './AppInner';
+import UserSettings from './components/UserSettings';
 import { AppProvider } from './context/selectionContext';
 
 // Import styles
@@ -21,6 +22,7 @@ const App: React.FC = () => {
                         <Routes>
                             <Route path="/" element={<AppInner />} />
                             <Route path="/stats" element={<AppInner showStats={true} />} />
+                            <Route path="/settings" element={<UserSettings />} />
                         </Routes>
                     </AuthWrapper>
                 </Router>

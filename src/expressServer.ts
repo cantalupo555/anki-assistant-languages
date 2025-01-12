@@ -611,6 +611,74 @@ app.post('/analyze/frequency', authenticateToken, isActiveUser, async (req: Requ
     }
 });
 
+// Rota para buscar configurações do usuário
+app.get('/api/user/settings', authenticateToken, async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user.userId;
+        const result = await pool.query(
+            'SELECT * FROM user_settings WHERE user_id = $1',
+            [userId]
+        );
+        
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: 'Configurações não encontradas' });
+        }
+    } catch (error) {
+        console.error('Error fetching user settings:', error);
+        res.status(500).json({ error: 'Erro ao buscar configurações' });
+    }
+});
+
+// Rota para atualizar configurações do usuário
+app.put('/api/user/settings', authenticateToken, async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user.userId;
+        const {
+            preferredLanguage,
+            theme,
+            nativeLanguage,
+            targetLanguage,
+            selectedApiService,
+            selectedTtsService,
+            selectedLlm,
+            selectedVoice
+        } = req.body;
+
+        const result = await pool.query(`
+            INSERT INTO user_settings 
+                (user_id, preferred_language, theme, native_language, target_language, selected_api_service, selected_tts_service, selected_llm, selected_voice)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            ON CONFLICT (user_id) DO UPDATE SET
+                preferred_language = $2,
+                theme = $3,
+                native_language = $4,
+                target_language = $5,
+                selected_api_service = $6,
+                selected_tts_service = $7,
+                selected_llm = $8,
+                selected_voice = $9
+            RETURNING *
+        `, [
+            userId,
+            preferredLanguage,
+            theme,
+            nativeLanguage,
+            targetLanguage,
+            selectedApiService,
+            selectedTtsService,
+            selectedLlm,
+            selectedVoice
+        ]);
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error updating user settings:', error);
+        res.status(500).json({ error: 'Erro ao atualizar configurações' });
+    }
+});
+
 // Route to handle token sum
 app.post('/token/sum', authenticateToken, (req: Request, res: Response) => {
     try {
