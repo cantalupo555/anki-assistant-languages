@@ -16,7 +16,16 @@ import Stats from './components/Stats';
 
 // Style imports
 import * as S from './styles/AppStyles';
-import { AnalyzeButton, Button, DialogueButton, GenerateButton, ListenButton, PaginationButton, SaveButton, TranslateButton as StyledTranslateButton } from './styles/ButtonStyles';
+import {
+    AnalyzeButton,
+    Button,
+    DialogueButton,
+    GenerateButton,
+    ListenButton,
+    PaginationButton,
+    SaveButton,
+    TranslateButton as StyledTranslateButton
+} from './styles/ButtonStyles';
 
 // Utility function imports
 import { apiServiceOptions, llmOptions, ttsOptions } from './utils/Options';
@@ -35,7 +44,18 @@ interface AppInnerProps {
 
 // Main component that renders the application's inner layout and functionality
 const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
-    const { nativeLanguage, targetLanguage, selectedAPIService, setSelectedAPIService, selectedTTS, setSelectedTTS, selectedVoice, setSelectedVoice, selectedLLM, setSelectedLLM } = useAppContext();
+    const {
+        nativeLanguage,
+        selectedAPIService,
+        selectedLLM,
+        selectedTTS,
+        selectedVoice,
+        setSelectedAPIService,
+        setSelectedLLM,
+        setSelectedTTS,
+        setSelectedVoice,
+        targetLanguage,
+    } = useAppContext();
     const [word, setWord] = useState('');
     const [definitions, setDefinitions] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
     const [sentences, setSentences] = useState<{ text: string[]; tokenCount: TokenCount; totalPages: number } | null>(null);

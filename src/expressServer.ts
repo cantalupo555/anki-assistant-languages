@@ -6,9 +6,27 @@ import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
 
 // Import API handlers
-import { analyzeFrequencyAnthropicClaude, getDefinitionsAnthropicClaude, getDialogueAnthropicClaude, getSentencesAnthropicClaude, translateSentenceAnthropicClaude } from './anthropicClaude';
-import { analyzeFrequencyGoogleGemini, getDefinitionsGoogleGemini, getDialogueGoogleGemini, getSentencesGoogleGemini, translateSentenceGoogleGemini } from './googleGemini';
-import { analyzeFrequencyOpenRouter, getDefinitionsOpenRouter, getDialogueOpenRouter, getSentencesOpenRouter, translateSentenceOpenRouter } from './openRouter';
+import { 
+    analyzeFrequencyAnthropicClaude, 
+    getDefinitionsAnthropicClaude, 
+    getDialogueAnthropicClaude, 
+    getSentencesAnthropicClaude, 
+    translateSentenceAnthropicClaude 
+} from './anthropicClaude';
+import { 
+    analyzeFrequencyGoogleGemini, 
+    getDefinitionsGoogleGemini, 
+    getDialogueGoogleGemini, 
+    getSentencesGoogleGemini, 
+    translateSentenceGoogleGemini 
+} from './googleGemini';
+import { 
+    analyzeFrequencyOpenRouter, 
+    getDefinitionsOpenRouter, 
+    getDialogueOpenRouter, 
+    getSentencesOpenRouter, 
+    translateSentenceOpenRouter 
+} from './openRouter';
 
 // Import middlewares
 import { authenticateToken, isActiveUser } from './middlewares/authMiddleware';
