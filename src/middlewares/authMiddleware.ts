@@ -38,6 +38,9 @@ interface JwtPayload {
  * @param next - Next middleware function
  */
 export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
+    const now = new Date();
+    const utcTime = now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+    console.log(`[${utcTime}] authenticateToken: Starting token verification`);
     // Extract token from Authorization header (format: Bearer <token>)
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -61,6 +64,9 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
             res.status(403).json({ error: 'Malformed token' });
             return;
         }
+        const now = new Date();
+        const utcTime = now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+        console.log(`[${utcTime}] authenticateToken: Token verified successfully`, decoded);
 
         // Attach user information to request object
         (req as any).user = {
@@ -116,6 +122,9 @@ export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
  * @param next - Next middleware function
  */
 export const isActiveUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const now = new Date();
+    const utcTime = now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+    console.log(`[${utcTime}] isActiveUser: Starting user status verification`);
     try {
         const userId = (req as any).user.userId;
         
@@ -145,7 +154,9 @@ export const isActiveUser = async (req: Request, res: Response, next: NextFuncti
 
         // Attach user ID to request for easier access in routes
         (req as any).userId = user.rows[0].id;
-
+        const now = new Date();
+        const utcTime = now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+        console.log(`[${utcTime}] isActiveUser: User verified successfully`, user.rows[0]);
         next();
     } catch (error) {
         console.error('Error verifying user status:', error);
