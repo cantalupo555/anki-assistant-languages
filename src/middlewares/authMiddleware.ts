@@ -37,26 +37,29 @@ interface JwtPayload {
  * @param res - Express response object
  * @param next - Next middleware function
  */
-export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
+export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
     // Extract token from Authorization header (format: Bearer <token>)
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
     // Return 401 if no token is provided
     if (!token) {
-        return res.status(401).json({ error: 'Authentication token not provided' });
+        res.status(401).json({ error: 'Authentication token not provided' });
+        return;
     }
 
     // Verify the JWT token
     jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
         // Handle invalid or expired tokens
         if (err) {
-            return res.status(403).json({ error: 'Invalid or expired token' });
+            res.status(403).json({ error: 'Invalid or expired token' });
+            return;
         }
 
         // Validate token payload structure
         if (!decoded.userId || !decoded.role) {
-            return res.status(403).json({ error: 'Malformed token' });
+            res.status(403).json({ error: 'Malformed token' });
+            return;
         }
 
         // Attach user information to request object
@@ -68,7 +71,8 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
         // Validate user role against allowed roles
         const allowedRoles = ['user', 'admin'];
         if (!allowedRoles.includes(decoded.role)) {
-            return res.status(403).json({ error: 'Unauthorized access' });
+            res.status(403).json({ error: 'Unauthorized access' });
+            return;
         }
 
         // Proceed to next middleware/route handler
@@ -111,7 +115,7 @@ export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
  * @param res - Express response object
  * @param next - Next middleware function
  */
-export const isActiveUser = async (req: Request, res: Response, next: NextFunction) => {
+export const isActiveUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const userId = (req as any).user.userId;
         
@@ -123,18 +127,20 @@ export const isActiveUser = async (req: Request, res: Response, next: NextFuncti
 
         // Check if user exists
         if (user.rows.length === 0) {
-            return res.status(404).json({ 
+            res.status(404).json({ 
                 error: 'User not found',
                 code: 'USER_NOT_FOUND'
             });
+            return;
         }
 
         // Check if user is active
         if (user.rows[0].status !== 'active') {
-            return res.status(403).json({ 
+            res.status(403).json({ 
                 error: 'Your account is inactive. Please contact support.',
                 code: 'USER_INACTIVE'
             });
+            return;
         }
 
         // Attach user ID to request for easier access in routes
