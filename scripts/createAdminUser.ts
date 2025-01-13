@@ -85,10 +85,29 @@ const createAdminUser = async () => {
         const adminUserRes = await client.query('SELECT id FROM users WHERE username = $1 OR email = $2', [adminUsername, adminEmail]);
         if (adminUserRes.rows.length === 0) {
             try {
-                await client.query(`
+                const adminUser = await client.query(`
                     INSERT INTO users (username, email, password_hash, role)
                     VALUES ($1, $2, $3, 'admin')
+                    RETURNING id
                 `, [adminUsername, adminEmail, adminPasswordHash]);
+
+                // Create default settings for admin
+                await client.query(`
+                    INSERT INTO user_settings 
+                    (user_id, preferred_language, theme, native_language, target_language, selected_api_service, selected_tts_service, selected_llm, selected_voice)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                `, [
+                    adminUser.rows[0].id, // user_id
+                    'english',           // preferred_language
+                    'light',             // theme
+                    'english', // native_language
+                    'english',   // target_language
+                    'openrouter',        // selected_api_service
+                    'google',            // selected_tts_service
+                    'qwen/qwen-2.5-72b-instruct', // selected_llm
+                    'en-US-Wavenet-A'    // selected_voice
+                ]);
+
                 console.log('Default admin user created successfully!');
                 console.log('Admin credentials:');
                 console.log(`Username: ${adminUsername}`);
