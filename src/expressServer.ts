@@ -226,6 +226,23 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
             RETURNING id, username, email, status, role`,
             [username, email, hashedPassword, 'active', 'user']
         );
+
+        // Create default settings
+        await pool.query(`
+            INSERT INTO user_settings 
+            (user_id, preferred_language, theme, native_language, target_language, selected_api_service, selected_tts_service, selected_llm, selected_voice)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `, [
+            newUser.rows[0].id, // user_id
+            'english',           // preferred_language
+            'light',             // theme
+            'english', // native_language
+            'english',   // target_language
+            'openrouter',        // selected_api_service
+            'google',            // selected_tts_service
+            'qwen/qwen-2.5-72b-instruct', // selected_llm
+            'en-US-Wavenet-A'    // selected_voice
+        ]);
         
         const token = jwt.sign({ userId: newUser.rows[0].id }, JWT_SECRET, { expiresIn: '1h' });
         res.status(201).json({ 
