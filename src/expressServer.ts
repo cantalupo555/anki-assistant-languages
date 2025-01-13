@@ -655,7 +655,7 @@ app.post('/analyze/frequency', authenticateToken, isActiveUser, async (req: Requ
 });
 
 // Rota para buscar configurações do usuário
-app.get('/api/user/settings', authenticateToken, async (req: Request, res: Response) => {
+app.get('/user/settings', authenticateToken, async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.userId;
         const result = await pool.query(
@@ -675,7 +675,7 @@ app.get('/api/user/settings', authenticateToken, async (req: Request, res: Respo
 });
 
 // Rota para atualizar configurações do usuário
-app.put('/api/user/settings', authenticateToken, async (req: Request, res: Response) => {
+app.put('/user/settings', authenticateToken, async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.userId;
         const {

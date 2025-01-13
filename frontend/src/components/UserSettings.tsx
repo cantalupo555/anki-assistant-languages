@@ -54,7 +54,7 @@ const UserSettings: React.FC = () => {
     useEffect(() => {
         const loadSettings = async () => {
             try {
-                const response = await fetch(`/api/user/settings`, {
+                const response = await fetch(`/user/settings`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -106,7 +106,7 @@ const UserSettings: React.FC = () => {
         e.preventDefault();
         
         try {
-            const response = await fetch('/api/user/settings', {
+            const response = await fetch('/user/settings', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
