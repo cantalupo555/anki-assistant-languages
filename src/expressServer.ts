@@ -5,6 +5,9 @@ import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
 
+// Import utilities
+import { getFullLanguageName } from '../frontend/src/utils/languageMapping';
+
 // Import API handlers
 import { 
     analyzeFrequencyAnthropicClaude, 
@@ -167,20 +170,10 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// List of supported languages with updated language names
+// List of supported language codes
 const supportedLanguages = [
-    'English (United States)',
-    'Italian (Italy)',
-    'German (Germany)',
-    'French (France)',
-    'Spanish (Spain)',
-    'Portuguese (Brazil)',
-    'Dutch (Netherlands)',
-    'Polish (Poland)',
-    'Russian (Russia)',
-    'Mandarin (China)',
-    'Japanese (Japan)',
-    'Korean (Korea)'
+    'en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR',
+    'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 'ja-JP', 'ko-KR'
 ];
 
 // Registration route
@@ -400,14 +393,15 @@ app.post('/user/change-password', authenticateToken, async (req: Request, res: R
 app.post('/generate/definitions', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
         console.log('Request body:', req.body); // Debug log
-        const { word, targetLanguage, apiService, llm } = validateRequestParams(req);
+        const { word, targetLanguage: targetLanguageCode, apiService, llm } = validateRequestParams(req);
+        const targetLanguage = getFullLanguageName(targetLanguageCode);
         console.log('Validated params:', { word, targetLanguage, apiService, llm }); // Debug log
 
         let definitions = '';
         let definitionsTokens = initializeTokenCount();
 
         console.log(`Calling ${apiService} API for definitions...`);
-        
+
         if (apiService === 'anthropic') {
             [definitions, definitionsTokens] = await getDefinitionsAnthropicClaude(word, targetLanguage, llm);
         } else if (apiService === 'openrouter') {
@@ -425,14 +419,14 @@ app.post('/generate/definitions', authenticateToken, isActiveUser, async (req: R
     } catch (error) {
         console.error('Error in /generate/definitions:', error);
         const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the request';
-        
+
         // Log detailed error information
         console.error('Error details:', {
             message: errorMessage,
             stack: error instanceof Error ? error.stack : 'No stack trace available'
         });
-        
-        res.status(500).json({ 
+
+        res.status(500).json({
             error: errorMessage,
             details: 'Check server logs for more information'
         });
@@ -442,49 +436,32 @@ app.post('/generate/definitions', authenticateToken, isActiveUser, async (req: R
 // Route to handle the generation of sentences
 app.post('/generate/sentences', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
-        // Get the word, target language, API service, and llm from the request body
-        const { word, language: targetLanguage, apiService, llm } = req.body;
-        // Validate the word, target language, API service, and llm
-        if (!word || typeof word !== 'string' || word.trim() === '') {
-            res.status(400).json({ error: 'Valid word is required' });
-            return;
-        }
-        if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
-            res.status(400).json({ error: 'Valid target language is required' });
-            return;
-        }
-        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter' && apiService !== 'google')) {
-            res.status(400).json({ error: 'Valid API service (anthropic, openrouter, or google) is required' });
-            return;
-        }
-        if (!llm || typeof llm !== 'string') {
-            res.status(400).json({ error: 'Valid llm is required' });
-            return;
-        }
+        console.log('Request body:', req.body); // Debug log
+        const { word, targetLanguage: targetLanguageCode, apiService, llm } = validateRequestParams(req);
+        const targetLanguage = getFullLanguageName(targetLanguageCode);
+        console.log('Validated params:', { word, targetLanguage, apiService, llm }); // Debug log
 
         let sentences = '';
-        let sentencesTokens: { inputTokens: number; outputTokens: number; totalTokens: number } = {
-            inputTokens: 0,
-            outputTokens: 0,
-            totalTokens: 0
-        };
+        let sentencesTokens = initializeTokenCount();
 
-        // Get the sentences for the word using the selected API service and llm
+        console.log(`Calling ${apiService} API for sentences...`);
+
         if (apiService === 'anthropic') {
             [sentences, sentencesTokens] = await getSentencesAnthropicClaude(word, targetLanguage, llm);
         } else if (apiService === 'openrouter') {
             [sentences, sentencesTokens] = await getSentencesOpenRouter(word, targetLanguage, llm);
         } else if (apiService === 'google') {
-             [sentences, sentencesTokens] = await getSentencesGoogleGemini(word, targetLanguage, llm);
+            [sentences, sentencesTokens] = await getSentencesGoogleGemini(word, targetLanguage, llm);
         }
+
+        console.log('Sentences generated successfully:', {
+            sentences: sentences.substring(0, 100) + '...', // Log as primeiras 100 caracteres
+            tokenCount: sentencesTokens
+        });
 
         // Split sentences into an array
         const sentencesArray = sentences.split('\n').filter(sentence => sentence.trim() !== '');
 
-        // Log the sentences result
-        console.log('Sentences result:', sentencesArray, sentencesTokens);
-
-        // Return the result as a JSON response
         res.json({
             sentences: {
                 text: sentencesArray,
@@ -493,9 +470,19 @@ app.post('/generate/sentences', authenticateToken, isActiveUser, async (req: Req
             }
         });
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error in /generate/sentences:', error);
         const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the request';
-        res.status(500).json({ error: errorMessage });
+
+        // Log detailed error information
+        console.error('Error details:', {
+            message: errorMessage,
+            stack: error instanceof Error ? error.stack : 'No stack trace available'
+        });
+
+        res.status(500).json({
+            error: errorMessage,
+            details: 'Check server logs for more information'
+        });
     }
 });
 

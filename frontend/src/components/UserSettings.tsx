@@ -10,21 +10,8 @@ import useAuth from '../utils/useAuth';
 import { apiServiceOptions, llmOptions, ttsOptions } from '../utils/Options';
 import { voiceOptions } from '../utils/voiceOptions';
 
-// List of supported languages
-const supportedLanguages = [
-    'English (United States)',
-    'Italian (Italy)',
-    'German (Germany)',
-    'French (France)',
-    'Spanish (Spain)',
-    'Portuguese (Brazil)',
-    'Dutch (Netherlands)',
-    'Polish (Poland)',
-    'Russian (Russia)',
-    'Mandarin (China)',
-    'Japanese (Japan)',
-    'Korean (Korea)'
-];
+// Import language options
+import { languageOptions } from '../utils/languageMapping';
 
 interface UserSettingsState {
     preferredLanguage: string;
@@ -180,9 +167,9 @@ const UserSettings: React.FC = () => {
                         required
                     >
                         <option value="">Select your native language</option>
-                        {supportedLanguages.map(lang => (
-                            <option key={lang} value={lang}>
-                                {lang}
+                        {languageOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
                             </option>
                         ))}
                     </select>
@@ -198,9 +185,9 @@ const UserSettings: React.FC = () => {
                         required
                     >
                         <option value="">Select the language you are learning</option>
-                        {supportedLanguages.map(lang => (
-                            <option key={lang} value={lang}>
-                                {lang}
+                        {languageOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
                             </option>
                         ))}
                     </select>
