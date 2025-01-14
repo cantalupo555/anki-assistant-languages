@@ -400,8 +400,20 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                 <GenerateButton type="submit" disabled={isGenerateLoading}>
                                     {isGenerateLoading ? 'Generating...' : 'Generate'}
                                 </GenerateButton>
-                                <DialogueButton type="button" onClick={() => handleGenerateDialogue(setDialogue, setIsDialogueLoading, setError, updateTotalTokenCount, setIsDialogueModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM)}
-                                        disabled={isDialogueLoading}>
+                                <DialogueButton type="button" onClick={() => handleGenerateDialogue(
+                                    setDialogue, 
+                                    setIsDialogueLoading, 
+                                    setError, 
+                                    updateTotalTokenCount, 
+                                    setIsDialogueModalOpen, 
+                                    nativeLanguage, 
+                                    targetLanguage, // Passar o código da língua (ex: 'de-DE')
+                                    selectedAPIService, 
+                                    selectedTTS, 
+                                    word, 
+                                    selectedLLM
+                                )}
+                                disabled={isDialogueLoading}>
                                     {isDialogueLoading ? 'Generating...' : 'Generate Dialogue'}
                                 </DialogueButton>
                                 <AnalyzeButton type="button" onClick={() => handleAnalyzeFrequency(setFrequencyAnalysis, setIsAnalyzeLoading, setError, updateTotalTokenCount, setIsFrequencyModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word)}

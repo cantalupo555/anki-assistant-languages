@@ -555,55 +555,56 @@ app.post('/translate', authenticateToken, isActiveUser, async (req: Request, res
 // Route to handle the generation of a dialogue
 app.post('/generate/dialogue', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
-        // Get the word, target language, native language, API service, and llm from the request body
-        const { word, targetLanguage, nativeLanguage, apiService, llm } = req.body;
-        // Validate the word, target language, native language, API service, and llm
-        if (!word || typeof word !== 'string' || word.trim() === '') {
-            res.status(400).json({ error: 'Valid word is required' });
-            return;
-        }
-        if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
-            res.status(400).json({ error: 'Valid target language is required' });
-            return;
-        }
-        if (!nativeLanguage || typeof nativeLanguage !== 'string' || !supportedLanguages.includes(nativeLanguage)) {
-            res.status(400).json({ error: 'Valid native language is required' });
-            return;
-        }
-        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter' && apiService !== 'google')) {
-            res.status(400).json({ error: 'Valid API service (anthropic, openrouter, or google) is required' });
-            return;
-        }
-        if (!llm || typeof llm !== 'string') {
-            res.status(400).json({ error: 'Valid llm is required' });
-            return;
-        }
+        console.log('Request body:', req.body); // Debug log
+        const { word, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req);
+        const targetLanguageFull = getFullLanguageName(targetLanguage);
+        const nativeLanguageFull = getFullLanguageName(nativeLanguage);
+
+        console.log('Validated params:', {
+            word,
+            targetLanguage: targetLanguageFull,
+            nativeLanguage: nativeLanguageFull,
+            apiService,
+            llm
+        });
 
         let dialogue = '';
-        let tokenCount: { inputTokens: number; outputTokens: number; totalTokens: number } = {
-            inputTokens: 0,
-            outputTokens: 0,
-            totalTokens: 0
-        };
+        let dialogueTokens = initializeTokenCount();
 
-        // Create the dialogue using the selected API service and llm
+        console.log(`Calling ${apiService} API for dialogue...`);
+
         if (apiService === 'anthropic') {
-            [dialogue, tokenCount] = await getDialogueAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
+            [dialogue, dialogueTokens] = await getDialogueAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
         } else if (apiService === 'openrouter') {
-            [dialogue, tokenCount] = await getDialogueOpenRouter(word, targetLanguage, nativeLanguage, llm);
+            [dialogue, dialogueTokens] = await getDialogueOpenRouter(word, targetLanguage, nativeLanguage, llm);
         } else if (apiService === 'google') {
-            [dialogue, tokenCount] = await getDialogueGoogleGemini(word, targetLanguage, nativeLanguage, llm);
+            [dialogue, dialogueTokens] = await getDialogueGoogleGemini(word, targetLanguage, nativeLanguage, llm);
         }
 
-        // Log the dialogue result
-        console.log('Dialogue result:', dialogue, tokenCount);
+        console.log('Dialogue generated successfully:', {
+            dialogue: dialogue.substring(0, 100) + '...',
+            tokenCount: dialogueTokens
+        });
 
-        // Return the dialogue and token count
-        res.json({ dialogue, tokenCount });
+        res.json({ 
+            dialogue: {
+                text: dialogue,
+                tokenCount: dialogueTokens
+            }
+        });
     } catch (error) {
-        console.error('Error:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the dialogue request';
-        res.status(500).json({ error: errorMessage });
+        console.error('Error in /generate/dialogue:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the request';
+
+        console.error('Error details:', {
+            message: errorMessage,
+            stack: error instanceof Error ? error.stack : 'No stack trace available'
+        });
+
+        res.status(500).json({
+            error: errorMessage,
+            details: 'Check server logs for more information'
+        });
     }
 });
 

@@ -32,7 +32,7 @@ export const handleGenerateDialogue = async (setDialogue: Dispatch<SetStateActio
       },
       body: JSON.stringify({
         word: word,
-        targetLanguage: targetLanguage,
+        language: targetLanguage,
         nativeLanguage: nativeLanguage,
         apiService: selectedAPIService.value,
         llm: selectedLLM.value
