@@ -58,22 +58,24 @@ export const handleGenerateDialogue = async (setDialogue: Dispatch<SetStateActio
 
     // Validate response data structure
     if (
-        dialogueData.dialogue && typeof dialogueData.dialogue === 'string' &&
-        dialogueData.tokenCount && typeof dialogueData.tokenCount === 'object' &&
-        'inputTokens' in dialogueData.tokenCount &&
-        'outputTokens' in dialogueData.tokenCount &&
-        'totalTokens' in dialogueData.tokenCount
+        dialogueData && typeof dialogueData === 'object' &&
+        dialogueData.dialogue && typeof dialogueData.dialogue === 'object' &&
+        typeof dialogueData.dialogue.text === 'string' &&
+        dialogueData.dialogue.tokenCount && typeof dialogueData.dialogue.tokenCount === 'object' &&
+        'inputTokens' in dialogueData.dialogue.tokenCount &&
+        'outputTokens' in dialogueData.dialogue.tokenCount &&
+        'totalTokens' in dialogueData.dialogue.tokenCount
     ) {
       // Replace special characters with \n
-      const dialogueText = dialogueData.dialogue.replace(/\n/g, '\n').replace(/<br\s*\/?>/g, '\n');
+      const dialogueText = dialogueData.dialogue.text.replace(/\n/g, '\n').replace(/<br\s*\/?>/g, '\n');
 
       // Create and set dialogue object
       const dialogue = {
         text: dialogueText,
-        tokenCount: dialogueData.tokenCount
+        tokenCount: dialogueData.dialogue.tokenCount
       };
       setDialogue(dialogue);
-      updateTotalTokenCount(dialogueData.tokenCount);
+      updateTotalTokenCount(dialogueData.dialogue.tokenCount);
       console.log('Set dialogue:', dialogue);
       setIsDialogueModalOpen(true); // Open dialogue modal
     } else {
