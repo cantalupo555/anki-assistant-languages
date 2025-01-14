@@ -19,7 +19,13 @@ export const handleAnalyzeFrequency = async (setFrequencyAnalysis: Dispatch<SetS
   try {
     // Log request details for debugging
     console.log('Sending frequency analysis request...');
-    console.log('Request payload:', { word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
+    console.log('Request payload:', { 
+      word, 
+      targetLanguage, 
+      nativeLanguage, 
+      apiService: selectedAPIService.value, 
+      llm: selectedLLM.value 
+    });
 
     // Get the token from localStorage
     const token = localStorage.getItem('token');
@@ -52,10 +58,10 @@ export const handleAnalyzeFrequency = async (setFrequencyAnalysis: Dispatch<SetS
 
     // Parse response JSON
     const analysisData = await analysisResponse.json();
-    console.log('Received analysis data:', analysisData);
-
-    // Log the analysis result
-    console.log('Analysis result:', analysisData.analysis);
+    console.log('Received analysis data:', {
+      analysis: analysisData.analysis.substring(0, 100) + '...', // Mostra os primeiros 100 caracteres
+      tokenCount: analysisData.tokenCount
+    });
 
     // Validate response data structure
     if (
@@ -72,7 +78,10 @@ export const handleAnalyzeFrequency = async (setFrequencyAnalysis: Dispatch<SetS
       };
       setFrequencyAnalysis(analysis);
       updateTotalTokenCount(analysisData.tokenCount);
-      console.log('Set frequency analysis:', analysis);
+      console.log('Set frequency analysis:', {
+        analysis: analysis.text.substring(0, 100) + '...',
+        tokenCount: analysis.tokenCount
+      });
       setIsFrequencyModalOpen(true); // Open frequency analysis modal
     } else {
       console.error('Invalid analysis data structure:', analysisData);

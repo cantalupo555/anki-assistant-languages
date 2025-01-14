@@ -611,33 +611,24 @@ app.post('/generate/dialogue', authenticateToken, isActiveUser, async (req: Requ
 // Route to handle the word frequency analysis request
 app.post('/analyze/frequency', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
-        const { word, targetLanguage, nativeLanguage, apiService, llm } = req.body;
+        console.log('Request body:', req.body); // Log do corpo da requisição
+        const { word, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req);
+        const targetLanguageFull = getFullLanguageName(targetLanguage);
+        const nativeLanguageFull = getFullLanguageName(nativeLanguage);
 
-        if (!word || typeof word !== 'string' || word.trim() === '') {
-            res.status(400).json({ error: 'Valid word is required' });
-            return;
-        }
-        if (!nativeLanguage || !targetLanguage || !supportedLanguages.includes(nativeLanguage) || !supportedLanguages.includes(targetLanguage)) {
-            res.status(400).json({ error: 'Valid native and target languages are required' });
-            return;
-        }
-        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter' && apiService !== 'google')) {
-            res.status(400).json({ error: 'Valid API service (anthropic, openrouter, or google) is required' });
-            return;
-        }
-        if (!llm || typeof llm !== 'string') {
-            res.status(400).json({ error: 'Valid llm is required' });
-            return;
-        }
+        console.log('Validated params:', { // Log dos parâmetros validados
+            word,
+            targetLanguage: targetLanguageFull,
+            nativeLanguage: nativeLanguageFull,
+            apiService,
+            llm
+        });
 
         let analysis = '';
-        let tokenCount: { inputTokens: number; outputTokens: number; totalTokens: number } = {
-            inputTokens: 0,
-            outputTokens: 0,
-            totalTokens: 0
-        };
+        let tokenCount: TokenCount = initializeTokenCount();
 
-        // Perform analysis using the selected API service and llm
+        console.log(`Calling ${apiService} API for frequency analysis...`); // Log indicando qual API será chamada
+
         if (apiService === 'anthropic') {
             [analysis, tokenCount] = await analyzeFrequencyAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
         } else if (apiService === 'openrouter') {
@@ -646,8 +637,10 @@ app.post('/analyze/frequency', authenticateToken, isActiveUser, async (req: Requ
             [analysis, tokenCount] = await analyzeFrequencyGoogleGemini(word, targetLanguage, nativeLanguage, llm);
         }
 
-        // Log the frequency analysis result
-        console.log('Frequency analysis result:', analysis, tokenCount);
+        console.log('Frequency analysis generated successfully:', { // Log do resultado
+            analysis: analysis.substring(0, 100) + '...', // Mostra os primeiros 100 caracteres
+            tokenCount
+        });
 
         res.json({ analysis, tokenCount });
     } catch (error) {
