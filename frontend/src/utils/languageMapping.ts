@@ -1,18 +1,25 @@
+// Array of supported languages with their display labels and language codes
 export const languageOptions = [
-    { label: 'English (United States)', value: 'en-US' },
-    { label: 'Italian (Italy)', value: 'it-IT' },
-    { label: 'German (Germany)', value: 'de-DE' },
-    { label: 'French (France)', value: 'fr-FR' },
-    { label: 'Spanish (Spain)', value: 'es-ES' },
-    { label: 'Portuguese (Brazil)', value: 'pt-BR' },
-    { label: 'Dutch (Netherlands)', value: 'nl-NL' },
-    { label: 'Polish (Poland)', value: 'pl-PL' },
-    { label: 'Russian (Russia)', value: 'ru-RU' },
-    { label: 'Mandarin (China)', value: 'cmn-CN' },
-    { label: 'Japanese (Japan)', value: 'ja-JP' },
-    { label: 'Korean (Korea)', value: 'ko-KR' }
+    { label: 'English (United States)', value: 'en-US' }, // English language option
+    { label: 'Italian (Italy)', value: 'it-IT' },         // Italian language option
+    { label: 'German (Germany)', value: 'de-DE' },       // German language option
+    { label: 'French (France)', value: 'fr-FR' },        // French language option
+    { label: 'Spanish (Spain)', value: 'es-ES' },        // Spanish language option
+    { label: 'Portuguese (Brazil)', value: 'pt-BR' },    // Portuguese (Brazil) language option
+    { label: 'Dutch (Netherlands)', value: 'nl-NL' },    // Dutch language option
+    { label: 'Polish (Poland)', value: 'pl-PL' },        // Polish language option
+    { label: 'Russian (Russia)', value: 'ru-RU' },       // Russian language option
+    { label: 'Mandarin (China)', value: 'cmn-CN' },      // Mandarin Chinese language option
+    { label: 'Japanese (Japan)', value: 'ja-JP' },       // Japanese language option
+    { label: 'Korean (Korea)', value: 'ko-KR' }          // Korean language option
 ];
 
+/**
+ * Converts a language code to its full language name
+ * @param code - The language code (e.g., 'en-US')
+ * @returns The full language name (e.g., 'English (United States)')
+ *          Defaults to 'English (United States)' if code is not found
+ */
 export function getFullLanguageName(code: string): string {
     const mapping: { [key: string]: string } = {
         'en-US': 'English (United States)',
@@ -31,6 +38,12 @@ export function getFullLanguageName(code: string): string {
     return mapping[code] || 'English (United States)';
 }
 
+/**
+ * Converts a full language name to its corresponding language code
+ * @param fullName - The full language name (e.g., 'English (United States)')
+ * @returns The language code (e.g., 'en-US')
+ *          Defaults to 'en-US' if full name is not found
+ */
 export function getLanguageCode(fullName: string): string {
     const reverseMapping: { [key: string]: string } = {
         'English (United States)': 'en-US',
