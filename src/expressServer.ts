@@ -56,14 +56,19 @@ interface RequestParams {
  * @throws {Error} If any parameter is invalid.
  */
 function validateRequestParams(req: Request): RequestParams {
-    const { word, language, nativeLanguage, apiService, llm } = req.body;
-    const targetLanguage = language; // Map 'language' to 'targetLanguage'
-    console.log('Received targetLanguage:', targetLanguage); // Debug log
+    const { word, text, targetLanguage, language, nativeLanguage, apiService, llm } = req.body;
 
-    if (!word || typeof word !== 'string' || word.trim() === '') {
-        throw new Error('Valid word is required');
+    // Debug log to check the request body
+    console.log('Request body in validate:', req.body);
+    
+    const content = word || text;
+    if (!content || typeof content !== 'string' || content.trim() === '') {
+        throw new Error('Valid word or text is required');
     }
-    if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
+
+    // Accepts both targetLanguage and language
+    const targetLang = targetLanguage || language;
+    if (!targetLang || typeof targetLang !== 'string' || !supportedLanguages.includes(targetLang)) {
         throw new Error('Valid target language is required');
     }
     if (!apiService || !['anthropic', 'openrouter', 'google'].includes(apiService)) {
@@ -72,17 +77,13 @@ function validateRequestParams(req: Request): RequestParams {
     if (!llm || typeof llm !== 'string') {
         throw new Error('Valid llm is required');
     }
-    if (!targetLanguage || typeof targetLanguage !== 'string' || !supportedLanguages.includes(targetLanguage)) {
-        console.error('Invalid target language:', targetLanguage); // Additional debug log
-        throw new Error('Valid target language is required');
-    }
     if (!nativeLanguage || typeof nativeLanguage !== 'string' || !supportedLanguages.includes(nativeLanguage)) {
         throw new Error('Valid native language is required');
     }
 
     return { 
-        word, 
-        targetLanguage, 
+        word: content, 
+        targetLanguage: targetLang, 
         nativeLanguage, 
         apiService, 
         llm 
@@ -393,9 +394,9 @@ app.post('/user/change-password', authenticateToken, async (req: Request, res: R
 app.post('/generate/definitions', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
         console.log('Request body:', req.body); // Debug log
-        const { word, targetLanguage: targetLanguageCode, apiService, llm } = validateRequestParams(req);
-        const targetLanguage = getFullLanguageName(targetLanguageCode);
-        console.log('Validated params:', { word, targetLanguage, apiService, llm }); // Debug log
+        const { word, targetLanguage, apiService, llm } = validateRequestParams(req);
+        const targetLanguageFull = getFullLanguageName(targetLanguage);
+        console.log('Validated params:', { word, targetLanguageFull, apiService, llm }); // Debug log
 
         let definitions = '';
         let definitionsTokens = initializeTokenCount();
@@ -437,9 +438,9 @@ app.post('/generate/definitions', authenticateToken, isActiveUser, async (req: R
 app.post('/generate/sentences', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
         console.log('Request body:', req.body); // Debug log
-        const { word, targetLanguage: targetLanguageCode, apiService, llm } = validateRequestParams(req);
-        const targetLanguage = getFullLanguageName(targetLanguageCode);
-        console.log('Validated params:', { word, targetLanguage, apiService, llm }); // Debug log
+        const { word, targetLanguage, apiService, llm } = validateRequestParams(req);
+        const targetLanguageFull = getFullLanguageName(targetLanguage);
+        console.log('Validated params:', { word, targetLanguageFull, apiService, llm }); // Debug log
 
         let sentences = '';
         let sentencesTokens = initializeTokenCount();
@@ -489,51 +490,65 @@ app.post('/generate/sentences', authenticateToken, isActiveUser, async (req: Req
 // Route to handle the translation request
 app.post('/translate', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
-        const { text: inputSentence, targetLanguage, nativeLanguage, apiService, llm } = req.body;
+        console.log('Request body:', req.body); // Debug log
+        const { word: content, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req);
+        const targetLanguageFull = getFullLanguageName(targetLanguage);
+        const nativeLanguageFull = getFullLanguageName(nativeLanguage);
 
-        // Validate input
-        if (!inputSentence || typeof inputSentence !== 'string' || inputSentence.trim() === '') {
-            res.status(400).json({ error: 'Valid input sentence is required' });
-            return;
-        }
-        if (!nativeLanguage || !targetLanguage || !supportedLanguages.includes(nativeLanguage) || !supportedLanguages.includes(targetLanguage)) {
-            res.status(400).json({ error: 'Valid native and target languages are required' });
-            return;
-        }
-        if (!apiService || (apiService !== 'anthropic' && apiService !== 'openrouter' && apiService !== 'google')) {
-            res.status(400).json({ error: 'Valid API service (anthropic, openrouter, or google) is required' });
-            return;
-        }
-        if (!llm || typeof llm !== 'string') {
-            res.status(400).json({ error: 'Valid llm is required' });
-            return;
-        }
+        console.log('Validated params:', {
+            content,
+            targetLanguage: targetLanguageFull,
+            nativeLanguage: nativeLanguageFull,
+            apiService,
+            llm
+        });
 
         let translation = '';
-        let tokenCount: { inputTokens: number; outputTokens: number; totalTokens: number } = {
-            inputTokens: 0,
-            outputTokens: 0,
-            totalTokens: 0
-        };
+        let translationTokens = initializeTokenCount();
 
-        // Perform translation using the selected API service and llm
+        console.log(`Calling ${apiService} API for translation...`);
+        console.log('Translation parameters:', {
+            content,
+            targetLanguage: targetLanguageFull,
+            nativeLanguage: nativeLanguageFull,
+            llm
+        });
+
+        // Process the translation based on the selected API service
         if (apiService === 'anthropic') {
-            [translation, tokenCount] = await translateSentenceAnthropicClaude(inputSentence, targetLanguage, nativeLanguage, llm);
+            [translation, translationTokens] = await translateSentenceAnthropicClaude(content, targetLanguage, nativeLanguageFull, llm);
         } else if (apiService === 'openrouter') {
-            [translation, tokenCount] = await translateSentenceOpenRouter(inputSentence, targetLanguage, nativeLanguage, llm);
+            [translation, translationTokens] = await translateSentenceOpenRouter(content, targetLanguage, nativeLanguageFull, llm);
         } else if (apiService === 'google') {
-            [translation, tokenCount] = await translateSentenceGoogleGemini(inputSentence, targetLanguage, nativeLanguage, llm);
+            [translation, translationTokens] = await translateSentenceGoogleGemini(content, targetLanguage, nativeLanguageFull, llm);
         }
 
-        // Log the translation result
-        console.log('Translation result:', translation, tokenCount);
+        console.log('Translation generated successfully:', {
+            translation: translation.substring(0, 100) + '...',
+            tokenCount: translationTokens
+        });
 
-        // Return the translated text and token count
-        res.json({ translation, tokenCount });
+        // Returns the translation and token count
+        res.json({ 
+            translation: { 
+                text: translation, 
+                tokenCount: translationTokens 
+            } 
+        });
     } catch (error) {
-        console.error('Error:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the translation request';
-        res.status(500).json({ error: errorMessage });
+        console.error('Error in /translate:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the request';
+
+        // Log detailed error information
+        console.error('Error details:', {
+            message: errorMessage,
+            stack: error instanceof Error ? error.stack : 'No stack trace available'
+        });
+
+        res.status(500).json({
+            error: errorMessage,
+            details: 'Check server logs for more information'
+        });
     }
 });
 

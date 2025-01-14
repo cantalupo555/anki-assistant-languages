@@ -159,13 +159,15 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
     };
 
     // Function to update the total token count to be cumulative
-    const updateTotalTokenCount = (tokenCount: TokenCount) => {
+    const updateTotalTokenCount = (tokenCount?: TokenCount) => {
+        if (!tokenCount) return;
+        
         const currentTotalTokenCount = totalTokenCount || { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
 
         const newTotalTokenCount = {
-            inputTokens: currentTotalTokenCount.inputTokens + tokenCount.inputTokens,
-            outputTokens: currentTotalTokenCount.outputTokens + tokenCount.outputTokens,
-            totalTokens: currentTotalTokenCount.totalTokens + tokenCount.totalTokens
+            inputTokens: currentTotalTokenCount.inputTokens + (tokenCount.inputTokens || 0),
+            outputTokens: currentTotalTokenCount.outputTokens + (tokenCount.outputTokens || 0),
+            totalTokens: currentTotalTokenCount.totalTokens + (tokenCount.totalTokens || 0)
         };
 
         setTotalTokenCount(newTotalTokenCount);

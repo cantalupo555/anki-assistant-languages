@@ -59,8 +59,10 @@ export const handleTranslation = async (sentence: string, setError: Dispatch<Set
     console.log('Translation result:', data.translation);
 
     // Set the state for the translation
-    setTranslation(data.translation);
-    updateTotalTokenCount(data.tokenCount);
+    setTranslation(data.translation.text);
+    if (data.translation.tokenCount) {
+      updateTotalTokenCount(data.translation.tokenCount);
+    }
 
     return data.translation; // Return the translation
   } catch (error) {
