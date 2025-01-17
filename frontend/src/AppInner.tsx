@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 
 // Context imports
 import { useAppContext } from './context/selectionContext';
+import { supportedLanguageCodes } from './shared/constants';
 
 // Internal component imports
 import DialogueModal from './components/DialogueModal';
@@ -364,7 +365,7 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                             </S.FormGroup>
 
                             {/* Voice selection dropdown */}
-                            {(targetLanguage === 'English (United States)' || targetLanguage === 'Italian (Italy)' || targetLanguage === 'German (Germany)' || targetLanguage === 'French (France)' || targetLanguage === 'Spanish (Spain)' || targetLanguage === 'Portuguese (Brazil)' || targetLanguage === 'Dutch (Netherlands)' || targetLanguage === 'Polish (Poland)' || targetLanguage === 'Russian (Russia)' || targetLanguage === 'Mandarin (China)' || targetLanguage === 'Japanese (Japan)' || targetLanguage === 'Korean (Korea)') && (
+                            {supportedLanguageCodes.includes(targetLanguage) && (
                                 <>
                                     <S.FormGroup>
                                         <label htmlFor="voice-select">Select Voice:</label>
@@ -443,7 +444,7 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                             >
                                                 <ReactMarkdown>{sentence}</ReactMarkdown>
                                                 {/* TTS listen button */}
-                                                {(targetLanguage === 'English (United States)' || targetLanguage === 'Italian (Italy)' || targetLanguage === 'German (Germany)' || targetLanguage === 'French (France)' || targetLanguage === 'Spanish (Spain)' || targetLanguage === 'Portuguese (Brazil)' || targetLanguage === 'Dutch (Netherlands)' || targetLanguage === 'Polish (Poland)' || targetLanguage === 'Russian (Russia)' || targetLanguage === 'Mandarin (China)' || targetLanguage === 'Japanese (Japan)' || targetLanguage === 'Korean (Korea)') && (
+                                                {supportedLanguageCodes.includes(targetLanguage) && (
                                                     <ListenButton onClick={() => handleTTS(sentence)}>
                                                         Listen
                                                     </ListenButton>

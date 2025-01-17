@@ -7,6 +7,7 @@ import { Pool } from 'pg';
 
 // Import utilities
 import { getFullLanguageName } from '../frontend/src/utils/languageMapping';
+import { supportedAPIServices, supportedTTSServices } from './shared/constants';
 
 // Import API handlers
 import { 
@@ -71,8 +72,8 @@ function validateRequestParams(req: Request): RequestParams {
     if (!targetLang || typeof targetLang !== 'string' || !supportedLanguages.includes(targetLang)) {
         throw new Error('Valid target language is required');
     }
-    if (!apiService || !['anthropic', 'openrouter', 'google'].includes(apiService)) {
-        throw new Error('Valid API service (anthropic, openrouter, or google) is required');
+    if (!apiService || !supportedAPIServices.includes(apiService)) {
+        throw new Error(`Valid API service (${supportedAPIServices.join(', ')}) is required`);
     }
     if (!llm || typeof llm !== 'string') {
         throw new Error('Valid llm is required');
@@ -100,8 +101,8 @@ function validateRequestParams(req: Request): RequestParams {
 function validateTTSParams(ttsService: string, languageCode: string, voice: string): void {
     const supportedLanguageCodes = ['en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 'ja-JP', 'ko-KR'];
 
-    if (!ttsService || !['google', 'azure'].includes(ttsService)) {
-        throw new Error('Valid TTS service (google or azure) is required');
+    if (!ttsService || !supportedTTSServices.includes(ttsService)) {
+        throw new Error(`Valid TTS service (${supportedTTSServices.join(', ')}) is required`);
     }
     if (!languageCode || !supportedLanguageCodes.includes(languageCode)) {
         throw new Error('Invalid language code');
@@ -171,11 +172,8 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// List of supported language codes
-const supportedLanguages = [
-    'en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR',
-    'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 'ja-JP', 'ko-KR'
-];
+// Import supported languages from shared constants
+import { supportedLanguageCodes as supportedLanguages } from './shared/constants';
 
 // Registration route
 app.post('/register', async (req: Request, res: Response): Promise<void> => {
