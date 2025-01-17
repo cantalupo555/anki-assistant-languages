@@ -87,8 +87,20 @@ async function createUserSettingsTable(client: PoolClient): Promise<void> {
                 user_id UUID NOT NULL, -- Reference to the user
                 preferred_language VARCHAR(50) DEFAULT 'english' CHECK (preferred_language IN ('english', 'spanish', 'french')), -- Default interface language
                 theme VARCHAR(50) DEFAULT 'light' CHECK (theme IN ('light', 'dark')), -- Interface theme
-                native_language VARCHAR(255) CHECK (native_language ~ '^[A-Za-z ]+$'), -- User's native language
-                target_language VARCHAR(255) CHECK (target_language ~ '^[A-Za-z ]+$'), -- User's target learning language
+                native_language VARCHAR(10) CHECK (
+                    native_language IN (
+                        'en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 
+                        'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 
+                        'ja-JP', 'ko-KR'
+                    )
+                ), -- User's native language code (e.g., en-US)
+                target_language VARCHAR(10) CHECK (
+                    target_language IN (
+                        'en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 
+                        'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 
+                        'ja-JP', 'ko-KR'
+                    )
+                ), -- User's target learning language code (e.g., es-ES)
                 selected_api_service VARCHAR(255), -- Selected API service
                 selected_tts_service VARCHAR(255), -- Selected TTS service
                 selected_llm VARCHAR(255), -- Selected LLM model
@@ -113,8 +125,8 @@ async function addCommentsToColumns(client: PoolClient): Promise<void> {
             COMMENT ON COLUMN user_settings.user_id IS 'Reference to the user';
             COMMENT ON COLUMN user_settings.preferred_language IS 'Default interface language';
             COMMENT ON COLUMN user_settings.theme IS 'Interface theme';
-            COMMENT ON COLUMN user_settings.native_language IS 'User native language';
-            COMMENT ON COLUMN user_settings.target_language IS 'User target learning language';
+            COMMENT ON COLUMN user_settings.native_language IS 'User native language code (e.g., en-US)';
+            COMMENT ON COLUMN user_settings.target_language IS 'User target learning language code (e.g., es-ES)';
             COMMENT ON COLUMN user_settings.selected_api_service IS 'Selected API service';
             COMMENT ON COLUMN user_settings.selected_tts_service IS 'Selected TTS service';
             COMMENT ON COLUMN user_settings.selected_llm IS 'Selected LLM model';
