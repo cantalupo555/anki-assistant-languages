@@ -7,7 +7,7 @@ import { Pool } from 'pg';
 
 // Import utilities
 import { getFullLanguageName } from '../frontend/src/utils/languageMapping';
-import { supportedAPIServices, supportedTTSServices } from './shared/constants';
+import { supportedLanguageCodes, supportedAPIServices, supportedTTSServices } from './shared/constants';
 
 // Import API handlers
 import { 
@@ -219,6 +219,11 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
             [username, email, hashedPassword, 'active', 'user']
         );
 
+        // Validate default language codes
+        if (!supportedLanguageCodes.includes('en-US')) {
+            throw new Error('Invalid default language codes');
+        }
+
         // Create default settings
         await pool.query(`
             INSERT INTO user_settings 
@@ -228,8 +233,8 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
             newUser.rows[0].id, // user_id
             'english',           // preferred_language
             'light',             // theme
-            'english', // native_language
-            'english',   // target_language
+            'en-US', // native_language
+            'en-US',   // target_language
             'openrouter',        // selected_api_service
             'google',            // selected_tts_service
             'qwen/qwen-2.5-72b-instruct', // selected_llm
