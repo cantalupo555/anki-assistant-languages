@@ -30,6 +30,7 @@ import {
 
 // Utility function imports
 import { apiServiceOptions, llmOptions, ttsOptions } from './utils/Options';
+import { getFullLanguageName } from './utils/languageMapping';
 import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
 import { handleExport } from './utils/languageCardExporter';
 import { handleGenerateDialogue } from './utils/handleGenerateDialogue';
@@ -97,14 +98,14 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
 
     // Effect to set the default voice option based on the selected language
     useEffect(() => {
-        const defaultVoice = voiceOptions.find(voice => voice.language === targetLanguage) || voiceOptions[0];
+        const defaultVoice = voiceOptions.find(voice => voice.language === getFullLanguageName(targetLanguage)) || voiceOptions[0];
         setSelectedVoice(defaultVoice);
     }, [targetLanguage, setSelectedVoice]);
 
     // Effect to fetch Azure voices when Azure TTS is selected
     useEffect(() => {
         const defaultVoice = voiceOptions.find(
-            voice => voice.language === targetLanguage && voice.ttsService === selectedTTS.value
+            voice => voice.language === getFullLanguageName(targetLanguage) && voice.ttsService === selectedTTS.value
         ) || voiceOptions[0];
         setSelectedVoice(defaultVoice);
     }, [targetLanguage, selectedTTS, setSelectedVoice]);
@@ -375,7 +376,7 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                             onChange={handleVoiceChange}
                                         >
                                             {voiceOptions
-                                                .filter((voice) => voice.language === targetLanguage && voice.ttsService === selectedTTS.value)
+                                                .filter((voice) => voice.language === getFullLanguageName(targetLanguage) && voice.ttsService === selectedTTS.value)
                                                 .map((voice) => (
                                                     <option key={voice.value} value={voice.value}>
                                                         {voice.name}
