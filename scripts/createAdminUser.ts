@@ -100,8 +100,8 @@ const createAdminUser = async () => {
                     adminUser.rows[0].id, // user_id
                     'english',           // preferred_language
                     'light',             // theme
-                    'english', // native_language
-                    'english',   // target_language
+                    'en-US', // native_language
+                    'en-US',   // target_language
                     'openrouter',        // selected_api_service
                     'google',            // selected_tts_service
                     'qwen/qwen-2.5-72b-instruct', // selected_llm
