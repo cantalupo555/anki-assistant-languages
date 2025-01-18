@@ -289,6 +289,12 @@ app.post('/login', async (req: Request, res: Response): Promise<void> => {
         }
 
         // Generate JWT token with user information
+        // Update last login timestamp
+        await pool.query(
+            'UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = $1',
+            [userData.id]
+        );
+
         const token = jwt.sign({ 
             userId: userData.id,
             role: userData.role

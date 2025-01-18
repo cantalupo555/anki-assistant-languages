@@ -86,8 +86,8 @@ const createAdminUser = async () => {
         if (adminUserRes.rows.length === 0) {
             try {
                 const adminUser = await client.query(`
-                    INSERT INTO users (username, email, password_hash, role)
-                    VALUES ($1, $2, $3, 'admin')
+                    INSERT INTO users (username, email, password_hash, role, last_login_at)
+                    VALUES ($1, $2, $3, 'admin', CURRENT_TIMESTAMP)
                     RETURNING id
                 `, [adminUsername, adminEmail, adminPasswordHash]);
 

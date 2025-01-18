@@ -73,6 +73,7 @@ async function createUsersTable(client: PoolClient): Promise<void> {
                 status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'banned')), -- User status
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- Timestamp with timezone
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- Timestamp with timezone
+                last_login_at TIMESTAMP WITH TIME ZONE, -- Timestamp of last successful login
                 role VARCHAR(50) DEFAULT 'user' CHECK (role IN ('user', 'admin')) -- User role
             );
         `);
@@ -94,6 +95,7 @@ async function addCommentsToColumns(client: PoolClient): Promise<void> {
             COMMENT ON COLUMN users.status IS 'User status (active, inactive, banned)';
             COMMENT ON COLUMN users.created_at IS 'Timestamp of user creation';
             COMMENT ON COLUMN users.updated_at IS 'Timestamp of last user update';
+            COMMENT ON COLUMN users.last_login_at IS 'Timestamp of last successful user login';
             COMMENT ON COLUMN users.role IS 'User role (user, admin)';
         `);
         console.log('Comments added to columns.');
