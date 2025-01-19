@@ -167,23 +167,6 @@ const cleanDatabase = async (dryRun: boolean = false) => {
             process.exit(1);
         }
 
-        // Confirm database cleanup
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-        });
-
-        const confirmation = await new Promise<string>((resolve) => {
-            rl.question('Are you sure you want to clean the database? (yes/no) ', (answer) => {
-                resolve(answer.toLowerCase());
-                rl.close();
-            });
-        });
-
-        if (confirmation !== 'yes') {
-            console.log('Database cleanup cancelled.');
-            process.exit(0);
-        }
 
         // Check database connection
         await checkDatabaseConnection(client);
