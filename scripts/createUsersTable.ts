@@ -73,7 +73,7 @@ async function createUsersTable(client: PoolClient): Promise<void> {
                 status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'banned')), -- User status
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- Timestamp with timezone
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- Timestamp with timezone
-                last_login_at TIMESTAMP WITH TIME ZONE, -- Timestamp of last successful login
+                last_login_at TIMESTAMP WITH TIME ZONE DEFAULT NULL, -- Timestamp of last successful login (NULL until first login)
                 role VARCHAR(50) DEFAULT 'user' CHECK (role IN ('user', 'admin')) -- User role
             );
         `);
