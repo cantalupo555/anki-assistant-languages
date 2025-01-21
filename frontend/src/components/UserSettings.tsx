@@ -47,11 +47,21 @@ const UserSettings: React.FC = () => {
                     }
                 });
                 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (response.status === 404) {
+                    console.log('Using default settings');
+                    return;
+                }
+                
+                if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
                 
                 const data = await response.json();
                 
-                // Complete validation of received data
+                // Enhanced validation for default voice
+                const defaultVoice = voiceOptions.find(v => 
+                    v.ttsService === data.selected_tts_service &&
+                    v.languageCode === data.target_language
+                )?.value || voiceOptions[0].value;
+
                 const validatedSettings = {
                     preferred_language: ['english', 'portuguese', 'spanish'].includes(data.preferred_language) 
                         ? data.preferred_language 
@@ -80,17 +90,21 @@ const UserSettings: React.FC = () => {
                         v.languageCode === data.target_language
                     )
                         ? data.selected_voice
-                        : (voiceOptions.find(v => 
-                            v.ttsService === data.selected_tts_service && 
-                            v.languageCode === data.target_language
-                          )?.value || voiceOptions[0].value)
+                        : defaultVoice // Use calculated default value
                 };
 
                 setSettings(validatedSettings);
 
             } catch (error) {
                 console.error('Error loading settings:', error);
-                alert('Error loading settings. Using default values.'); // TODO: Replace with proper error handling
+                if (error instanceof Error && error.message.includes('404')) {
+                    console.log('Settings not found');
+                } else {
+                    console.error('Error details:', {
+                        message: error instanceof Error ? error.message : 'Unknown error',
+                        stack: error instanceof Error ? error.stack : null
+                    });
+                }
             }
         };
 
@@ -126,23 +140,22 @@ const UserSettings: React.FC = () => {
         }
     }, [settings.selected_api_service]);
 
-    // Update voice only if current value is invalid
     useEffect(() => {
         const filteredVoices = voiceOptions.filter(v => 
             v.ttsService === settings.selected_tts_service &&
             v.languageCode === settings.target_language
         );
         
-        const isValidVoice = filteredVoices.some(v => v.value === settings.selected_voice);
-        
-        if (!isValidVoice) {
-            const defaultVoice = filteredVoices[0]?.value || voiceOptions[0].value;
-            setSettings(prev => ({ 
-                ...prev, 
-                selected_voice: defaultVoice 
+        // Force valid voice selection if none matches
+        if (filteredVoices.length > 0 && !filteredVoices.some(v => v.value === settings.selected_voice)) {
+            const defaultVoice = filteredVoices[0].value;
+            console.warn(`Voice ${settings.selected_voice} is invalid. Updating to ${defaultVoice}`);
+            setSettings(prev => ({
+                ...prev,
+                selected_voice: defaultVoice
             }));
         }
-    }, [settings.selected_tts_service, settings.target_language]);
+    }, [settings.selected_tts_service, settings.target_language, settings.selected_voice]);
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target;

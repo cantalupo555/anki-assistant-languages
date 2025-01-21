@@ -231,6 +231,7 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
             (user_id, preferred_language, theme, native_language, target_language, 
              selected_api_service, selected_tts_service, selected_llm, selected_voice)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            ON CONFLICT (user_id) DO NOTHING; -- Prevents duplicate settings creation if user_id already exists
         `, [
             newUser.rows[0].id, // user_id
             'english', // preferred_language
@@ -242,7 +243,7 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
             'qwen/qwen-2.5-72b-instruct', // selected_llm
             'en-US-Wavenet-A' // selected_voice
         ]);
-        
+
         const token = jwt.sign({ userId: newUser.rows[0].id }, JWT_SECRET, { expiresIn: '1h' });
         res.status(201).json({ 
             message: 'User registered successfully', 
@@ -263,7 +264,7 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
 app.post('/login', async (req: Request, res: Response): Promise<void> => {
     try {
         const { username, password } = req.body;
-        
+
         // Fetch user including status and role
         const user = await pool.query(
             'SELECT id, username, email, password_hash, status, role FROM users WHERE username = $1', 

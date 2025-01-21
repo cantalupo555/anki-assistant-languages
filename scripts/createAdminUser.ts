@@ -96,6 +96,7 @@ const createAdminUser = async () => {
                     INSERT INTO user_settings 
                     (user_id, preferred_language, theme, native_language, target_language, selected_api_service, selected_tts_service, selected_llm, selected_voice)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                    ON CONFLICT (user_id) DO NOTHING; -- Prevents duplicate settings creation if user_id already exists
                 `, [
                     adminUser.rows[0].id, // user_id
                     'english',           // preferred_language
