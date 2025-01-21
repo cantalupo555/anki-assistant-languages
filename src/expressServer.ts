@@ -224,21 +224,22 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
             throw new Error('Invalid default language codes');
         }
 
-        // Create default settings
+        // Create default settings with explicit values
         await pool.query(`
             INSERT INTO user_settings 
-            (user_id, preferred_language, theme, native_language, target_language, selected_api_service, selected_tts_service, selected_llm, selected_voice)
+            (user_id, preferred_language, theme, native_language, target_language, 
+             selected_api_service, selected_tts_service, selected_llm, selected_voice)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         `, [
-            newUser.rows[0].id, // user_id
-            'english',           // preferred_language
-            'light',             // theme
+            newUser.rows[0].id,
+            'english',
+            'light',
             'en-US', // native_language
-            'en-US',   // target_language
-            'openrouter',        // selected_api_service
-            'google',            // selected_tts_service
-            'qwen/qwen-2.5-72b-instruct', // selected_llm
-            'en-US-Wavenet-A'    // selected_voice
+            'en-US', // target_language
+            'openrouter',
+            'google',
+            'qwen/qwen-2.5-72b-instruct', // Corrigido para valor exato do LLM
+            'en-US-Wavenet-A'
         ]);
         
         const token = jwt.sign({ userId: newUser.rows[0].id }, JWT_SECRET, { expiresIn: '1h' });
@@ -269,7 +270,7 @@ app.post('/login', async (req: Request, res: Response): Promise<void> => {
         );
 
         if (user.rows.length === 0) {
-            res.status(401).json({ error: 'Credenciais inválidas' });
+            res.status(401).json({ error: 'Invalid credentials' });
             return;
         }
 
@@ -277,14 +278,14 @@ app.post('/login', async (req: Request, res: Response): Promise<void> => {
 
         // Verify user status
         if (userData.status !== 'active') {
-            res.status(403).json({ error: 'Sua conta está inativa' });
+            res.status(403).json({ error: 'Your account is inactive' });
             return;
         }
 
         // Verify password
         const passwordMatch = await bcrypt.compare(password, userData.password_hash);
         if (!passwordMatch) {
-            res.status(401).json({ error: 'Credenciais inválidas' });
+            res.status(401).json({ error: 'Invalid credentials' });
             return;
         }
 
@@ -312,8 +313,8 @@ app.post('/login', async (req: Request, res: Response): Promise<void> => {
             }
         });
     } catch (error) {
-        console.error('Erro durante o login:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Erro durante o login';
+        console.error('Error during login:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Error during login';
         res.status(500).json({ error: errorMessage });
     }
 });
@@ -474,7 +475,7 @@ app.post('/generate/sentences', authenticateToken, isActiveUser, async (req: Req
         }
 
         console.log('Sentences generated successfully:', {
-            sentences: sentences.substring(0, 100) + '...', // Log as primeiras 100 caracteres
+            sentences: sentences.substring(0, 100) + '...', // Log the first 100 characters
             tokenCount: sentencesTokens
         });
 
@@ -629,12 +630,12 @@ app.post('/generate/dialogue', authenticateToken, isActiveUser, async (req: Requ
 // Route to handle the word frequency analysis request
 app.post('/analyze/frequency', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
-        console.log('Request body:', req.body); // Log do corpo da requisição
+        console.log('Request body:', req.body); // Log request body
         const { word, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req);
         const targetLanguageFull = getFullLanguageName(targetLanguage);
         const nativeLanguageFull = getFullLanguageName(nativeLanguage);
 
-        console.log('Validated params:', { // Log dos parâmetros validados
+        console.log('Validated params:', { // Log validated parameters
             word,
             targetLanguage: targetLanguageFull,
             nativeLanguage: nativeLanguageFull,
@@ -645,7 +646,7 @@ app.post('/analyze/frequency', authenticateToken, isActiveUser, async (req: Requ
         let analysis = '';
         let tokenCount: TokenCount = initializeTokenCount();
 
-        console.log(`Calling ${apiService} API for frequency analysis...`); // Log indicando qual API será chamada
+        console.log(`Calling ${apiService} API for frequency analysis...`); // Log indicating which API will be called
 
         if (apiService === 'anthropic') {
             [analysis, tokenCount] = await analyzeFrequencyAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
@@ -655,8 +656,8 @@ app.post('/analyze/frequency', authenticateToken, isActiveUser, async (req: Requ
             [analysis, tokenCount] = await analyzeFrequencyGoogleGemini(word, targetLanguage, nativeLanguage, llm);
         }
 
-        console.log('Frequency analysis generated successfully:', { // Log do resultado
-            analysis: analysis.substring(0, 100) + '...', // Mostra os primeiros 100 caracteres
+        console.log('Frequency analysis generated successfully:', { // Log the result
+            analysis: analysis.substring(0, 100) + '...', // Show first 100 characters
             tokenCount
         });
 
@@ -668,71 +669,87 @@ app.post('/analyze/frequency', authenticateToken, isActiveUser, async (req: Requ
     }
 });
 
-// Rota para buscar configurações do usuário
+// Route to get user settings
 app.get('/user/settings', authenticateToken, async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.userId;
         const result = await pool.query(
-            'SELECT * FROM user_settings WHERE user_id = $1',
+            `SELECT 
+                preferred_language,
+                theme,
+                native_language,
+                target_language,
+                selected_api_service,
+                selected_tts_service,
+                selected_llm,
+                selected_voice
+             FROM user_settings WHERE user_id = $1`,
             [userId]
         );
         
         if (result.rows.length > 0) {
             res.json(result.rows[0]);
         } else {
-            res.status(404).json({ error: 'Configurações não encontradas' });
+            res.status(404).json({ error: 'Settings not found' });
         }
     } catch (error) {
         console.error('Error fetching user settings:', error);
-        res.status(500).json({ error: 'Erro ao buscar configurações' });
+        res.status(500).json({ error: 'Error fetching settings' });
     }
 });
 
-// Rota para atualizar configurações do usuário
+// Route to update user settings
 app.put('/user/settings', authenticateToken, async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.userId;
         const {
-            preferredLanguage,
+            preferred_language,
             theme,
-            nativeLanguage,
-            targetLanguage,
-            selectedApiService,
-            selectedTtsService,
-            selectedLlm,
-            selectedVoice
+            native_language,
+            target_language,
+            selected_api_service,
+            selected_tts_service,
+            selected_llm,
+            selected_voice
         } = req.body;
+
+        // Validate service/llm combination
+        const validLLMs = llmOptions[selected_api_service]?.map(llm => llm.value) || [];
+        if (!validLLMs.includes(selected_llm)) {
+            return res.status(400).json({ error: 'Invalid service and model combination' });
+        }
 
         const result = await pool.query(`
             INSERT INTO user_settings 
-                (user_id, preferred_language, theme, native_language, target_language, selected_api_service, selected_tts_service, selected_llm, selected_voice)
+                (user_id, preferred_language, theme, native_language, target_language, 
+                 selected_api_service, selected_tts_service, selected_llm, selected_voice)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             ON CONFLICT (user_id) DO UPDATE SET
-                preferred_language = $2,
-                theme = $3,
-                native_language = $4,
-                target_language = $5,
-                selected_api_service = $6,
-                selected_tts_service = $7,
-                selected_llm = $8,
-                selected_voice = $9
+                preferred_language = EXCLUDED.preferred_language,
+                theme = EXCLUDED.theme,
+                native_language = EXCLUDED.native_language,
+                target_language = EXCLUDED.target_language,
+                selected_api_service = EXCLUDED.selected_api_service,
+                selected_tts_service = EXCLUDED.selected_tts_service,
+                selected_llm = EXCLUDED.selected_llm,
+                selected_voice = EXCLUDED.selected_voice
             RETURNING *
         `, [
             userId,
-            preferredLanguage,
+            preferred_language,
             theme,
-            nativeLanguage,
-            targetLanguage,
-            selectedApiService,
-            selectedTtsService,
-            selectedLlm,
-            selectedVoice
+            native_language,
+            target_language,
+            selected_api_service,
+            selected_tts_service,
+            selected_llm,
+            selected_voice
         ]);
 
         res.json(result.rows[0]);
     } catch (error) {
         console.error('Error updating user settings:', error);
-        res.status(500).json({ error: 'Erro ao atualizar configurações' });
+        res.status(500).json({ error: 'Error updating settings' });
     }
 });
 
