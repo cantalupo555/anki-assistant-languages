@@ -94,7 +94,7 @@ async function addCommentsToColumns(client: PoolClient): Promise<void> {
             COMMENT ON COLUMN users.password_hash IS 'Hashed password for security';
             COMMENT ON COLUMN users.status IS 'User status (active, inactive, banned)';
             COMMENT ON COLUMN users.created_at IS 'Timestamp of user creation';
-            COMMENT ON COLUMN users.updated_at IS 'Timestamp of last user update';
+            COMMENT ON COLUMN users.updated_at IS 'Timestamp of last profile update (username, email, password, status or role)';
             COMMENT ON COLUMN users.last_login_at IS 'Timestamp of last successful user login';
             COMMENT ON COLUMN users.role IS 'User role (user, admin)';
         `);
@@ -148,7 +148,9 @@ async function createUpdateUpdatedAtTrigger(client: PoolClient): Promise<void> {
         console.log('Creating trigger to update updated_at field...');
         await client.query(`
             CREATE TRIGGER update_users_updated_at
-            BEFORE UPDATE ON users
+            BEFORE UPDATE OF 
+                username, email, password_hash, status, role
+            ON users
             FOR EACH ROW
             EXECUTE FUNCTION update_updated_at_column();
         `);

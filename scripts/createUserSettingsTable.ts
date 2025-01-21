@@ -106,7 +106,7 @@ async function createUserSettingsTable(client: PoolClient): Promise<void> {
                 selected_llm VARCHAR(255), -- Selected LLM model
                 selected_voice VARCHAR(255), -- Selected TTS voice
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of settings creation
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of last update
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of last settings update
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Foreign key to users table
             );
         `);
@@ -183,7 +183,11 @@ async function createUpdateUpdatedAtTrigger(client: PoolClient): Promise<void> {
         console.log('Creating trigger to update updated_at field...');
         await client.query(`
             CREATE TRIGGER update_user_settings_updated_at
-            BEFORE UPDATE ON user_settings
+            BEFORE UPDATE OF 
+                preferred_language, theme, native_language, 
+                target_language, selected_api_service, 
+                selected_tts_service, selected_llm, selected_voice
+            ON user_settings
             FOR EACH ROW
             EXECUTE FUNCTION update_updated_at_column_user_settings();
         `);

@@ -348,10 +348,14 @@ app.put('/user/profile', authenticateToken, async (req: Request, res: Response) 
             return;
         }
 
-        const updateResult = await pool.query(
-            'UPDATE users SET username = $1, email = $2 WHERE id = $3 RETURNING id, username, email',
-            [username, email, userId]
-        );
+        const updateResult = await pool.query(`
+            UPDATE users 
+            SET username = $1, 
+                email = $2,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $3 
+            RETURNING id, username, email
+        `, [username, email, userId]);
 
         res.status(200).json(updateResult.rows[0]);
     } catch (error) {
@@ -385,7 +389,12 @@ app.post('/user/change-password', authenticateToken, async (req: Request, res: R
 
         // Update password
         const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-        await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hashedNewPassword, userId]);
+        await pool.query(`
+            UPDATE users 
+            SET password_hash = $1,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $2
+        `, [hashedNewPassword, userId]);
 
         res.status(200).json({ message: 'Password changed successfully' });
     } catch (error) {
