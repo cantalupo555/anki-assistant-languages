@@ -39,8 +39,9 @@ import { authenticateToken, isActiveUser } from './middlewares/authMiddleware';
 import { textToSpeech as azureTextToSpeech } from './azureTTS';
 import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
 
-// Import type definitions
+// Import type definitions and options
 import { TokenCount } from '../frontend/src/utils/Types';
+import { llmOptions } from '../frontend/src/utils/Options';
 
 interface RequestParams {
     word: string;
@@ -231,15 +232,15 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
              selected_api_service, selected_tts_service, selected_llm, selected_voice)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         `, [
-            newUser.rows[0].id,
-            'english',
-            'light',
+            newUser.rows[0].id, // user_id
+            'english', // preferred_language
+            'light', // theme
             'en-US', // native_language
             'en-US', // target_language
-            'openrouter',
-            'google',
-            'qwen/qwen-2.5-72b-instruct', // Corrigido para valor exato do LLM
-            'en-US-Wavenet-A'
+            'openrouter', // selected_api_service
+            'google', // selected_api_service
+            'qwen/qwen-2.5-72b-instruct', // selected_llm
+            'en-US-Wavenet-A' // selected_voice
         ]);
         
         const token = jwt.sign({ userId: newUser.rows[0].id }, JWT_SECRET, { expiresIn: '1h' });
@@ -699,7 +700,7 @@ app.get('/user/settings', authenticateToken, async (req: Request, res: Response)
 });
 
 // Route to update user settings
-app.put('/user/settings', authenticateToken, async (req: Request, res: Response) => {
+app.put('/user/settings', authenticateToken, async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = (req as any).user.userId;
         const {
@@ -714,9 +715,10 @@ app.put('/user/settings', authenticateToken, async (req: Request, res: Response)
         } = req.body;
 
         // Validate service/llm combination
-        const validLLMs = llmOptions[selected_api_service]?.map(llm => llm.value) || [];
+        const validLLMs = llmOptions[selected_api_service]?.map((llm: { value: string }) => llm.value) || [];
         if (!validLLMs.includes(selected_llm)) {
-            return res.status(400).json({ error: 'Invalid service and model combination' });
+            res.status(400).json({ error: 'Invalid service and model combination' });
+            return;
         }
 
         const result = await pool.query(`
@@ -747,9 +749,11 @@ app.put('/user/settings', authenticateToken, async (req: Request, res: Response)
         ]);
 
         res.json(result.rows[0]);
+        return;
     } catch (error) {
         console.error('Error updating user settings:', error);
         res.status(500).json({ error: 'Error updating settings' });
+        return;
     }
 });
 
