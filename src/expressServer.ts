@@ -57,12 +57,12 @@ interface RequestParams {
  * @returns Validated parameters.
  * @throws {Error} If any parameter is invalid.
  */
-function validateRequestParams(req: Request): RequestParams {
+function validateRequestParams(req: Request, requireNativeLanguage = false): RequestParams {
     const { word, text, targetLanguage, language, nativeLanguage, apiService, llm } = req.body;
 
     // Debug log to check the request body
     console.log('Request body in validate:', req.body);
-    
+
     const content = word || text;
     if (!content || typeof content !== 'string' || content.trim() === '') {
         throw new Error('Valid word or text is required');
@@ -79,14 +79,16 @@ function validateRequestParams(req: Request): RequestParams {
     if (!llm || typeof llm !== 'string') {
         throw new Error('Valid llm is required');
     }
-    if (!nativeLanguage || typeof nativeLanguage !== 'string' || !supportedLanguages.includes(nativeLanguage)) {
+
+    // Only validate nativeLanguage if required
+    if (requireNativeLanguage && (!nativeLanguage || typeof nativeLanguage !== 'string' || !supportedLanguages.includes(nativeLanguage))) {
         throw new Error('Valid native language is required');
     }
 
     return { 
         word: content, 
         targetLanguage: targetLang, 
-        nativeLanguage, 
+        nativeLanguage: nativeLanguage || '', // Allow undefined if not required
         apiService, 
         llm 
     };
@@ -599,7 +601,7 @@ app.post('/generate/sentences', authenticateToken, isActiveUser, async (req: Req
 app.post('/translate', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
         console.log('Request body:', req.body); // Debug log
-        const { word: content, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req);
+        const { word: content, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req, true);
         const targetLanguageFull = getFullLanguageName(targetLanguage);
         const nativeLanguageFull = getFullLanguageName(nativeLanguage);
 
@@ -664,7 +666,7 @@ app.post('/translate', authenticateToken, isActiveUser, async (req: Request, res
 app.post('/generate/dialogue', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
         console.log('Request body:', req.body); // Debug log
-        const { word, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req);
+        const { word, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req, true);
         const targetLanguageFull = getFullLanguageName(targetLanguage);
         const nativeLanguageFull = getFullLanguageName(nativeLanguage);
 
@@ -720,7 +722,7 @@ app.post('/generate/dialogue', authenticateToken, isActiveUser, async (req: Requ
 app.post('/analyze/frequency', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
         console.log('Request body:', req.body); // Log request body
-        const { word, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req);
+        const { word, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req, true);
         const targetLanguageFull = getFullLanguageName(targetLanguage);
         const nativeLanguageFull = getFullLanguageName(nativeLanguage);
 
