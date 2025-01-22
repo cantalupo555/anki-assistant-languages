@@ -407,6 +407,93 @@ app.post('/user/change-password', authenticateToken, async (req: Request, res: R
     }
 });
 
+// Route to get user settings
+app.get('/user/settings', authenticateToken, async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user.userId;
+        const result = await pool.query(
+            `SELECT 
+                preferred_language,
+                theme,
+                native_language,
+                target_language,
+                selected_api_service,
+                selected_tts_service,
+                selected_llm,
+                selected_voice
+             FROM user_settings WHERE user_id = $1`,
+            [userId]
+        );
+
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: 'Settings not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching user settings:', error);
+        res.status(500).json({ error: 'Error fetching settings' });
+    }
+});
+
+// Route to update user settings
+app.put('/user/settings', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = (req as any).user.userId;
+        const {
+            preferred_language,
+            theme,
+            native_language,
+            target_language,
+            selected_api_service,
+            selected_tts_service,
+            selected_llm,
+            selected_voice
+        } = req.body;
+
+        // Validate service/llm combination
+        const validLLMs = llmOptions[selected_api_service]?.map((llm: { value: string }) => llm.value) || [];
+        if (!validLLMs.includes(selected_llm)) {
+            res.status(400).json({ error: 'Invalid service and model combination' });
+            return;
+        }
+
+        const result = await pool.query(`
+            INSERT INTO user_settings 
+                (user_id, preferred_language, theme, native_language, target_language, 
+                 selected_api_service, selected_tts_service, selected_llm, selected_voice)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            ON CONFLICT (user_id) DO UPDATE SET
+                preferred_language = EXCLUDED.preferred_language,
+                theme = EXCLUDED.theme,
+                native_language = EXCLUDED.native_language,
+                target_language = EXCLUDED.target_language,
+                selected_api_service = EXCLUDED.selected_api_service,
+                selected_tts_service = EXCLUDED.selected_tts_service,
+                selected_llm = EXCLUDED.selected_llm,
+                selected_voice = EXCLUDED.selected_voice
+            RETURNING *
+        `, [
+            userId,
+            preferred_language,
+            theme,
+            native_language,
+            target_language,
+            selected_api_service,
+            selected_tts_service,
+            selected_llm,
+            selected_voice
+        ]);
+
+        res.json(result.rows[0]);
+        return;
+    } catch (error) {
+        console.error('Error updating user settings:', error);
+        res.status(500).json({ error: 'Error updating settings' });
+        return;
+    }
+});
+
 /**
  * Route to generate word definitions.
  * @param req - Express request object.
@@ -668,93 +755,6 @@ app.post('/analyze/frequency', authenticateToken, isActiveUser, async (req: Requ
         console.error('Error in /analyze/frequency:', error);
         const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the frequency analysis request';
         res.status(500).json({ error: errorMessage });
-    }
-});
-
-// Route to get user settings
-app.get('/user/settings', authenticateToken, async (req: Request, res: Response) => {
-    try {
-        const userId = (req as any).user.userId;
-        const result = await pool.query(
-            `SELECT 
-                preferred_language,
-                theme,
-                native_language,
-                target_language,
-                selected_api_service,
-                selected_tts_service,
-                selected_llm,
-                selected_voice
-             FROM user_settings WHERE user_id = $1`,
-            [userId]
-        );
-        
-        if (result.rows.length > 0) {
-            res.json(result.rows[0]);
-        } else {
-            res.status(404).json({ error: 'Settings not found' });
-        }
-    } catch (error) {
-        console.error('Error fetching user settings:', error);
-        res.status(500).json({ error: 'Error fetching settings' });
-    }
-});
-
-// Route to update user settings
-app.put('/user/settings', authenticateToken, async (req: Request, res: Response): Promise<void> => {
-    try {
-        const userId = (req as any).user.userId;
-        const {
-            preferred_language,
-            theme,
-            native_language,
-            target_language,
-            selected_api_service,
-            selected_tts_service,
-            selected_llm,
-            selected_voice
-        } = req.body;
-
-        // Validate service/llm combination
-        const validLLMs = llmOptions[selected_api_service]?.map((llm: { value: string }) => llm.value) || [];
-        if (!validLLMs.includes(selected_llm)) {
-            res.status(400).json({ error: 'Invalid service and model combination' });
-            return;
-        }
-
-        const result = await pool.query(`
-            INSERT INTO user_settings 
-                (user_id, preferred_language, theme, native_language, target_language, 
-                 selected_api_service, selected_tts_service, selected_llm, selected_voice)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            ON CONFLICT (user_id) DO UPDATE SET
-                preferred_language = EXCLUDED.preferred_language,
-                theme = EXCLUDED.theme,
-                native_language = EXCLUDED.native_language,
-                target_language = EXCLUDED.target_language,
-                selected_api_service = EXCLUDED.selected_api_service,
-                selected_tts_service = EXCLUDED.selected_tts_service,
-                selected_llm = EXCLUDED.selected_llm,
-                selected_voice = EXCLUDED.selected_voice
-            RETURNING *
-        `, [
-            userId,
-            preferred_language,
-            theme,
-            native_language,
-            target_language,
-            selected_api_service,
-            selected_tts_service,
-            selected_llm,
-            selected_voice
-        ]);
-
-        res.json(result.rows[0]);
-        return;
-    } catch (error) {
-        console.error('Error updating user settings:', error);
-        res.status(500).json({ error: 'Error updating settings' });
-        return;
     }
 });
 
