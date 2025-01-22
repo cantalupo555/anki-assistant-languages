@@ -84,8 +84,8 @@ async function createTokensContextTable(client: PoolClient): Promise<void> {
         await client.query(`
             CREATE TABLE IF NOT EXISTS tokens_context (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique context ID
-                target_language VARCHAR(255) CHECK (target_language ~ '^[A-Za-z ]+$'), -- Target language for token usage
-                api_service VARCHAR(255) CHECK (api_service ~ '^[A-Za-z0-9_]+$') -- API service used for token consumption
+                target_language VARCHAR(255) NOT NULL CHECK (target_language ~ '^[A-Za-z ]+$'), -- Target language for token usage
+                api_service VARCHAR(255) NOT NULL CHECK (api_service ~ '^[A-Za-z0-9_]+$') -- API service used for token consumption
             );
         `);
         console.log('tokens_context table created.');
@@ -117,7 +117,6 @@ async function createIndexes(client: PoolClient): Promise<void> {
         await client.query(`
             CREATE INDEX IF NOT EXISTS idx_tokens_context_target_language ON tokens_context(target_language);
             CREATE INDEX IF NOT EXISTS idx_tokens_context_api_service ON tokens_context(api_service);
-            CREATE INDEX IF NOT EXISTS idx_tokens_context_target_language_api_service ON tokens_context(target_language, api_service);
         `);
         console.log('Indexes created.');
     } catch (error) {

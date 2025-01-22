@@ -101,14 +101,15 @@ async function createTokensTable(client: PoolClient): Promise<void> {
         await client.query(`
             CREATE TABLE IF NOT EXISTS user_tokens (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique token record ID
-                user_id UUID NOT NULL, -- Reference to the user
+                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- Reference to the user with cascade delete
                 input_tokens INTEGER NOT NULL DEFAULT 0 CHECK (input_tokens >= 0), -- Number of input tokens consumed
                 output_tokens INTEGER NOT NULL DEFAULT 0 CHECK (output_tokens >= 0), -- Number of output tokens consumed
                 total_tokens INTEGER NOT NULL DEFAULT 0 CHECK (total_tokens >= 0), -- Total tokens consumed (input + output)
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- Timestamp of token usage
                 tokens_context_id UUID NOT NULL, -- Reference to the token context
-                FOREIGN KEY (user_id) REFERENCES users(id), -- Foreign key to users table
-                FOREIGN KEY (tokens_context_id) REFERENCES tokens_context(id) -- Foreign key to tokens_context table
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- Foreign key to users table with cascade delete
+                FOREIGN KEY (tokens_context_id) REFERENCES tokens_context(id) ON DELETE CASCADE, -- Foreign key to tokens_context table with cascade delete
+                UNIQUE (user_id, tokens_context_id) -- Unique combination of user and context
             );
         `);
         console.log('user_tokens table created.');

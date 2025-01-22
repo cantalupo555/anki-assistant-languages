@@ -84,7 +84,7 @@ async function createUserSettingsTable(client: PoolClient): Promise<void> {
         await client.query(`
             CREATE TABLE IF NOT EXISTS user_settings (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique settings ID
-                user_id UUID NOT NULL, -- Reference to the user
+                user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE, -- Reference to the user with unique constraint
                 preferred_language VARCHAR(50) DEFAULT 'english' CHECK (preferred_language IN ('english', 'spanish', 'french')), -- Default interface language
                 theme VARCHAR(50) DEFAULT 'light' CHECK (theme IN ('light', 'dark')), -- Interface theme
                 native_language VARCHAR(10) CHECK (

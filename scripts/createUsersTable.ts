@@ -66,7 +66,7 @@ async function createUsersTable(client: PoolClient): Promise<void> {
         console.log('Creating users table...');
         await client.query(`
             CREATE TABLE IF NOT EXISTS users (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique user ID
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid() UNIQUE, -- Unique user ID
                 username VARCHAR(255) UNIQUE NOT NULL CHECK (username ~ '^[a-zA-Z0-9_]+$'), -- Username with alphanumeric and underscore
                 email VARCHAR(255) UNIQUE NOT NULL CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'), -- Valid email format
                 password_hash VARCHAR(255) NOT NULL, -- Hashed password for security
