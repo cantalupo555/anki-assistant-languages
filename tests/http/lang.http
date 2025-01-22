@@ -1,0 +1,36 @@
+### Generate word definitions
+POST {{base_url}}/generate/definitions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "word": "{{word}}",
+  "targetLanguage": "{{target_language}}",
+  "apiService": "{{api_service}}",
+  "llm": "{{llm}}"
+}
+
+### Generate example sentences
+POST {{base_url}}/generate/sentences
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "word": "{{word}}",
+  "targetLanguage": "{{target_language}}",
+  "apiService": "{{api_service}}",
+  "llm": "{{llm}}"
+}
+
+### Translate text
+POST {{base_url}}/translate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "text": "{{text}}",
+  "nativeLanguage": "{{native_language}}",
+  "targetLanguage": "{{target_language}}",
+  "apiService": "{{api_service}}",
+  "llm": "{{llm}}"
+}

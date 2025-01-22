@@ -1,0 +1,11 @@
+### Generate TTS audio
+POST {{base_url}}/tts
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "text": "{{text}}",
+  "voice": "{{voice}}",
+  "languageCode": "{{language_code}}",
+  "ttsService": "{{tts_service}}"
+}

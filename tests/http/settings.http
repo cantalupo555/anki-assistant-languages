@@ -1,0 +1,19 @@
+### Get user settings
+GET {{base_url}}/user/settings
+Authorization: Bearer {{token}}
+
+### Update user settings
+PUT {{base_url}}/user/settings
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "preferred_language": "english",
+  "theme": "dark",
+  "native_language": "{{native_language}}",
+  "target_language": "{{target_language}}",
+  "selected_api_service": "{{api_service}}",
+  "selected_tts_service": "{{tts_service}}",
+  "selected_llm": "{{llm}}",
+  "selected_voice": "{{voice}}"
+}

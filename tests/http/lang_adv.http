@@ -1,0 +1,25 @@
+### Generate dialogue
+POST {{base_url}}/generate/dialogue
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "word": "{{word}}",
+  "targetLanguage": "{{target_language}}",
+  "nativeLanguage": "{{native_language}}",
+  "apiService": "{{api_service}}",
+  "llm": "{{llm}}"
+}
+
+### Analyze word frequency
+POST {{base_url}}/analyze/frequency
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "word": "{{word}}",
+  "targetLanguage": "{{target_language}}",
+  "nativeLanguage": "{{native_language}}",
+  "apiService": "{{api_service}}",
+  "llm": "{{llm}}"
+}
