@@ -12,3 +12,4 @@ node_modules/
 # Environment configuration and sensitive files
 # Contains API keys, database credentials and other secrets
 .env
+tests/http/http-client.env.json
