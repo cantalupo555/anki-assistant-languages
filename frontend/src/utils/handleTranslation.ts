@@ -1,5 +1,6 @@
 // Import necessary dependencies and utility functions
 import { Dispatch, SetStateAction } from 'react';
+import { validateAndRefreshToken } from './validateAndRefreshToken';
 import { TokenCount } from './Types';
 
 // Define the backend API URLs, using environment variables
@@ -22,8 +23,12 @@ export const handleTranslation = async (sentence: string, setError: Dispatch<Set
       llm: selectedLLM
     });
 
-    // Get the token from localStorage
-    const token = localStorage.getItem('token');
+    // Validate and refresh token
+    const token = await validateAndRefreshToken();
+    if (!token) {
+      setError('Sessão expirada. Por favor faça login novamente.');
+      return '';
+    }
 
     // Send POST request to the translation API endpoint
     const response = await fetch(TRANSLATION_URL, {

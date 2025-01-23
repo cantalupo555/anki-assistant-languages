@@ -62,6 +62,10 @@ const Login: React.FC<LoginProps & { onRegisterClick: () => void }> = ({ onLogin
                     setError('Your account is inactive. Please contact support.');
                 } else if (errorData.code === 'USER_NOT_FOUND') {
                     setError('Account not found. Please check your credentials.');
+                } else if (errorData.code === 'TOKEN_EXPIRED') {
+                    setError('Your session has expired. Please login again.');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('isAuthenticated');
                 } else {
                     setError(errorData.error || 'Login failed. Please check your credentials.');
                 }

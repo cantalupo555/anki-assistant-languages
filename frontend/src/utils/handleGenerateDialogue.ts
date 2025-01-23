@@ -1,5 +1,6 @@
 // Import necessary dependencies and utility functions
 import { Dispatch, SetStateAction } from 'react';
+import { validateAndRefreshToken } from './validateAndRefreshToken';
 import { TokenCount, APIServiceOption, TTSOption, LLMOption } from './Types';
 
 // Define the backend API URLs, using environment variables
@@ -20,8 +21,12 @@ export const handleGenerateDialogue = async (setDialogue: Dispatch<SetStateActio
     console.log('Sending dialogue generation request...');
     console.log('Request payload:', { word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
-    // Get the token from localStorage
-    const token = localStorage.getItem('token');
+    // Validate and refresh token
+    const token = await validateAndRefreshToken();
+    if (!token) {
+      setError('Sessão expirada. Por favor faça login novamente.');
+      return;
+    }
 
     // Send POST request to the dialogue generation endpoint
     const dialogueResponse = await fetch(DIALOGUE_URL, {

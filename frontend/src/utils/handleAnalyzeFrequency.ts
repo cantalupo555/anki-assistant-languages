@@ -1,5 +1,6 @@
 // Import necessary dependencies and utility functions
 import { Dispatch, SetStateAction } from 'react';
+import { validateAndRefreshToken } from './validateAndRefreshToken';
 import { TokenCount, APIServiceOption, LLMOption, FrequencyAnalysis } from './Types';
 
 // Define the backend API URLs, using environment variables
@@ -27,8 +28,12 @@ export const handleAnalyzeFrequency = async (setFrequencyAnalysis: Dispatch<SetS
       llm: selectedLLM.value 
     });
 
-    // Get the token from localStorage
-    const token = localStorage.getItem('token');
+    // Validate and refresh token
+    const token = await validateAndRefreshToken();
+    if (!token) {
+      setError('Sessão expirada. Por favor faça login novamente.');
+      return;
+    }
 
     // Send POST request to the frequency analysis endpoint
     const analysisResponse = await fetch(ANALYZE_FREQUENCY_URL, {

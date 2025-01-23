@@ -342,6 +342,79 @@ app.post('/logout', authenticateToken, (_req: Request, res: Response) => {
     res.status(200).json({ message: 'Logout successful' });
 });
 
+// Route to validate JWT token
+app.post('/auth/validate', authenticateToken, (req: Request, res: Response) => {
+    try {
+        const token = req.body.token;
+        if (!token) {
+            return res.status(400).json({ error: 'Token is required' });
+        }
+
+        // Verify the token
+        jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
+            if (err) {
+                return res.status(401).json({ 
+                    isValid: false,
+                    error: 'Invalid token'
+                });
+            }
+
+            // If token is valid, return user information
+            return res.json({ 
+                isValid: true,
+                user: {
+                    userId: decoded.userId,
+                    role: decoded.role,
+                    exp: decoded.exp
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Error validating token:', error);
+        res.status(500).json({ error: 'Error validating token' });
+    }
+});
+
+// Route to refresh JWT token
+app.post('/auth/refresh', authenticateToken, async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user.userId;
+        
+        // Get updated user information
+        const user = await pool.query(
+            'SELECT id, username, email, role FROM users WHERE id = $1',
+            [userId]
+        );
+
+        if (user.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Generate new token with renewed expiration
+        const newToken = jwt.sign(
+            { 
+                userId: user.rows[0].id,
+                role: user.rows[0].role 
+            },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.json({ 
+            token: newToken,
+            user: {
+                id: user.rows[0].id,
+                username: user.rows[0].username,
+                email: user.rows[0].email,
+                role: user.rows[0].role
+            }
+        });
+    } catch (error) {
+        console.error('Error refreshing token:', error);
+        res.status(500).json({ error: 'Error refreshing token' });
+    }
+});
+
 app.put('/user/profile', authenticateToken, async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.userId;

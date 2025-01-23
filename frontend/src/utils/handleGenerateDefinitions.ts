@@ -1,5 +1,6 @@
 // Import necessary dependencies and utility functions
 import { Dispatch, SetStateAction } from 'react';
+import { validateAndRefreshToken } from './validateAndRefreshToken';
 import { TokenCount, APIServiceOption, LLMOption } from './Types';
 
 // Define the backend API URLs, using environment variables
@@ -19,8 +20,12 @@ export const handleGenerateDefinitions = async (setDefinitions: Dispatch<SetStat
     console.log('Sending definitions generation request...');
     console.log('Request payload:', { word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
-    // Get the token from localStorage
-    const token = localStorage.getItem('token');
+    // Validate and refresh token
+    const token = await validateAndRefreshToken();
+    if (!token) {
+      setError('Sessão expirada. Por favor faça login novamente.');
+      return { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
+    }
 
     // Send POST request to the definitions generation endpoint
     const definitionsResponse = await fetch(DEFINITIONS_URL, {

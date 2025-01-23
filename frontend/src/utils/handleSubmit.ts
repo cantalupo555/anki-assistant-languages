@@ -1,5 +1,6 @@
 // Import necessary dependencies and utility functions
 import React, { Dispatch, SetStateAction } from 'react';
+import { validateAndRefreshToken } from './validateAndRefreshToken';
 import { TokenCount, APIServiceOption, LLMOption, TTSOption } from './Types';
 import { handleGenerateDefinitions } from './handleGenerateDefinitions';
 import { handleGenerateSentences } from './handleGenerateSentences';
@@ -32,8 +33,12 @@ export const handleSubmit = async (e: React.FormEvent, setDefinitions: Dispatch<
       translationTokens: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
     });
 
-    // Get the token from localStorage
-    const token = localStorage.getItem('token');
+    // Validate and refresh token if needed
+    const token = await validateAndRefreshToken();
+    if (!token) {
+      setError('Session expired. Please login again.');
+      return;
+    }
 
     // Calculate total token count
     const totalTokenCountResponse = await fetch(TOKEN_SUM_URL, {

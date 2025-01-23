@@ -119,27 +119,71 @@ const useAuth = () => {
     }, []);
 
     // Function to handle logout
-    const handleLogout = () => {
-        setIsAuthenticated(false); // Set the authentication status to false
-        localStorage.removeItem('isAuthenticated'); // Remove the authentication state from localStorage
-        localStorage.removeItem('token'); // Remove the token from localStorage
-        localStorage.removeItem('savedItems'); // Remove saved items from localStorage
-        localStorage.removeItem('audioData'); // Remove audio data from localStorage
-        setUser(null); // Clear user data
-    };
+    const handleLogout = useCallback(() => {
+        setIsAuthenticated(false);
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('token');
+        localStorage.removeItem('savedItems');
+        localStorage.removeItem('audioData');
+        setUser(null);
+    }, [setIsAuthenticated, setUser]); // Add stable dependencies
 
     // Effect to load authentication state from localStorage on component mount
-    const checkAuth = useCallback(async () => {
-        // Get the authentication state from localStorage
-        const isAuthenticatedFromStorage = localStorage.getItem('isAuthenticated');
-        const token = localStorage.getItem('token');
+    const validateToken = async (token: string) => {
+      try {
+        const response = await fetch(`${BACKEND_API_URL}/auth/validate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token }),
+        });
 
-        // If the authentication state is true, set the authentication status to true
-        if (isAuthenticatedFromStorage === 'true' && token) {
-            setIsAuthenticated(true);
-            await fetchUser();
+        if (!response.ok) throw new Error('Invalid token');
+        return await response.json();
+      } catch (error) {
+        throw new Error('Token validation failed');
+      }
+    };
+
+    const refreshToken = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No token available');
+        
+        const response = await fetch(`${BACKEND_API_URL}/auth/refresh`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) throw new Error('Failed to refresh token');
+        
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        return data.token;
+      } catch (error) {
+        handleLogout();
+        throw error;
+      }
+    };
+
+    const checkAuth = useCallback(async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const { isValid } = await validateToken(token);
+          if (!isValid) {
+            await refreshToken();
+          }
+          setIsAuthenticated(true);
+          await fetchUser();
+        } catch (error) {
+          handleLogout();
         }
-        setIsCheckingAuth(false); // Set checking auth to false after loading state
+      }
+      setIsCheckingAuth(false);
     }, [fetchUser]);
 
     useEffect(() => {
@@ -156,5 +200,8 @@ const useAuth = () => {
         user,
     };
 };
+
+// Function type for token validation
+export type TokenValidator = () => Promise<string | null>;
 
 export default useAuth;

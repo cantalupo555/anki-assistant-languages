@@ -1,5 +1,8 @@
 // Import necessary React hooks and components
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+// Import token validation utility
+import { validateAndRefreshToken } from '../utils/validateAndRefreshToken';
 
 // Import internal components
 import Login from './Login';
@@ -15,8 +18,13 @@ interface AuthWrapperProps {
 
 // Define the AuthWrapper component
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
-    // Get authentication state and login function from useAuth hook
-    const { isAuthenticated, isCheckingAuth, handleLogin } = useAuth();
+    // Get authentication state and functions from useAuth hook
+    const { 
+        isAuthenticated, 
+        isCheckingAuth, 
+        handleLogin,
+        handleLogout
+    } = useAuth();
     // State to control the display of the registration form
     const [isRegistering, setIsRegistering] = useState(false);
 
@@ -30,27 +38,36 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         setIsRegistering(false);
     };
 
-    // Display a loading screen while checking authentication status
+    // Avoid rendering until initial auth check is complete
     if (isCheckingAuth) {
         return <div className="loading-screen"><p>Loading...</p></div>;
     }
 
-    // Render the appropriate content based on authentication status
+    useEffect(() => {
+        const validateSession = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    await validateAndRefreshToken();
+                }
+            } catch (error) {
+                handleLogout();
+            }
+        };
+
+        validateSession();
+        const interval = setInterval(validateSession, 300000);
+        return () => clearInterval(interval);
+    }, [isAuthenticated, handleLogout]); // Correct dependencies
+
     return (
         <>
             {isAuthenticated ? (
-                // Render the children if the user is authenticated
                 children
             ) : (
-                // Render the registration or login form if the user is not authenticated
-                isRegistering ? <Register onRegister={handleRegisterClose} /> : <Login onLogin={handleLogin} onRegisterClick={handleRegisterClick} />
-            )}
-            {!isAuthenticated && (
-                // Display buttons to switch between login and registration forms
-                <div className="auth-switch">
-                    <button onClick={() => setIsRegistering(false)}>Go to Login</button>
-                    <button onClick={() => setIsRegistering(true)}>Go to Register</button>
-                </div>
+                isRegistering 
+                    ? <Register onRegister={() => setIsRegistering(false)} /> 
+                    : <Login onLogin={handleLogin} onRegisterClick={() => setIsRegistering(true)} />
             )}
         </>
     );
