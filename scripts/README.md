@@ -50,7 +50,17 @@ This will execute all required scripts in the correct order without requiring ma
 - **Options**:
   - `--non-interactive`: Runs without confirmation prompts
 
-### 3. `createUserSettingsTable.ts`
+### 3. `createUserSessionsTable.ts`
+- **Description**: Creates the `user_sessions` table to store refresh token information for user sessions. Configures indexes and foreign keys.
+- **Dependencies**: The `users` table must exist.
+- **Command**:
+  ```bash
+  yarn create-user-sessions-table
+  ```
+- **Options**:
+  - `--non-interactive`: Runs without confirmation prompts
+
+### 4. `createUserSettingsTable.ts`
 - **Description**: Creates the `user_settings` table and configures indexes, triggers, and related functions.
 - **Dependencies**: The `users` table must exist.
 - **Command**:
@@ -60,7 +70,7 @@ This will execute all required scripts in the correct order without requiring ma
 - **Options**:
   - `--non-interactive`: Runs without confirmation prompts
 
-### 4. `createTokensContextTable.ts`
+### 5. `createTokensContextTable.ts`
 - **Description**: Creates the `tokens_context` table and configures indexes.
 - **Dependencies**: The `users` table must exist.
 - **Command**:
@@ -70,7 +80,7 @@ This will execute all required scripts in the correct order without requiring ma
 - **Options**:
   - `--non-interactive`: Runs without confirmation prompts
 
-### 5. `createTokensTable.ts`
+### 6. `createTokensTable.ts`
 - **Description**: Creates the `user_tokens` table and configures indexes and foreign keys.
 - **Dependencies**: The `users` and `tokens_context` tables must exist.
 - **Command**:
@@ -80,7 +90,7 @@ This will execute all required scripts in the correct order without requiring ma
 - **Options**:
   - `--non-interactive`: Runs without confirmation prompts
 
-### 6. `createAdminUser.ts`
+### 7. `createAdminUser.ts`
 - **Description**: Creates the default admin user with random credentials.
 - **Dependencies**: The `users` table must exist.
 - **Command**:
@@ -90,7 +100,7 @@ This will execute all required scripts in the correct order without requiring ma
 - **Options**:
   - `--non-interactive`: Runs without confirmation prompts
 
-### 7. `cleanDatabase.ts`
+### 8. `cleanDatabase.ts`
 - **Description**: Cleans the database by dropping all tables, functions, and triggers. Includes a dry-run mode for safety checks.
 - **Dependencies**: None.
 - **Command**:
@@ -102,7 +112,7 @@ This will execute all required scripts in the correct order without requiring ma
   - `--non-interactive`: Runs without confirmation prompts
 - **Safety**: Prevents execution in production environments
 
-### 8. `setupDatabase.ts`
+### 9. `setupDatabase.ts`
 - **Description**: Automates the complete database setup process by running all required scripts in the correct order.
 - **Dependencies**: None.
 - **Command**:
@@ -120,6 +130,8 @@ This will execute all required scripts in the correct order without requiring ma
 check-db-connection
        ↓
 create-users-table
+       ↓
+create-user-sessions-table
        ↓
 create-user-settings-table
        ↓

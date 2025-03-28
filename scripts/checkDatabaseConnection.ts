@@ -84,6 +84,7 @@ async function checkRequiredTables(client: PoolClient): Promise<void> {
         console.log('Checking required tables...');
         const requiredTables = [
             { name: 'users', createScript: 'yarn create-users-table' },
+            { name: 'user_sessions', createScript: 'yarn create-user-sessions-table' },
             { name: 'user_settings', createScript: 'yarn create-user-settings-table' },
             { name: 'tokens_context', createScript: 'yarn create-tokens-context-table' },
             { name: 'user_tokens', createScript: 'yarn create-tokens-table' },

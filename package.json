@@ -12,6 +12,7 @@
     "create-user-settings-table": "tsx scripts/createUserSettingsTable.ts",
     "create-tokens-context-table": "tsx scripts/createTokensContextTable.ts",
     "create-tokens-table": "tsx scripts/createTokensTable.ts",
+    "create-user-sessions-table": "tsx scripts/createUserSessionsTable.ts",
     "create-admin-user": "tsx scripts/createAdminUser.ts",
     "clean-database": "tsx scripts/cleanDatabase.ts"
   },

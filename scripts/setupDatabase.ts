@@ -58,16 +58,19 @@ const setupDatabase = async () => {
         // 2. Create users table
         await runYarnCommand('create-users-table');
 
-        // 3. Create user settings table 
+        // 3. Create user sessions table (depends on users table)
+        await runYarnCommand('create-user-sessions-table'); // Renamed command
+
+        // 4. Create user settings table (depends on users table)
         await runYarnCommand('create-user-settings-table');
 
-        // 4. Create tokens context table
+        // 5. Create tokens context table
         await runYarnCommand('create-tokens-context-table');
 
-        // 5. Create user tokens table
+        // 6. Create user tokens table (depends on users and tokens_context)
         await runYarnCommand('create-tokens-table');
 
-        // 6. Create admin user
+        // 7. Create admin user (depends on users and user_settings)
         await runYarnCommand('create-admin-user');
 
         console.log('Database set up successfully!');
