@@ -1,5 +1,5 @@
 // Import necessary React hooks and components
-import React, { useEffect, useState } from 'react';
+// Removed unused imports: React, useEffect, useState
 
 // Import styled components
 import styled, { keyframes } from 'styled-components';
@@ -39,28 +39,18 @@ export const Loader = styled.div`
   animation: ${spin} 1s linear infinite;
 `;
 
+// Simplified Preloader: Always renders the spinner.
+// The parent component (AuthWrapper) should conditionally render this based on loading state (e.g., isCheckingAuth).
+
+// --- FORCEFULLY DISABLED FOR DEBUGGING ---
 export const Preloader = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  // Return null to render nothing, regardless of where it might be called from.
+  return null;
 
-  useEffect(() => {
-    const handleLoad = () => {
-      setIsLoading(false);
-    };
-
-    window.addEventListener('load', handleLoad);
-    document.addEventListener('DOMContentLoaded', handleLoad);
-
-    return () => {
-      window.removeEventListener('load', handleLoad);
-      document.removeEventListener('DOMContentLoaded', handleLoad);
-    };
-  }, []);
-
-  if (!isLoading) return null;
-
-  return (
-    <PreloaderContainer id="preloader">
-      <Loader />
-    </PreloaderContainer>
-  );
+  // Original code:
+  // return (
+  //   <PreloaderContainer id="preloader">
+  //     <Loader />
+  //   </PreloaderContainer>
+  // );
 };
