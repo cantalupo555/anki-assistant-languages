@@ -1,13 +1,25 @@
 // Import necessary dependencies and utility functions
 import { Dispatch, SetStateAction } from 'react';
-import { validateAndRefreshToken } from './validateAndRefreshToken';
+// import { validateAndRefreshToken } from './validateAndRefreshToken'; // Removed deprecated import
 import { TokenCount, APIServiceOption, LLMOption, FrequencyAnalysis } from './Types';
 
 // Define the backend API URLs, using environment variables
-const ANALYZE_FREQUENCY_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/analyze/frequency';
+// const ANALYZE_FREQUENCY_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/analyze/frequency'; // No longer needed
 
 // Function to handle word frequency analysis
-export const handleAnalyzeFrequency = async (setFrequencyAnalysis: Dispatch<SetStateAction<FrequencyAnalysis | null>>, setIsAnalyzeLoading: Dispatch<SetStateAction<boolean>>, setError: Dispatch<SetStateAction<string | null>>, updateTotalTokenCount: (tokenCount: TokenCount) => void, setIsFrequencyModalOpen: Dispatch<SetStateAction<boolean>>, nativeLanguage: string, targetLanguage: string, selectedAPIService: APIServiceOption, selectedLLM: LLMOption, word: string) => {
+export const handleAnalyzeFrequency = async (
+    setFrequencyAnalysis: Dispatch<SetStateAction<FrequencyAnalysis | null>>,
+    setIsAnalyzeLoading: Dispatch<SetStateAction<boolean>>,
+    setError: Dispatch<SetStateAction<string | null>>,
+    updateTotalTokenCount: (tokenCount: TokenCount) => void,
+    setIsFrequencyModalOpen: Dispatch<SetStateAction<boolean>>,
+    nativeLanguage: string,
+    targetLanguage: string,
+    selectedAPIService: APIServiceOption,
+    selectedLLM: LLMOption,
+    word: string,
+    token: string | null // Added token parameter
+) => {
   // Validate required fields
   if (!nativeLanguage || !targetLanguage || !selectedAPIService || !word || selectedLLM.value === '') {
     setError('Please fill in all required fields.');
@@ -28,15 +40,15 @@ export const handleAnalyzeFrequency = async (setFrequencyAnalysis: Dispatch<SetS
       llm: selectedLLM.value 
     });
 
-    // Validate and refresh token
-    const token = await validateAndRefreshToken();
+    // Check if token is provided (passed as parameter)
     if (!token) {
-      setError('Sessão expirada. Por favor faça login novamente.');
-      return;
+      setError('Sessão expirada ou inválida. Por favor faça login novamente.');
+      setIsAnalyzeLoading(false); // Ensure loading state is reset
+      return; // Exit if no token
     }
 
     // Send POST request to the frequency analysis endpoint
-    const analysisResponse = await fetch(ANALYZE_FREQUENCY_URL, {
+    const analysisResponse = await fetch(`/analyze/frequency`, { // Use relative path
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

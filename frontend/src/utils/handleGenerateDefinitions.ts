@@ -1,13 +1,22 @@
 // Import necessary dependencies and utility functions
 import { Dispatch, SetStateAction } from 'react';
-import { validateAndRefreshToken } from './validateAndRefreshToken';
+// import { validateAndRefreshToken } from './validateAndRefreshToken'; // Removed deprecated import
 import { TokenCount, APIServiceOption, LLMOption } from './Types';
 
 // Define the backend API URLs, using environment variables
-const DEFINITIONS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/definitions';
+// const DEFINITIONS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/definitions'; // No longer needed
 
 // Function to handle generating definitions
-export const handleGenerateDefinitions = async (setDefinitions: Dispatch<SetStateAction<{ text: string; tokenCount: TokenCount } | null>>, setError: Dispatch<SetStateAction<string | null>>, nativeLanguage: string, targetLanguage: string, selectedAPIService: APIServiceOption, selectedLLM: LLMOption, word: string): Promise<TokenCount> => {
+export const handleGenerateDefinitions = async (
+    setDefinitions: Dispatch<SetStateAction<{ text: string; tokenCount: TokenCount } | null>>,
+    setError: Dispatch<SetStateAction<string | null>>,
+    nativeLanguage: string,
+    targetLanguage: string,
+    selectedAPIService: APIServiceOption,
+    selectedLLM: LLMOption,
+    word: string,
+    token: string | null // Added token parameter
+): Promise<TokenCount> => {
   if (!nativeLanguage || !targetLanguage || !selectedAPIService || !word || selectedLLM.value === '') {
     setError('Please fill in all required fields.');
     return { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
@@ -20,15 +29,14 @@ export const handleGenerateDefinitions = async (setDefinitions: Dispatch<SetStat
     console.log('Sending definitions generation request...');
     console.log('Request payload:', { word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
-    // Validate and refresh token
-    const token = await validateAndRefreshToken();
+    // Check if token is provided (passed as parameter)
     if (!token) {
-      setError('Sessão expirada. Por favor faça login novamente.');
-      return { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
+      setError('Sessão expirada ou inválida. Por favor faça login novamente.');
+      return { inputTokens: 0, outputTokens: 0, totalTokens: 0 }; // Return default token count on auth error
     }
 
     // Send POST request to the definitions generation endpoint
-    const definitionsResponse = await fetch(DEFINITIONS_URL, {
+    const definitionsResponse = await fetch(`/generate/definitions`, { // Use relative path
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

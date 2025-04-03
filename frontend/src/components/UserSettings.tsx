@@ -124,10 +124,11 @@ const UserSettings: React.FC = () => {
             const defaultLLM = llmOptions[currentAPIService]?.[0]?.value || '';
             setSettings(prev => ({ 
                 ...prev, 
-                selected_llm: defaultLLM 
+                selected_llm: defaultLLM
             }));
         }
-    }, [settings.selected_api_service]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [settings.selected_api_service]); // Keep only selected_api_service as intended
 
     // Add additional validation
     useEffect(() => {
@@ -138,10 +139,11 @@ const UserSettings: React.FC = () => {
             const defaultLLM = llmOptions[currentService]?.[0]?.value || '';
             setSettings(prev => ({ ...prev, selected_llm: defaultLLM }));
         }
-    }, [settings.selected_api_service]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [settings.selected_api_service]); // Keep only selected_api_service as intended
 
     useEffect(() => {
-        const filteredVoices = voiceOptions.filter(v => 
+        const filteredVoices = voiceOptions.filter(v =>
             v.ttsService === settings.selected_tts_service &&
             v.languageCode === settings.target_language
         );

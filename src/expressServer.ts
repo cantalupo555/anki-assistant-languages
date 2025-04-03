@@ -1,9 +1,12 @@
 // Import necessary dependencies and utility functions
 import bcrypt from 'bcrypt';
+import cookieParser from 'cookie-parser'; // Added cookie-parser
 import cors from 'cors';
+import crypto from 'crypto'; // Added crypto for hashing refresh tokens
 import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
+import { v4 as uuidv4 } from 'uuid'; // Added for generating token family UUIDs
 
 // Import utilities
 import { getFullLanguageName } from '../frontend/src/utils/languageMapping';
@@ -148,7 +151,8 @@ function validateText(text: string): void {
 
 // Create an Express application instance
 const app = express();
-app.use(cors()); // Enable CORS middleware
+// app.use(cors()); // Remove default CORS middleware which defaults to '*' origin
+
 // Get the port number from the environment variable 'PORT'
 const port = process.env.PORT || 5000;
 
@@ -166,14 +170,16 @@ const pool = new Pool({
     port: parseInt(process.env.DB_PORT || '5432'),
 });
 
-// Enable CORS middleware
+// Enable CORS middleware - Ensure origin is specific and credentials allowed
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Use specific origin
+    credentials: true // Allow cookies to be sent cross-origin
 }));
 // Parse incoming JSON requests with increased size limit
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+// Add cookie parser middleware
+app.use(cookieParser());
 
 // Import supported languages from shared constants
 import { supportedLanguageCodes as supportedLanguages } from './shared/constants';
@@ -246,10 +252,41 @@ app.post('/register', async (req: Request, res: Response): Promise<void> => {
             'en-US-Wavenet-A' // selected_voice
         ]);
 
-        const token = jwt.sign({ userId: newUser.rows[0].id }, JWT_SECRET, { expiresIn: '1h' });
-        res.status(201).json({ 
-            message: 'User registered successfully', 
-            token,
+        // Generate tokens (Access + Refresh)
+        const userId = newUser.rows[0].id;
+        const userRole = newUser.rows[0].role; // Assuming role is returned
+        const accessToken = jwt.sign({ userId, role: userRole }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRATION });
+        const refreshToken = jwt.sign({ userId, role: userRole }, JWT_SECRET, { expiresIn: `${REFRESH_TOKEN_EXPIRATION_MS / 1000}s` }); // Use a different secret in production!
+
+        // Store refresh token hash in DB
+        const refreshTokenHash = hashToken(refreshToken);
+        const refreshTokenFamily = uuidv4(); // Generate a new family UUID
+        const refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRATION_MS);
+
+        await pool.query(
+            `INSERT INTO user_sessions (user_id, token_hash, family, expires_at, ip_address, user_agent)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [userId, refreshTokenHash, refreshTokenFamily, refreshTokenExpiresAt, req.ip, req.headers['user-agent']]
+        );
+
+        const isProduction = process.env.NODE_ENV === 'production';
+        const cookieOptions = {
+            httpOnly: true,
+            secure: isProduction, // Explicitamente definido com base no NODE_ENV
+            sameSite: 'lax' as const, // Manter 'lax' para desenvolvimento same-site
+            path: '/',
+            maxAge: REFRESH_TOKEN_EXPIRATION_MS
+        };
+        // Log detalhado incluindo status do NODE_ENV
+        console.log(`[${new Date().toISOString()}] /register: NODE_ENV='${process.env.NODE_ENV}', isProduction=${isProduction}. Setting refreshToken cookie with options:`, cookieOptions); // Corrected log source
+
+        // Set refresh token in HttpOnly cookie
+        res.cookie('refreshToken', refreshToken, cookieOptions);
+
+        // Send access token and user data in response body
+        res.status(201).json({
+            message: 'User registered successfully',
+            accessToken, // Send access token in body
             user: newUser.rows[0]
         });
     } catch (error) {
@@ -300,14 +337,45 @@ app.post('/login', async (req: Request, res: Response): Promise<void> => {
             [userData.id]
         );
 
-        const token = jwt.sign({ 
-            userId: userData.id,
-            role: userData.role
-        }, JWT_SECRET, { expiresIn: '1h' });
+        // Generate tokens (Access + Refresh)
+        const accessToken = jwt.sign({ userId: userData.id, role: userData.role }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRATION });
+        const refreshTokenFamily = uuidv4(); // Generate a new family UUID for this login session
+        // Include the family UUID in the refresh token payload to ensure uniqueness
+        const refreshToken = jwt.sign(
+            { userId: userData.id, role: userData.role, family: refreshTokenFamily }, // Add family here
+            JWT_SECRET, 
+            { expiresIn: `${REFRESH_TOKEN_EXPIRATION_MS / 1000}s` }
+        ); 
+        // Calculate the hash of the new refresh token
+        const refreshTokenHash = hashToken(refreshToken); 
 
-        res.status(200).json({ 
+        const refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRATION_MS);
+
+        // Session cleanup removed to allow multiple active sessions per user.
+        // The refresh token rotation mechanism handles invalidating used tokens.
+
+        await pool.query(
+            `INSERT INTO user_sessions (user_id, token_hash, family, expires_at, ip_address, user_agent)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [userData.id, refreshTokenHash, refreshTokenFamily, refreshTokenExpiresAt, req.ip, req.headers['user-agent']]
+        );
+
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax' as const, // Explicitly 'lax'
+            path: '/',
+            maxAge: REFRESH_TOKEN_EXPIRATION_MS
+        };
+        console.log(`[${new Date().toISOString()}] /login: Setting refreshToken cookie with options:`, cookieOptions); // Log options
+
+        // Set refresh token in HttpOnly cookie
+        res.cookie('refreshToken', refreshToken, cookieOptions);
+
+        // Send access token and user data in response body
+        res.status(200).json({
             message: 'Login bem-sucedido',
-            token,
+            accessToken, // Send access token in body
             user: {
                 id: userData.id,
                 username: userData.username,
@@ -337,80 +405,191 @@ app.get('/user', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // Logout route
-app.post('/logout', authenticateToken, (_req: Request, res: Response) => {
-    // Invalidate the token on the client side by removing it from storage
+app.post('/logout', async (req: Request, res: Response) => {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (refreshToken) {
+        try {
+            const tokenHash = hashToken(refreshToken);
+            // Invalidate the specific session (refresh token) in the database
+            await pool.query(
+                'UPDATE user_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE token_hash = $1 AND revoked_at IS NULL',
+                [tokenHash]
+            );
+        } catch (dbError) {
+            console.error("Error invalidating session token during logout:", dbError);
+            // Continue with clearing the cookie even if DB update fails
+        }
+    }
+
+    // Clear the refresh token cookie
+    res.cookie('refreshToken', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        expires: new Date(0) // Set expiry to past date
+    });
+
     res.status(200).json({ message: 'Logout successful' });
 });
 
-// Route to validate JWT token
+// Route to validate JWT access token (remains mostly the same, validates token from Authorization header)
+// Note: This route might become less necessary if frontend relies more on refresh flow.
 app.post('/auth/validate', authenticateToken, (req: Request, res: Response) => {
-    try {
-        const token = req.body.token;
-        if (!token) {
-            return res.status(400).json({ error: 'Token is required' });
-        }
-
-        // Verify the token
-        jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
-            if (err) {
-                return res.status(401).json({ 
-                    isValid: false,
-                    error: 'Invalid token'
-                });
-            }
-
-            // If token is valid, return user information
-            return res.json({ 
-                isValid: true,
-                user: {
-                    userId: decoded.userId,
-                    role: decoded.role,
-                    exp: decoded.exp
-                }
-            });
-        });
-    } catch (error) {
-        console.error('Error validating token:', error);
-        res.status(500).json({ error: 'Error validating token' });
+    // The authenticateToken middleware already validates the access token.
+    // If it reaches here, the token is valid (though maybe expired if not checked by middleware).
+    // We can return the user info attached by the middleware.
+    const user = (req as any).user;
+    if (user) {
+        res.status(200).json({ isValid: true, user });
+    } else {
+        // Should not happen if authenticateToken is working correctly
+        res.status(401).json({ isValid: false, error: 'Invalid token or user not found' });
     }
 });
 
-// Route to refresh JWT token
-app.post('/auth/refresh', authenticateToken, async (req: Request, res: Response) => {
+
+// Route to refresh JWT access token using the refresh token from the HttpOnly cookie
+app.post('/auth/refresh', async (req: Request, res: Response) => {
+    const incomingRefreshToken = req.cookies.refreshToken;
+    const allCookies = req.cookies;
+    const cookieHeader = req.headers.cookie;
+    console.log(`[${new Date().toISOString()}] /auth/refresh: Received request.`); // Log entry
+    console.log(`[${new Date().toISOString()}] /auth/refresh: Cookie Header:`, cookieHeader); // Log raw cookie header
+    console.log(`[${new Date().toISOString()}] /auth/refresh: Parsed Cookies (req.cookies):`, allCookies); // Log parsed cookies
+
+    if (!incomingRefreshToken) {
+        console.log(`[${new Date().toISOString()}] /auth/refresh: No refreshToken cookie found in parsed cookies.`);
+        // Adicional: Logar se o cookie-parser está funcionando
+        if (!req.cookies) {
+             console.log(`[${new Date().toISOString()}] /auth/refresh: req.cookies object is missing. Is cookie-parser middleware active?`);
+        }
+        return res.status(401).json({ error: 'Refresh token not found' });
+    } else {
+         console.log(`[${new Date().toISOString()}] /auth/refresh: refreshToken cookie found in parsed cookies (length: ${incomingRefreshToken.length}).`);
+    }
+
+    const incomingTokenHash = hashToken(incomingRefreshToken);
+    console.log(`[${new Date().toISOString()}] /auth/refresh: Calculated hash: ${incomingTokenHash.substring(0, 10)}...`);
+
     try {
-        const userId = (req as any).user.userId;
-        
-        // Get updated user information
-        const user = await pool.query(
-            'SELECT id, username, email, role FROM users WHERE id = $1',
-            [userId]
+        // Find the session (refresh token) in the database
+        const tokenResult = await pool.query(
+            `SELECT id, user_id, family, expires_at, revoked_at
+             FROM user_sessions
+             WHERE token_hash = $1`,
+            [incomingTokenHash]
         );
 
-        if (user.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
+        const storedToken = tokenResult.rows[0];
+        console.log(`[${new Date().toISOString()}] /auth/refresh: DB query result for hash ${incomingTokenHash.substring(0, 10)}... :`, storedToken);
+
+        // Case 1: Token not found or already revoked
+        if (!storedToken) {
+             console.log(`[${new Date().toISOString()}] /auth/refresh: Token hash not found in DB.`);
+             // Clear the cookie on the client
+             res.cookie('refreshToken', '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', expires: new Date(0) });
+             return res.status(401).json({ error: 'Invalid session' }); // Use 401 for not found
         }
 
-        // Generate new token with renewed expiration
-        const newToken = jwt.sign(
-            { 
-                userId: user.rows[0].id,
-                role: user.rows[0].role 
-            },
-            JWT_SECRET,
-            { expiresIn: '1h' }
-        );
+        if (storedToken.revoked_at) {
+             console.log(`[${new Date().toISOString()}] /auth/refresh: Token hash found but session is revoked (revoked_at: ${storedToken.revoked_at}).`);
+             // Potential token theft detected if a revoked token is used. Invalidate the entire session family.
+             if (storedToken?.family) {
+                 await pool.query(
+                     'UPDATE user_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE family = $1 AND revoked_at IS NULL',
+                     [storedToken.family]
+                 );
+             }
+             // Clear the cookie on the client
+             res.cookie('refreshToken', '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', expires: new Date(0) });
+             return res.status(403).json({ error: 'Session revoked' }); // Use 403 for revoked
+        }
 
-        res.json({ 
-            token: newToken,
-            user: {
-                id: user.rows[0].id,
-                username: user.rows[0].username,
-                email: user.rows[0].email,
-                role: user.rows[0].role
+        // Case 2: Token expired
+        const expiresAt = new Date(storedToken.expires_at);
+        const now = new Date();
+        if (expiresAt < now) {
+            console.log(`[${new Date().toISOString()}] /auth/refresh: Token hash found but session expired (expires_at: ${expiresAt.toISOString()}, now: ${now.toISOString()}).`);
+            // Clear the cookie on the client
+            res.cookie('refreshToken', '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', expires: new Date(0) });
+            return res.status(403).json({ error: 'Session expired' }); // Use 403 for expired
+        }
+
+        // --- Token is valid, proceed with rotation ---
+        console.log(`[${new Date().toISOString()}] /auth/refresh: Token is valid. Proceeding with rotation for user ${storedToken.user_id}, family ${storedToken.family}.`);
+
+        // Get user info
+        // Fetch comprehensive user details
+        const userResult = await pool.query(
+            'SELECT id, username, email, role, status FROM users WHERE id = $1', 
+            [storedToken.user_id]
+        );
+        if (userResult.rows.length === 0) {
+            console.error(`[${new Date().toISOString()}] /auth/refresh: User not found in DB for user_id ${storedToken.user_id} associated with token family ${storedToken.family}.`);
+            // Invalidate the potentially compromised token family
+            await pool.query(
+                'UPDATE user_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE family = $1 AND revoked_at IS NULL',
+                [storedToken.family]
+            );
+            res.cookie('refreshToken', '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', expires: new Date(0) });
+            return res.status(404).json({ error: 'User associated with token not found' });
+        }
+        const user = userResult.rows[0]; // Contains id, username, email, role, status
+
+        // Generate new tokens
+        const newAccessToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRATION });
+        const newRefreshToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: `${REFRESH_TOKEN_EXPIRATION_MS / 1000}s` }); // Use a different secret in production!
+        const newRefreshTokenHash = hashToken(newRefreshToken);
+        const newRefreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRATION_MS);
+
+        // Update the database: Revoke the old token and insert the new one within a transaction
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+            // Revoke the used session token
+            await client.query(
+                'UPDATE user_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE id = $1',
+                [storedToken.id]
+            );
+            // Insert the new session token (same family)
+            await client.query(
+                `INSERT INTO user_sessions (user_id, token_hash, family, expires_at, ip_address, user_agent)
+                 VALUES ($1, $2, $3, $4, $5, $6)`,
+                [user.id, newRefreshTokenHash, storedToken.family, newRefreshTokenExpiresAt, req.ip, req.headers['user-agent']]
+            );
+            await client.query('COMMIT');
+        } catch (dbError) {
+            await client.query('ROLLBACK');
+            console.error("Error during refresh token rotation:", dbError);
+            return res.status(500).json({ error: 'Database error during token rotation' });
+        } finally {
+            client.release();
+        }
+
+        // Set the new refresh token in the HttpOnly cookie
+        res.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: REFRESH_TOKEN_EXPIRATION_MS
+        });
+
+        // Send the new access token and full user details in the response body
+        res.json({
+            accessToken: newAccessToken,
+            user: { // Return comprehensive user details
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                status: user.status // Include status if needed by frontend
             }
         });
+        console.log(`[${new Date().toISOString()}] /auth/refresh: Successfully rotated token for user ${user.id}, family ${storedToken.family}. Sent new accessToken and user data.`);
+
     } catch (error) {
-        console.error('Error refreshing token:', error);
+        console.error(`[${new Date().toISOString()}] /auth/refresh: Error during token refresh process:`, error);
         res.status(500).json({ error: 'Error refreshing token' });
     }
 });
@@ -876,6 +1055,15 @@ app.post('/tts', authenticateToken, isActiveUser, async (req: Request, res: Resp
 
 // Add the error handling middleware
 app.use(errorHandler);
+
+// Constants for token expiration (example values, adjust as needed)
+const ACCESS_TOKEN_EXPIRATION = '15m'; // 15 minutes
+const REFRESH_TOKEN_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+
+// Helper function to hash refresh tokens
+function hashToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
+}
 
 // Start the server
 app.listen(port, () => {

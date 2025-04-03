@@ -38,41 +38,43 @@ const Login: React.FC<LoginProps & { onRegisterClick: () => void }> = ({ onLogin
             });
 
             if (response.ok) {
-                const data = await response.json();
+                // const data = await response.json(); // data is unused, comment out or remove
                 
                 // Store authentication information
-                localStorage.setItem('isAuthenticated', 'true');
-                localStorage.setItem('token', data.token);
-                
-                // Store user information
-                localStorage.setItem('user', JSON.stringify({
-                    id: data.user.id,
-                    username: data.user.username,
-                    email: data.user.email,
-                    role: data.user.role,
-                    status: data.user.status
-                }));
+                // No longer setting localStorage here.
+                // The access token and user info are now handled by useAuth hook state.
 
-                // Call login function with required information
+                // Call login function (now likely just triggers state update in useAuth)
+                // The actual onLogin prop might need adjustment depending on how useAuth is consumed
+                // Assuming onLogin is implicitly handled by the state update via useAuth's handleLogin
+                // onLogin(username, password); // This might be redundant if handleLogin updates context/state
+
+                // If onLogin prop is meant for something else (e.g., navigation), keep it.
+                // For now, assume useAuth handles the core login logic and state update.
+                // Call the onLogin prop (which triggers useAuth's handleLogin)
                 onLogin(username, password);
-                
+
             } else {
-                const errorData = await response.json();
+                // This 'else' block corresponds to the outer 'if (response.ok)'
+                const errorData = await response.json(); // Process error response
+                // Error handling remains similar, but no need to clear localStorage
                 if (errorData.code === 'USER_INACTIVE') {
                     setError('Your account is inactive. Please contact support.');
                 } else if (errorData.code === 'USER_NOT_FOUND') {
                     setError('Account not found. Please check your credentials.');
-                } else if (errorData.code === 'TOKEN_EXPIRED') {
+                } else if (errorData.code === 'TOKEN_EXPIRED') { // This error might change with refresh tokens
                     setError('Your session has expired. Please login again.');
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('isAuthenticated');
-                } else {
+                    // localStorage.removeItem('token'); // No longer needed
+                    // localStorage.removeItem('isAuthenticated'); // No longer needed
+                } else { // This is the final 'else' for the error code checks
                     setError(errorData.error || 'Login failed. Please check your credentials.');
                 }
-            }
+            } // This closes the 'else' block for 'if (response.ok)'
         } catch (error) {
             console.error('Error during login:', error);
-            setError('An error occurred during login. Please try again.');
+            // Ensure the error passed to setError is a string
+            const errorMessage = error instanceof Error ? error.message : 'An error occurred during login. Please try again.';
+            setError(errorMessage);
         }
     };
 

@@ -39,6 +39,7 @@ import { handleTranslation } from './utils/handleTranslation';
 import { handleSubmit } from './utils/handleSubmit';
 import { voiceOptions } from './utils/voiceOptions';
 import { FrequencyAnalysis, SavedItem, TokenCount } from './utils/Types';
+import useAuth from './utils/useAuth'; // Import useAuth
 
 interface AppInnerProps {
     showStats?: boolean;
@@ -82,6 +83,7 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
     const [dialogue, setDialogue] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
     const [isDialogueModalOpen, setIsDialogueModalOpen] = useState(false);
     const [isFrequencyModalOpen, setIsFrequencyModalOpen] = useState(false);
+    const { accessToken } = useAuth(); // Get accessToken from useAuth
 
     // Effect to load saved items and authentication state from localStorage on component mount
     useEffect(() => {
@@ -180,16 +182,16 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
         if (selectedSentence && definitions && sentences) {
             try {
                 // Always generate new TTS for the selected sentence
-                const token = localStorage.getItem('token');
-                const audioBlob = await handleGenerateTTS(selectedSentence, selectedVoice, selectedTTS, token);
-                const translation = await handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading, nativeLanguage, targetLanguage, selectedAPIService.value, selectedLLM.value);
+                // const token = localStorage.getItem('token'); // No longer needed
+                const audioBlob = await handleGenerateTTS(selectedSentence, selectedVoice, selectedTTS, accessToken); // Pass accessToken
+                const translationResult = await handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading, nativeLanguage, targetLanguage, selectedAPIService.value, selectedLLM.value, accessToken); // Pass accessToken
 
                 const audioKey = `audio_${Date.now()}`; // Generate a unique key for the audio
                 const newItem: SavedItem = {
                     sentence: selectedSentence,
                     definition: definitions.text,
                     audioKey: audioKey,
-                    translation: translation
+                    translation: translationResult // Use the result from handleTranslation
                 };
 
                 if (!savedItems.some(item => item.sentence === newItem.sentence)) {
@@ -258,8 +260,8 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
     // Function to handle TTS request
     const handleTTS = async (sentence: string) => {
         try {
-            const token = localStorage.getItem('token');
-            const audioBlob = await handleGenerateTTS(sentence, selectedVoice, selectedTTS, token);
+            // const token = localStorage.getItem('token'); // No longer needed
+            const audioBlob = await handleGenerateTTS(sentence, selectedVoice, selectedTTS, accessToken); // Pass accessToken
             const audioUrl = URL.createObjectURL(audioBlob);
             const audio = new Audio(audioUrl);
             audio.play();
@@ -310,7 +312,7 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                     {!showStats && (
                     <S.Section id="card-generator">
                         <h2>Card Generator</h2>
-                        <S.Form onSubmit={(e) => handleSubmit(e, setDefinitions, setSentences, setTotalTokenCount, setError, setIsGenerateLoading, setCurrentPage, updateTotalTokenCount, setShowGenerateNotification, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM)}> {/* Update the onSubmit prop */}
+                        <S.Form onSubmit={(e) => handleSubmit(e, setDefinitions, setSentences, setTotalTokenCount, setError, setIsGenerateLoading, setCurrentPage, updateTotalTokenCount, setShowGenerateNotification, nativeLanguage, targetLanguage, selectedAPIService, selectedTTS, word, selectedLLM, accessToken)}> {/* Pass accessToken */}
                             {/* API service selection dropdown */}
                             <S.FormGroup>
                                 <label htmlFor="api-service-select">AI Provider:</label>
@@ -411,14 +413,15 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                     nativeLanguage, 
                                     targetLanguage, // Passar o código da língua (ex: 'de-DE')
                                     selectedAPIService, 
-                                    selectedTTS, 
-                                    word, 
-                                    selectedLLM
+                                    selectedTTS,
+                                    word,
+                                    selectedLLM,
+                                    accessToken // Pass accessToken
                                 )}
                                 disabled={isDialogueLoading}>
                                     {isDialogueLoading ? 'Generating...' : 'Generate Dialogue'}
                                 </DialogueButton>
-                                <AnalyzeButton type="button" onClick={() => handleAnalyzeFrequency(setFrequencyAnalysis, setIsAnalyzeLoading, setError, updateTotalTokenCount, setIsFrequencyModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word)}
+                                <AnalyzeButton type="button" onClick={() => handleAnalyzeFrequency(setFrequencyAnalysis, setIsAnalyzeLoading, setError, updateTotalTokenCount, setIsFrequencyModalOpen, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word, accessToken)} // Pass accessToken
                                         disabled={isAnalyzeLoading}>
                                     {isAnalyzeLoading ? 'Analyzing...' : 'Analyze Frequency'}
                                 </AnalyzeButton>
@@ -477,7 +480,7 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                             <SaveButton onClick={handleSaveItem}>Save Sentence</SaveButton>
                                             <StyledTranslateButton
                                                 disabled={isTranslateLoading}
-                                                onClick={() => handleTranslation(selectedSentence, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading, nativeLanguage, targetLanguage, selectedAPIService.value, selectedLLM.value)}
+                                                onClick={() => handleTranslation(selectedSentence!, setError, setIsTranslateLoading, updateTotalTokenCount, setTranslation, isTranslateLoading, nativeLanguage, targetLanguage, selectedAPIService.value, selectedLLM.value, accessToken)} // Pass accessToken (added non-null assertion for selectedSentence)
                                             >
                                                 {isTranslateLoading ? 'Translating...' : 'Translate this sentence'}
                                             </StyledTranslateButton>

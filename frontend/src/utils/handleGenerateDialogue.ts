@@ -1,13 +1,26 @@
 // Import necessary dependencies and utility functions
 import { Dispatch, SetStateAction } from 'react';
-import { validateAndRefreshToken } from './validateAndRefreshToken';
+// import { validateAndRefreshToken } from './validateAndRefreshToken'; // Removed deprecated import
 import { TokenCount, APIServiceOption, TTSOption, LLMOption } from './Types';
 
 // Define the backend API URLs, using environment variables
-const DIALOGUE_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/dialogue';
+// const DIALOGUE_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/generate/dialogue'; // No longer needed
 
 // Function to handle generating dialogue
-export const handleGenerateDialogue = async (setDialogue: Dispatch<SetStateAction<{ text: string; tokenCount: TokenCount } | null>>, setIsDialogueLoading: Dispatch<SetStateAction<boolean>>, setError: Dispatch<SetStateAction<string | null>>, updateTotalTokenCount: (tokenCount: TokenCount) => void, setIsDialogueModalOpen: Dispatch<SetStateAction<boolean>>, nativeLanguage: string, targetLanguage: string, selectedAPIService: APIServiceOption, selectedTTS: TTSOption, word: string, selectedLLM: LLMOption) => {
+export const handleGenerateDialogue = async (
+    setDialogue: Dispatch<SetStateAction<{ text: string; tokenCount: TokenCount } | null>>,
+    setIsDialogueLoading: Dispatch<SetStateAction<boolean>>,
+    setError: Dispatch<SetStateAction<string | null>>,
+    updateTotalTokenCount: (tokenCount: TokenCount) => void,
+    setIsDialogueModalOpen: Dispatch<SetStateAction<boolean>>,
+    nativeLanguage: string,
+    targetLanguage: string,
+    selectedAPIService: APIServiceOption,
+    selectedTTS: TTSOption, // selectedTTS seems unused here, consider removing if not needed for dialogue logic
+    word: string,
+    selectedLLM: LLMOption,
+    token: string | null // Added token parameter
+) => {
   if (!nativeLanguage || !targetLanguage || !selectedAPIService || !selectedTTS || !word || selectedLLM.value === '') {
     setError('Please fill in all required fields.');
     return;
@@ -21,15 +34,15 @@ export const handleGenerateDialogue = async (setDialogue: Dispatch<SetStateActio
     console.log('Sending dialogue generation request...');
     console.log('Request payload:', { word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
-    // Validate and refresh token
-    const token = await validateAndRefreshToken();
+    // Check if token is provided (passed as parameter)
     if (!token) {
-      setError('Sessão expirada. Por favor faça login novamente.');
-      return;
+      setError('Sessão expirada ou inválida. Por favor faça login novamente.');
+      setIsDialogueLoading(false); // Ensure loading state is reset
+      return; // Exit if no token
     }
 
     // Send POST request to the dialogue generation endpoint
-    const dialogueResponse = await fetch(DIALOGUE_URL, {
+    const dialogueResponse = await fetch(`/generate/dialogue`, { // Use relative path
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

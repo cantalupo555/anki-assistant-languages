@@ -1,13 +1,25 @@
 // Import necessary dependencies and utility functions
 import { Dispatch, SetStateAction } from 'react';
-import { validateAndRefreshToken } from './validateAndRefreshToken';
+// import { validateAndRefreshToken } from './validateAndRefreshToken'; // Removed deprecated import
 import { TokenCount } from './Types';
 
 // Define the backend API URLs, using environment variables
-const TRANSLATION_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/translate';
+// const TRANSLATION_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/translate'; // No longer needed
 
 // Function to handle the translation of a given sentence
-export const handleTranslation = async (sentence: string, setError: Dispatch<SetStateAction<string | null>>, setIsTranslateLoading: Dispatch<SetStateAction<boolean>>, updateTotalTokenCount: (tokenCount: TokenCount) => void, setTranslation: Dispatch<SetStateAction<string | null>>, isTranslateLoading: boolean, nativeLanguage: string, targetLanguage: string, selectedAPIService: string, selectedLLM: string): Promise<string> => {
+export const handleTranslation = async (
+    sentence: string,
+    setError: Dispatch<SetStateAction<string | null>>,
+    setIsTranslateLoading: Dispatch<SetStateAction<boolean>>,
+    updateTotalTokenCount: (tokenCount: TokenCount) => void,
+    setTranslation: Dispatch<SetStateAction<string | null>>,
+    isTranslateLoading: boolean,
+    nativeLanguage: string,
+    targetLanguage: string,
+    selectedAPIService: string,
+    selectedLLM: string,
+    token: string | null // Added token parameter
+): Promise<string> => {
   if (isTranslateLoading) return ''; // Prevent multiple clicks while translating
 
   try {
@@ -23,15 +35,15 @@ export const handleTranslation = async (sentence: string, setError: Dispatch<Set
       llm: selectedLLM
     });
 
-    // Validate and refresh token
-    const token = await validateAndRefreshToken();
+    // Check if token is provided (passed as parameter)
     if (!token) {
-      setError('Sessão expirada. Por favor faça login novamente.');
-      return '';
+      setError('Sessão expirada ou inválida. Por favor faça login novamente.');
+      setIsTranslateLoading(false); // Ensure loading state is reset
+      return ''; // Return empty string on auth error
     }
 
     // Send POST request to the translation API endpoint
-    const response = await fetch(TRANSLATION_URL, {
+    const response = await fetch(`/translate`, { // Use relative path
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

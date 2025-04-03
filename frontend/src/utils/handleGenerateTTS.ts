@@ -1,15 +1,20 @@
 // Import necessary dependencies and utility functions
 import { stripMarkdown } from './markdownStripper';
-import { validateAndRefreshToken } from './validateAndRefreshToken';
+// import { validateAndRefreshToken } from './validateAndRefreshToken'; // Removed deprecated import
 import { VoiceOption, TTSOption } from './Types';
 
 // Define the backend API URLs, using environment variables
 const TTS_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/tts';
 
 // Function to handle generating TTS
-export const handleGenerateTTS = async (sentence: string, selectedVoice: VoiceOption, selectedTTS: TTSOption, token: string | null): Promise<Blob> => {
+export const handleGenerateTTS = async (
+    sentence: string,
+    selectedVoice: VoiceOption,
+    selectedTTS: TTSOption,
+    token: string | null // Parameter already exists
+): Promise<Blob> => {
     if (!token) {
-        throw new Error('Não autenticado');
+        throw new Error('Não autenticado'); // Keep existing check
     }
     const strippedSentence = stripMarkdown(sentence);
     const response = await fetch(TTS_URL, {
