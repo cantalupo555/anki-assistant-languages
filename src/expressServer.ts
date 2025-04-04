@@ -503,7 +503,8 @@ app.post('/auth/refresh', async (req: Request, res: Response) => {
              }
              // Clear the cookie on the client
              res.cookie('refreshToken', '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', expires: new Date(0) });
-             return res.status(403).json({ error: 'Session revoked' }); // Use 403 for revoked
+             // *** Return 403 Forbidden for revoked tokens ***
+             return res.status(403).json({ error: 'Session revoked (potential reuse detected)' });
         }
 
         // Case 2: Token expired
