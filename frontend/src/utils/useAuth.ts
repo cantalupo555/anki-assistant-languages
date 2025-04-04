@@ -1,5 +1,6 @@
 // Import necessary libraries
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { jwtDecode } from 'jwt-decode'; // Import jwt-decode
 
 // Define the backend API URL, using environment variables or a default value
 // const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000'; // No longer needed for relative paths
@@ -15,10 +16,12 @@ const useAuth = () => {
     const [user, setUser] = useState<any>(null);
     // State variable to store the access token IN MEMORY
     const [accessToken, setAccessToken] = useState<string | null>(null);
-    // Ref to track if the initial auth check has run (to prevent StrictMode double execution)
-    const didInitialize = useRef(false);
-    // Ref to prevent concurrent refresh token calls
+    // State variable to store the access token's expiration timestamp (in seconds since epoch)
+    const [accessTokenExpiresAt, setAccessTokenExpiresAt] = useState<number | null>(null);
+    // Ref to prevent concurrent refresh token calls (used in callApiWithAuth)
     const isRefreshing = useRef(false);
+    // Ref to ensure initial check runs only once despite StrictMode
+    const didRunInitialCheck = useRef(false);
 
     // Function to handle login
     const handleLogin = async (username: string, password: string) => {
@@ -38,7 +41,17 @@ const useAuth = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                setAccessToken(data.accessToken); // Store access token in state (memory)
+                const newAccessToken = data.accessToken;
+                setAccessToken(newAccessToken); // Store access token in state (memory)
+                // Decode token to get expiration time
+                try {
+                    const decodedToken: { exp: number } = jwtDecode(newAccessToken);
+                    setAccessTokenExpiresAt(decodedToken.exp); // Store expiration timestamp (seconds)
+                    console.log(`[${new Date().toISOString()}] handleLogin: New access token expires at: ${new Date(decodedToken.exp * 1000).toISOString()}`);
+                } catch (decodeError) {
+                    console.error("Error decoding access token:", decodeError);
+                    setAccessTokenExpiresAt(null); // Clear expiration if decode fails
+                }
                 setIsAuthenticated(true); // Set authenticated state immediately on successful login
                 setUser(data.user); // Set user data immediately
                 // Refresh token is handled by HttpOnly cookie automatically
@@ -47,6 +60,7 @@ const useAuth = () => {
                 const errorData = await response.json();
                 // Clear state on failed login
                 setAccessToken(null);
+                setAccessTokenExpiresAt(null); // Clear expiration on failed login
                 setIsAuthenticated(false);
                 setUser(null);
                 throw new Error(errorData.error || 'Credenciais inválidas');
@@ -55,6 +69,7 @@ const useAuth = () => {
             console.error('Erro durante o login:', error);
             // Ensure state is cleared on error
             setAccessToken(null);
+            setAccessTokenExpiresAt(null); // Clear expiration on error
             setIsAuthenticated(false);
             setUser(null);
             // Clean up any potential leftover local storage items from previous versions
@@ -88,7 +103,17 @@ const useAuth = () => {
 
             if (response.ok) {
                  const data = await response.json();
-                 setAccessToken(data.accessToken); // Store access token in state (memory)
+                 const newAccessToken = data.accessToken;
+                 setAccessToken(newAccessToken); // Store access token in state (memory)
+                 // Decode token to get expiration time
+                 try {
+                     const decodedToken: { exp: number } = jwtDecode(newAccessToken);
+                     setAccessTokenExpiresAt(decodedToken.exp); // Store expiration timestamp (seconds)
+                     console.log(`[${new Date().toISOString()}] handleRegister: New access token expires at: ${new Date(decodedToken.exp * 1000).toISOString()}`);
+                 } catch (decodeError) {
+                     console.error("Error decoding access token:", decodeError);
+                     setAccessTokenExpiresAt(null); // Clear expiration if decode fails
+                 }
                  setIsAuthenticated(true); // Set authenticated state immediately on successful registration
                  setUser(data.user); // Set user data immediately
                  // Refresh token handled by HttpOnly cookie
@@ -97,6 +122,7 @@ const useAuth = () => {
                  const errorData = await response.json();
                  // Clear state on failed registration
                  setAccessToken(null);
+                 setAccessTokenExpiresAt(null); // Clear expiration on failed registration
                  setIsAuthenticated(false);
                  setUser(null);
                  throw new Error(errorData.error || 'Registration failed');
@@ -105,6 +131,7 @@ const useAuth = () => {
             console.error('Error during registration:', error);
             // Ensure state is cleared on error
             setAccessToken(null);
+            setAccessTokenExpiresAt(null); // Clear expiration on error
             setIsAuthenticated(false);
             setUser(null);
             throw error; // Re-throw error
@@ -135,6 +162,7 @@ const useAuth = () => {
             // Clear frontend state regardless of backend response
             console.log(`[${new Date().toISOString()}] handleLogout: FINALLY block. Clearing state.`);
             setAccessToken(null);
+            setAccessTokenExpiresAt(null); // Clear expiration on logout
             setIsAuthenticated(false);
             setUser(null);
             // Clear any legacy localStorage items just in case
@@ -150,17 +178,11 @@ const useAuth = () => {
     }, []); // No dependencies needed
 
     // Function to attempt refreshing the access token
-    const refreshToken = useCallback(async (): Promise<boolean> => {
-        // *** Stricter check: Immediately exit if already refreshing ***
-        if (isRefreshing.current) {
-            console.warn(`[${new Date().toISOString()}] refreshToken: Aborted! Refresh operation already in progress.`);
-            // Return a resolved promise indicating no action was taken, or potentially the expected outcome
-            // For simplicity, let's return false, indicating no successful refresh occurred *in this specific call*.
-            return false;
-        }
-
-        isRefreshing.current = true; // Mark refresh as started *only if* not already in progress
-        console.log(`[${new Date().toISOString()}] refreshToken: Attempting... (isRefreshing = true)`);
+    // Returns the new access token string on success, or null on failure.
+    const refreshToken = useCallback(async (): Promise<string | null> => {
+        // *** Removed isRefreshing check and set/reset logic from here ***
+        // It's now handled by the useEffect hook that calls attemptInitialRefresh.
+        console.log(`[${new Date().toISOString()}] refreshToken: Entered.`);
 
         try {
             const fetchOptions = {
@@ -175,7 +197,17 @@ const useAuth = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                setAccessToken(data.accessToken); // Store the new access token in state
+                const newAccessToken = data.accessToken;
+                setAccessToken(newAccessToken); // Store the new access token in state
+                // Decode new token to get expiration time
+                try {
+                    const decodedToken: { exp: number } = jwtDecode(newAccessToken);
+                    setAccessTokenExpiresAt(decodedToken.exp); // Store expiration timestamp (seconds)
+                    console.log(`[${new Date().toISOString()}] refreshToken: Refreshed access token expires at: ${new Date(decodedToken.exp * 1000).toISOString()}`);
+                } catch (decodeError) {
+                    console.error("Error decoding refreshed access token:", decodeError);
+                    setAccessTokenExpiresAt(null); // Clear expiration if decode fails
+                }
                 setIsAuthenticated(true); // Mark as authenticated
                 // Update user data directly from refresh response
                 if (data.user) {
@@ -188,10 +220,10 @@ const useAuth = () => {
                     // await fetchUser(data.accessToken); // Example fallback
                 }
                 console.log(`[${new Date().toISOString()}] refreshToken: Success.`);
-                return true; // Indicate success
+                return data.accessToken; // Return the new access token
             } else {
                 // Log based on status code
-                if (response.status === 401) {
+                if (response.status === 401 || response.status === 403) { // Check for 403 as well
                     console.log(`[${new Date().toISOString()}] refreshToken: Failed with status 401 (Likely no active session).`);
                 } else {
                     console.error(`[${new Date().toISOString()}] refreshToken: Failed, status:`, response.status);
@@ -199,52 +231,156 @@ const useAuth = () => {
                 // If refresh fails (e.g., 401, 403 means invalid/expired refresh token), logout
                  console.log(`[${new Date().toISOString()}] refreshToken: Refresh failed, calling handleLogout...`);
                  await handleLogout(); // Use await as handleLogout is async
-                // Setting isCheckingAuth(false) is handled in finally
-                return false; // Indicate failure
+                // Setting isCheckingAuth(false) is handled by the caller (useEffect)
+                return null; // Indicate failure by returning null
             }
         } catch (error) {
             console.error(`[${new Date().toISOString()}] refreshToken: Network or other error:`, error);
              console.log(`[${new Date().toISOString()}] refreshToken: Error caught, calling handleLogout...`);
              await handleLogout(); // Logout on network or other errors
-            return false; // Indicate failure
+            return null; // Indicate failure by returning null
         } finally {
-             console.log(`[${new Date().toISOString()}] refreshToken: FINALLY block reached.`);
-             isRefreshing.current = false; // Mark refresh as finished
-             console.log(`[${new Date().toISOString()}] refreshToken: FINALLY block (isRefreshing = false)`);
-        }
-    }, [handleLogout]); // Add handleLogout as dependency
+            // *** Removed isRefreshing reset from here ***
+            console.log(`[${new Date().toISOString()}] refreshToken: FINALLY block reached.`);
+       }
+   }, [handleLogout]); // Add handleLogout as dependency
 
-    // Effect to check authentication status on initial load
+    // Effect to check authentication status ONCE on initial load
     useEffect(() => {
-        // This ref ensures the core logic runs only once.
-        if (!didInitialize.current) {
-            didInitialize.current = true;
-            console.log(`[${new Date().toISOString()}] useAuth: Initializing - First Run (didInitialize set).`);
+        console.log(`[${new Date().toISOString()}] useAuth: useEffect triggered. Checking didRunInitialCheck: ${didRunInitialCheck.current}`);
 
-            const attemptInitialRefresh = async () => {
-                console.log(`[${new Date().toISOString()}] useAuth: Attempting initial refreshToken...`);
-                try {
-                    await refreshToken(); // Call the refresh token logic
-                } catch (e) {
-                    // Errors during initial refresh are handled within refreshToken (calls handleLogout)
-                    console.error(`[${new Date().toISOString()}] useAuth: Error during initial refreshToken attempt:`, e);
-                } finally {
-                    // This block runs regardless of success or failure of refreshToken
-                    console.log(`[${new Date().toISOString()}] useAuth: Initial refreshToken attempt finished (finally block). Setting isCheckingAuth = false.`);
-                    // Crucially, set checking to false *only* after the first attempt is fully completed.
-                    setIsCheckingAuth(false);
-                }
-            };
-
-            // Execute the attempt.
-            attemptInitialRefresh();
-
-        } else {
-            // Log subsequent renders (e.g., StrictMode) but don't re-run the core logic or setIsCheckingAuth.
-            console.log(`[${new Date().toISOString()}] useAuth: Skipping initialization (already run or StrictMode re-run).`);
+        // --- Prevent execution on subsequent runs (e.g., StrictMode re-mount) ---
+        if (didRunInitialCheck.current) {
+            console.log(`[${new Date().toISOString()}] useAuth: Skipping useEffect run (didRunInitialCheck is true).`);
+            // Ensure loading state is false if we skip and it wasn't set previously
+            // It should be false already from the first run's finally block, but as a safeguard:
+            // setIsCheckingAuth(false); // Let the first run handle this in its finally block
+            return;
         }
+        // --- Mark that the initial check will now run ---
+        didRunInitialCheck.current = true;
+        console.log(`[${new Date().toISOString()}] useAuth: First useEffect run, setting didRunInitialCheck = true.`);
+
+        // Define the async function to attempt token refresh
+        const attemptInitialRefresh = async () => {
+            console.log(`[${new Date().toISOString()}] useAuth: Attempting initial refreshToken...`);
+            // isRefreshing flag is NOT used for this initial load check anymore
+
+            try {
+                await refreshToken(); // Call the refresh token logic
+            } catch (e) {
+                // Errors during initial refresh are handled within refreshToken (calls handleLogout)
+                console.error(`[${new Date().toISOString()}] useAuth: Error during initial refreshToken attempt (caught in useEffect):`, e);
+            } finally {
+                // This block runs regardless of success or failure of refreshToken,
+                // or if it was aborted by the isRefreshing check inside refreshToken.
+                console.log(`[${new Date().toISOString()}] useAuth: Initial refresh attempt finished (useEffect finally block). Setting isCheckingAuth = false.`);
+                // Crucially, set checking to false *after* the attempt is fully completed or aborted.
+                setIsCheckingAuth(false);
+                // *** DO NOT reset isRefreshing here (it wasn't set here) ***
+                console.log(`[${new Date().toISOString()}] useAuth: Initial refresh attempt finished (useEffect finally block).`);
+            }
+        };
+
+        // Execute the attempt directly. StrictMode will call this twice.
+        // The isRefreshing flag inside refreshToken should prevent the second network call.
+        attemptInitialRefresh();
+
+        // No cleanup needed for this approach
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Keep empty dependency array for mount-only execution.
+    }, [refreshToken]); // Add refreshToken dependency as it's used inside
+
+    // Wrapper function for making authenticated API calls with automatic token refresh
+    const callApiWithAuth = useCallback(async (url: string, options: RequestInit = {}): Promise<Response> => {
+        let currentToken = accessToken; // Use state directly
+        let currentExpiresAt = accessTokenExpiresAt; // Use state directly
+
+        // --- Proactive Refresh Check ---
+        const nowInSeconds = Date.now() / 1000;
+        // Check if expiration exists and is in the past or very near future (e.g., 10 seconds buffer)
+        if (currentExpiresAt && nowInSeconds >= (currentExpiresAt - 10)) {
+            console.log(`[${new Date().toISOString()}] callApiWithAuth: Access token expired or expiring soon (exp: ${currentExpiresAt}, now: ${nowInSeconds}). Attempting proactive refresh.`);
+
+            if (isRefreshing.current) {
+                console.warn(`[${new Date().toISOString()}] callApiWithAuth: Aborting proactive refresh attempt as another is already in progress.`);
+                // If already refreshing, we might need to wait or handle differently,
+                // but for now, let's proceed and let the 401 handling catch it if needed.
+                // Alternatively, could implement a waiting mechanism here.
+            } else {
+                 isRefreshing.current = true;
+                 console.log(`[${new Date().toISOString()}] callApiWithAuth: >>> Calling refreshToken proactively... (isRefreshing = true)`);
+                 const proactivelyRefreshedToken = await refreshToken();
+                 isRefreshing.current = false;
+                 console.log(`[${new Date().toISOString()}] callApiWithAuth: <<< Proactive refreshToken finished. New token received: ${!!proactivelyRefreshedToken}. (isRefreshing = false)`);
+
+                 if (proactivelyRefreshedToken) {
+                     currentToken = proactivelyRefreshedToken; // Update token for the upcoming call
+                     // Re-read expiration from state as refreshToken updates it
+                     currentExpiresAt = accessTokenExpiresAt;
+                 } else {
+                     console.error(`[${new Date().toISOString()}] callApiWithAuth: Proactive token refresh failed. Logout should have occurred.`);
+                     // If proactive refresh fails, logout is handled by refreshToken.
+                     // We should probably not proceed with the API call.
+                     // Return a synthetic error response or throw.
+                     return new Response(JSON.stringify({ error: 'Session refresh failed' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+                 }
+            }
+        }
+        // --- End Proactive Refresh Check ---
+
+
+        // Prepare headers
+        const headers = new Headers(options.headers);
+        if (currentToken) {
+            headers.set('Authorization', `Bearer ${currentToken}`);
+        }
+        // Ensure credentials are included for refresh token cookie
+        options.credentials = 'include';
+
+        console.log(`[${new Date().toISOString()}] callApiWithAuth: >>> Initial fetch attempt to ${url} with token: ${currentToken ? currentToken.substring(0, 10) + '...' : 'null'}`);
+        // Initial API call
+        let response = await fetch(url, { ...options, headers });
+        console.log(`[${new Date().toISOString()}] callApiWithAuth: <<< Initial fetch response status for ${url}: ${response.status}`);
+
+        // Check if token expired (401/403)
+        if (response.status === 401 || response.status === 403) {
+            console.log(`[${new Date().toISOString()}] callApiWithAuth: Received ${response.status} for ${url}. Attempting token refresh.`);
+
+            // Use a separate ref to prevent multiple concurrent *refresh* attempts triggered by *different* failed API calls
+            if (isRefreshing.current) {
+                 console.warn(`[${new Date().toISOString()}] callApiWithAuth: Aborting refresh attempt as another is already in progress.`);
+                 // Return the original error response if refresh is already happening elsewhere
+                 return response;
+            }
+
+            isRefreshing.current = true; // Mark refresh as started
+            console.log(`[${new Date().toISOString()}] callApiWithAuth: >>> Calling refreshToken due to ${response.status}... (isRefreshing = true)`);
+            const newToken = await refreshToken(); // Attempt to refresh
+            isRefreshing.current = false; // Mark refresh as finished
+            console.log(`[${new Date().toISOString()}] callApiWithAuth: <<< refreshToken finished. New token received: ${!!newToken}. (isRefreshing = false)`);
+
+
+            if (newToken) {
+                console.log(`[${new Date().toISOString()}] callApiWithAuth: Token refreshed successfully. Retrying original request to ${url}.`);
+                // Update headers with the new token
+                headers.set('Authorization', `Bearer ${newToken}`);
+                console.log(`[${new Date().toISOString()}] callApiWithAuth: >>> Retrying fetch to ${url} with new token: ${newToken.substring(0, 10)}...`);
+                // Retry the original request
+                response = await fetch(url, { ...options, headers });
+                console.log(`[${new Date().toISOString()}] callApiWithAuth: <<< Retry fetch response status for ${url}: ${response.status}`);
+            } else {
+                console.error(`[${new Date().toISOString()}] callApiWithAuth: Token refresh failed. Logout should have been triggered by refreshToken.`);
+                // Logout is handled within refreshToken failure, just return the original error response
+                // Or potentially throw a new error to signal catastrophic failure
+                // throw new Error('Session expired or invalid.');
+                return response; // Return original 401/403 response
+            }
+        }
+
+        // Return the final response (either from initial call or retry)
+        return response;
+
+    }, [accessToken, refreshToken, accessTokenExpiresAt]); // Dependencies: Added accessTokenExpiresAt for proactive check
 
     // The logic previously in this effect is now handled by:
     // 1. refreshToken success: Sets isAuthenticated and user.
@@ -256,12 +392,13 @@ const useAuth = () => {
         isAuthenticated,
         isCheckingAuth,
         user,
-        accessToken, // Expose accessToken for API call wrappers
+        accessToken, // Expose accessToken (though direct use discouraged)
+        // accessTokenExpiresAt, // Probably don't need to expose this
         handleLogin,
         handleRegister,
         handleLogout,
-        refreshToken, // Expose refresh function if needed
-        // attemptRefreshOrLogout // This helper might be less needed now
+        refreshToken, // Expose core refresh function
+        callApiWithAuth // Expose the wrapped fetch function
     };
 };
 
