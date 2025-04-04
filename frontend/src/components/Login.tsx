@@ -21,59 +21,25 @@ const Login: React.FC<LoginProps & { onRegisterClick: () => void }> = ({ onLogin
         // Basic field validation
         if (!username || !password) {
             setError('Please fill in both username and password fields.');
-            return;
+            return; // Remove duplicate return
         }
 
+        // Clear previous errors
+        setError(null);
+
         try {
-            // Make a POST request to the login endpoint
-            const response = await fetch('http://localhost:5000/login', {
-                method: 'POST', // Use POST method for login
-                headers: {
-                    'Content-Type': 'application/json', // Set content type to JSON
-                },
-                body: JSON.stringify({ 
-                    username, // Send username from form
-                    password  // Send password from form
-                }),
-            });
+            // Call the onLogin prop (which triggers useAuth's handleLogin)
+            // handleLogin will perform the fetch and handle success/error states
+            await onLogin(username, password);
+            // If onLogin completes without throwing an error, login was successful.
+            // Navigation or further actions should be handled by the parent component (AuthWrapper)
+            // based on the updated isAuthenticated state from useAuth.
 
-            if (response.ok) {
-                // const data = await response.json(); // data is unused, comment out or remove
-                
-                // Store authentication information
-                // No longer setting localStorage here.
-                // The access token and user info are now handled by useAuth hook state.
-
-                // Call login function (now likely just triggers state update in useAuth)
-                // The actual onLogin prop might need adjustment depending on how useAuth is consumed
-                // Assuming onLogin is implicitly handled by the state update via useAuth's handleLogin
-                // onLogin(username, password); // This might be redundant if handleLogin updates context/state
-
-                // If onLogin prop is meant for something else (e.g., navigation), keep it.
-                // For now, assume useAuth handles the core login logic and state update.
-                // Call the onLogin prop (which triggers useAuth's handleLogin)
-                onLogin(username, password);
-
-            } else {
-                // This 'else' block corresponds to the outer 'if (response.ok)'
-                const errorData = await response.json(); // Process error response
-                // Error handling remains similar, but no need to clear localStorage
-                if (errorData.code === 'USER_INACTIVE') {
-                    setError('Your account is inactive. Please contact support.');
-                } else if (errorData.code === 'USER_NOT_FOUND') {
-                    setError('Account not found. Please check your credentials.');
-                } else if (errorData.code === 'TOKEN_EXPIRED') { // This error might change with refresh tokens
-                    setError('Your session has expired. Please login again.');
-                    // localStorage.removeItem('token'); // No longer needed
-                    // localStorage.removeItem('isAuthenticated'); // No longer needed
-                } else { // This is the final 'else' for the error code checks
-                    setError(errorData.error || 'Login failed. Please check your credentials.');
-                }
-            } // This closes the 'else' block for 'if (response.ok)'
         } catch (error) {
-            console.error('Error during login:', error);
-            // Ensure the error passed to setError is a string
-            const errorMessage = error instanceof Error ? error.message : 'An error occurred during login. Please try again.';
+            // handleLogin in useAuth should throw an error on failure
+            console.error('Error during login (caught in Login.tsx):', error);
+            // Display the error message from the thrown error
+            const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred during login.';
             setError(errorMessage);
         }
     };

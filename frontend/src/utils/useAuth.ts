@@ -33,15 +33,16 @@ const useAuth = () => {
                     username,
                     password
                 }),
-                // credentials: 'include' // Not needed for login itself, but needed for refresh later
+                credentials: 'include' // Send cookies if any exist, needed for potential future session checks
             });
 
             if (response.ok) {
                 const data = await response.json();
                 setAccessToken(data.accessToken); // Store access token in state (memory)
-                setIsAuthenticated(true);
-                setUser(data.user); // Store user data from response
+                setIsAuthenticated(true); // Set authenticated state immediately on successful login
+                setUser(data.user); // Set user data immediately
                 // Refresh token is handled by HttpOnly cookie automatically
+                // The initial useEffect will still run refreshToken for verification/refresh if needed
             } else {
                 const errorData = await response.json();
                 // Clear state on failed login
@@ -82,14 +83,16 @@ const useAuth = () => {
                     status: 'active', // Adding default status
                     role: 'user'      // Adding default role
                 }),
+                credentials: 'include' // Send cookies if any exist
             });
 
             if (response.ok) {
                  const data = await response.json();
                  setAccessToken(data.accessToken); // Store access token in state (memory)
-                 setIsAuthenticated(true);
-                 setUser(data.user); // Store user data from response
+                 setIsAuthenticated(true); // Set authenticated state immediately on successful registration
+                 setUser(data.user); // Set user data immediately
                  // Refresh token handled by HttpOnly cookie
+                 // The initial useEffect will still run refreshToken for verification/refresh if needed
              } else {
                  const errorData = await response.json();
                  // Clear state on failed registration
@@ -148,13 +151,15 @@ const useAuth = () => {
 
     // Function to attempt refreshing the access token
     const refreshToken = useCallback(async (): Promise<boolean> => {
-        // Prevent concurrent refresh attempts
+        // *** Stricter check: Immediately exit if already refreshing ***
         if (isRefreshing.current) {
-            console.log(`[${new Date().toISOString()}] refreshToken: Aborted, refresh already in progress.`);
-            return false; // Indicate failure (or maybe true if we assume the ongoing one will succeed?) Let's stick with false.
+            console.warn(`[${new Date().toISOString()}] refreshToken: Aborted! Refresh operation already in progress.`);
+            // Return a resolved promise indicating no action was taken, or potentially the expected outcome
+            // For simplicity, let's return false, indicating no successful refresh occurred *in this specific call*.
+            return false;
         }
 
-        isRefreshing.current = true; // Mark refresh as started
+        isRefreshing.current = true; // Mark refresh as started *only if* not already in progress
         console.log(`[${new Date().toISOString()}] refreshToken: Attempting... (isRefreshing = true)`);
 
         try {
@@ -211,52 +216,40 @@ const useAuth = () => {
 
     // Effect to check authentication status on initial load
     useEffect(() => {
-        // Use didInitialize ref to ensure this logic runs only once across mounts/Strict Mode
+        // This ref ensures the core logic runs only once.
         if (!didInitialize.current) {
-            didInitialize.current = true; // Mark as initialized *immediately*
-            console.log(`[${new Date().toISOString()}] useAuth: Initializing Auth (didInitialize set)...`);
+            didInitialize.current = true;
+            console.log(`[${new Date().toISOString()}] useAuth: Initializing - First Run (didInitialize set).`);
 
-            // Define the async function inside the effect
             const attemptInitialRefresh = async () => {
                 console.log(`[${new Date().toISOString()}] useAuth: Attempting initial refreshToken...`);
-                await refreshToken(); // Call refreshToken directly
-                console.log(`[${new Date().toISOString()}] useAuth: Initial refreshToken attempt finished.`);
+                try {
+                    await refreshToken(); // Call the refresh token logic
+                } catch (e) {
+                    // Errors during initial refresh are handled within refreshToken (calls handleLogout)
+                    console.error(`[${new Date().toISOString()}] useAuth: Error during initial refreshToken attempt:`, e);
+                } finally {
+                    // This block runs regardless of success or failure of refreshToken
+                    console.log(`[${new Date().toISOString()}] useAuth: Initial refreshToken attempt finished (finally block). Setting isCheckingAuth = false.`);
+                    // Crucially, set checking to false *only* after the first attempt is fully completed.
+                    setIsCheckingAuth(false);
+                }
             };
 
-            // Call the async function and set isCheckingAuth to false *only* after it completes
-            attemptInitialRefresh().finally(() => {
-                console.log(`[${new Date().toISOString()}] useAuth: Initial auth attempt completed. Setting isCheckingAuth = false.`);
-                setIsCheckingAuth(false);
-            });
+            // Execute the attempt.
+            attemptInitialRefresh();
 
         } else {
-            // If already initialized (e.g., StrictMode second run), ensure isCheckingAuth is false.
-            // The first run's finally block should handle this, but this is a safeguard.
-            console.log(`[${new Date().toISOString()}] useAuth: Skipping initialization (already run).`);
-            if (isCheckingAuth) {
-                 console.log(`[${new Date().toISOString()}] useAuth: Skipped initialization, ensuring isCheckingAuth is false.`);
-                 setIsCheckingAuth(false);
-            }
+            // Log subsequent renders (e.g., StrictMode) but don't re-run the core logic or setIsCheckingAuth.
+            console.log(`[${new Date().toISOString()}] useAuth: Skipping initialization (already run or StrictMode re-run).`);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Empty dependency array ensures this runs only on mount/StrictMode remount
+    }, []); // Keep empty dependency array for mount-only execution.
 
-     // Simplified Effect: Clear user state if token becomes null
-     // We rely on refreshToken (called initially or on API failure) to set the user state.
-     useEffect(() => {
-         console.log(`[${new Date().toISOString()}] useAuth: useEffect [accessToken] START. AccessToken: ${accessToken ? accessToken.substring(0, 5)+'...' : 'null'}`);
-         if (!accessToken) {
-              console.log(`[${new Date().toISOString()}] useAuth: accessToken is null.`);
-              // Ensure user is logged out if token becomes null
-              if (isAuthenticated || user) { // If authenticated or user data exists but token is gone
-                  console.log(`[${new Date().toISOString()}] useAuth: Token became null while authenticated/user data existed. Clearing auth state.`);
-                  setIsAuthenticated(false);
-                  setUser(null);
-              }
-         }
-         // No need to call fetchUser here anymore. Refresh handles user state.
-         console.log(`[${new Date().toISOString()}] useAuth: useEffect [accessToken] END`);
-     }, [accessToken, isAuthenticated, user]); // Dependencies: accessToken, isAuthenticated, user
+    // The logic previously in this effect is now handled by:
+    // 1. refreshToken success: Sets isAuthenticated and user.
+    // 2. refreshToken failure: Calls handleLogout, which clears state.
+    // 3. handleLogout: Clears state.
 
     // Return the authentication state and functions
     return {
