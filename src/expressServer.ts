@@ -517,66 +517,30 @@ app.post('/auth/refresh', async (req: Request, res: Response) => {
             return res.status(403).json({ error: 'Session expired' }); // Use 403 for expired
         }
 
-        // --- Token is valid, proceed with rotation ---
-        console.log(`[${new Date().toISOString()}] /auth/refresh: Token is valid. Proceeding with rotation for user ${storedToken.user_id}, family ${storedToken.family}.`);
+        // --- Token is valid, proceed WITHOUT rotation ---
+        console.log(`[${new Date().toISOString()}] /auth/refresh: Token is valid. Proceeding WITHOUT rotation for user ${storedToken.user_id}, family ${storedToken.family}.`);
 
         // Get user info
-        // Fetch comprehensive user details
         const userResult = await pool.query(
-            'SELECT id, username, email, role, status FROM users WHERE id = $1', 
+            'SELECT id, username, email, role, status FROM users WHERE id = $1',
             [storedToken.user_id]
         );
         if (userResult.rows.length === 0) {
-            console.error(`[${new Date().toISOString()}] /auth/refresh: User not found in DB for user_id ${storedToken.user_id} associated with token family ${storedToken.family}.`);
-            // Invalidate the potentially compromised token family
-            await pool.query(
-                'UPDATE user_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE family = $1 AND revoked_at IS NULL',
-                [storedToken.family]
-            );
+            console.error(`[${new Date().toISOString()}] /auth/refresh: User not found in DB for user_id ${storedToken.user_id} associated with token ${storedToken.id}.`);
+            // Clear the cookie as the session is invalid
             res.cookie('refreshToken', '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', expires: new Date(0) });
             return res.status(404).json({ error: 'User associated with token not found' });
         }
-        const user = userResult.rows[0]; // Contains id, username, email, role, status
+        const user = userResult.rows[0];
 
-        // Generate new tokens
+        // Generate ONLY a new access token
         const newAccessToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRATION });
-        const newRefreshToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: `${REFRESH_TOKEN_EXPIRATION_MS / 1000}s` }); // Use a different secret in production!
-        const newRefreshTokenHash = hashToken(newRefreshToken);
-        const newRefreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRATION_MS);
 
-        // Update the database: Revoke the old token and insert the new one within a transaction
-        const client = await pool.connect();
-        try {
-            await client.query('BEGIN');
-            // Revoke the used session token
-            await client.query(
-                'UPDATE user_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE id = $1',
-                [storedToken.id]
-            );
-            // Insert the new session token (same family)
-            await client.query(
-                `INSERT INTO user_sessions (user_id, token_hash, family, expires_at, ip_address, user_agent)
-                 VALUES ($1, $2, $3, $4, $5, $6)`,
-                [user.id, newRefreshTokenHash, storedToken.family, newRefreshTokenExpiresAt, req.ip, req.headers['user-agent']]
-            );
-            await client.query('COMMIT');
-        } catch (dbError) {
-            await client.query('ROLLBACK');
-            console.error("Error during refresh token rotation:", dbError);
-            return res.status(500).json({ error: 'Database error during token rotation' });
-        } finally {
-            client.release();
-        }
+        // *** DO NOT generate a new refresh token ***
+        // *** DO NOT update the database (no revocation, no insertion) ***
+        // *** DO NOT set a new refresh token cookie ***
 
-        // Set the new refresh token in the HttpOnly cookie
-        res.cookie('refreshToken', newRefreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: REFRESH_TOKEN_EXPIRATION_MS
-        });
-
-        // Send the new access token and full user details in the response body
+        // Send the new access token and user details in the response body
         res.json({
             accessToken: newAccessToken,
             user: { // Return comprehensive user details
@@ -587,10 +551,12 @@ app.post('/auth/refresh', async (req: Request, res: Response) => {
                 status: user.status // Include status if needed by frontend
             }
         });
-        console.log(`[${new Date().toISOString()}] /auth/refresh: Successfully rotated token for user ${user.id}, family ${storedToken.family}. Sent new accessToken and user data.`);
+        console.log(`[${new Date().toISOString()}] /auth/refresh: Successfully refreshed access token for user ${user.id}. Refresh token was NOT rotated.`);
 
     } catch (error) {
         console.error(`[${new Date().toISOString()}] /auth/refresh: Error during token refresh process:`, error);
+        // Ensure cookie is cleared on unexpected errors during refresh
+        res.cookie('refreshToken', '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', expires: new Date(0) });
         res.status(500).json({ error: 'Error refreshing token' });
     }
 });
@@ -1058,7 +1024,7 @@ app.post('/tts', authenticateToken, isActiveUser, async (req: Request, res: Resp
 app.use(errorHandler);
 
 // Constants for token expiration (example values, adjust as needed)
-const ACCESS_TOKEN_EXPIRATION = '15m'; // 15 minutes
+const ACCESS_TOKEN_EXPIRATION = '1m'; // 1 minute (for testing)
 const REFRESH_TOKEN_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 // Helper function to hash refresh tokens
