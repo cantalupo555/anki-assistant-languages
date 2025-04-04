@@ -52,14 +52,20 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     }
 
     // Verify the JWT token
-    jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
-        // Handle invalid or expired tokens
+    jwt.verify(token, JWT_SECRET, (err: jwt.VerifyErrors | null, decoded: any) => { // Use types from jsonwebtoken
+        // Handle verification errors
         if (err) {
-            res.status(403).json({ error: 'Invalid or expired token' });
-            return;
+            // Check specifically for expiration error
+            if (err.name === 'TokenExpiredError') {
+                console.log(`[${new Date().toISOString()}] authenticateToken: Access Token EXPIRED. Returning 401.`); // Added log detail
+                return res.status(401).json({ error: 'Token expired', code: 'TOKEN_EXPIRED' }); // Return 401 for expired
+            }
+            // For other errors (malformed, invalid signature, etc.)
+            console.log(`[${new Date().toISOString()}] authenticateToken: Token verification failed:`, err.message);
+            return res.status(403).json({ error: 'Invalid token', code: 'TOKEN_INVALID' }); // Return 403 for other invalid cases
         }
 
-        // Validate token payload structure
+        // Validate token payload structure (after successful verification)
         if (!decoded.userId || !decoded.role) {
             res.status(403).json({ error: 'Malformed token' });
             return;
