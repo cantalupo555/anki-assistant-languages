@@ -19,7 +19,8 @@ export const handleGenerateDialogue = async (
     selectedTTS: TTSOption, // selectedTTS seems unused here, consider removing if not needed for dialogue logic
     word: string,
     selectedLLM: LLMOption,
-    token: string | null // Added token parameter
+    // Replace token parameter with callApiWithAuth function
+    callApiWithAuth: (url: string, options?: RequestInit) => Promise<Response>
 ) => {
   if (!nativeLanguage || !targetLanguage || !selectedAPIService || !selectedTTS || !word || selectedLLM.value === '') {
     setError('Please fill in all required fields.');
@@ -34,19 +35,14 @@ export const handleGenerateDialogue = async (
     console.log('Sending dialogue generation request...');
     console.log('Request payload:', { word, targetLanguage, nativeLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
-    // Check if token is provided (passed as parameter)
-    if (!token) {
-      setError('Sessão expirada ou inválida. Por favor faça login novamente.');
-      setIsDialogueLoading(false); // Ensure loading state is reset
-      return; // Exit if no token
-    }
+    // No need for explicit token check here
 
-    // Send POST request to the dialogue generation endpoint
-    const dialogueResponse = await fetch(`/generate/dialogue`, { // Use relative path
+    // Send POST request using callApiWithAuth
+    const dialogueResponse = await callApiWithAuth(`/generate/dialogue`, { // Use relative path and callApiWithAuth
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
+        // Authorization header is handled by callApiWithAuth
       },
       body: JSON.stringify({
         word: word,

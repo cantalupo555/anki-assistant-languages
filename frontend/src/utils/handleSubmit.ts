@@ -25,7 +25,8 @@ export const handleSubmit = async (
     selectedTTS: TTSOption, // selectedTTS seems unused here, consider removing if not needed for submit logic
     word: string,
     selectedLLM: LLMOption,
-    token: string | null // Added token parameter
+    // Replace token parameter with callApiWithAuth function
+    callApiWithAuth: (url: string, options?: RequestInit) => Promise<Response>
 ) => {
   e.preventDefault();
   if (!nativeLanguage || !targetLanguage || !selectedAPIService || !selectedTTS || !word || !selectedLLM) {
@@ -37,18 +38,13 @@ export const handleSubmit = async (
   setCurrentPage(1);
 
   try {
-    // Check if token is provided before proceeding
-    if (!token) {
-        setError('Sessão expirada ou inválida. Por favor faça login novamente.');
-        setIsGenerateLoading(false); // Ensure loading state is reset
-        return; // Exit if no token
-    }
+    // No need for explicit token check here, callApiWithAuth handles it implicitly
 
-    // Generate definitions
-    const definitionsTokenCount = await handleGenerateDefinitions(setDefinitions, setError, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word, token); // Pass token
+    // Generate definitions - Pass callApiWithAuth down
+    const definitionsTokenCount = await handleGenerateDefinitions(setDefinitions, setError, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word, callApiWithAuth);
 
-    // Generate sentences
-    const sentencesTokenCount = await handleGenerateSentences(setSentences, setError, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word, token); // Pass token
+    // Generate sentences - Pass callApiWithAuth down
+    const sentencesTokenCount = await handleGenerateSentences(setSentences, setError, nativeLanguage, targetLanguage, selectedAPIService, selectedLLM, word, callApiWithAuth);
 
     // Log request details for debugging
     console.log('Request payload for total token count:', {
@@ -57,15 +53,12 @@ export const handleSubmit = async (
       translationTokens: { inputTokens: 0, outputTokens: 0, totalTokens: 0 } // Assuming translation is not part of initial submit
     });
 
-    // Note: The 'token' variable is already available from the function parameters.
-    // The check for its existence was done earlier. No need for validateAndRefreshToken() here.
-
-    // Calculate total token count (using the already validated token)
-    const totalTokenCountResponse = await fetch(`/token/sum`, { // Use relative path
+    // Calculate total token count using callApiWithAuth
+    const totalTokenCountResponse = await callApiWithAuth(`/token/sum`, { // Use relative path and callApiWithAuth
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
+        // Authorization header is handled by callApiWithAuth
       },
       body: JSON.stringify({
         definitionsTokens: definitionsTokenCount,

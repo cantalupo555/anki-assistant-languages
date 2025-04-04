@@ -11,17 +11,17 @@ export const handleGenerateTTS = async (
     sentence: string,
     selectedVoice: VoiceOption,
     selectedTTS: TTSOption,
-    token: string | null // Parameter already exists
+    // Replace token parameter with callApiWithAuth function
+    callApiWithAuth: (url: string, options?: RequestInit) => Promise<Response>
 ): Promise<Blob> => {
-    if (!token) {
-        throw new Error('Não autenticado'); // Keep existing check
-    }
+    // No need for explicit token check here
     const strippedSentence = stripMarkdown(sentence);
-    const response = await fetch(TTS_URL, {
+    // Use callApiWithAuth instead of fetch
+    const response = await callApiWithAuth(TTS_URL, { // Use callApiWithAuth
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
+            // Authorization header is handled by callApiWithAuth
         },
         body: JSON.stringify({
             text: strippedSentence,

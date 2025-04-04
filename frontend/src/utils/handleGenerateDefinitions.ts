@@ -15,7 +15,8 @@ export const handleGenerateDefinitions = async (
     selectedAPIService: APIServiceOption,
     selectedLLM: LLMOption,
     word: string,
-    token: string | null // Added token parameter
+    // Replace token parameter with callApiWithAuth function
+    callApiWithAuth: (url: string, options?: RequestInit) => Promise<Response>
 ): Promise<TokenCount> => {
   if (!nativeLanguage || !targetLanguage || !selectedAPIService || !word || selectedLLM.value === '') {
     setError('Please fill in all required fields.');
@@ -29,18 +30,14 @@ export const handleGenerateDefinitions = async (
     console.log('Sending definitions generation request...');
     console.log('Request payload:', { word, language: targetLanguage, apiService: selectedAPIService.value, llm: selectedLLM.value });
 
-    // Check if token is provided (passed as parameter)
-    if (!token) {
-      setError('Sessão expirada ou inválida. Por favor faça login novamente.');
-      return { inputTokens: 0, outputTokens: 0, totalTokens: 0 }; // Return default token count on auth error
-    }
+    // No need to check for token here, callApiWithAuth handles Authorization header
 
-    // Send POST request to the definitions generation endpoint
-    const definitionsResponse = await fetch(`/generate/definitions`, { // Use relative path
+    // Send POST request using the wrapped function
+    const definitionsResponse = await callApiWithAuth(`/generate/definitions`, { // Use relative path and callApiWithAuth
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
+        // Authorization header is now handled by callApiWithAuth
       },
       body: JSON.stringify({
         word: word,

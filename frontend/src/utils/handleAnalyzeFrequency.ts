@@ -18,7 +18,8 @@ export const handleAnalyzeFrequency = async (
     selectedAPIService: APIServiceOption,
     selectedLLM: LLMOption,
     word: string,
-    token: string | null // Added token parameter
+    // Replace token parameter with callApiWithAuth function
+    callApiWithAuth: (url: string, options?: RequestInit) => Promise<Response>
 ) => {
   // Validate required fields
   if (!nativeLanguage || !targetLanguage || !selectedAPIService || !word || selectedLLM.value === '') {
@@ -37,22 +38,17 @@ export const handleAnalyzeFrequency = async (
       targetLanguage, 
       nativeLanguage, 
       apiService: selectedAPIService.value, 
-      llm: selectedLLM.value 
+      llm: selectedLLM.value
     });
 
-    // Check if token is provided (passed as parameter)
-    if (!token) {
-      setError('Sessão expirada ou inválida. Por favor faça login novamente.');
-      setIsAnalyzeLoading(false); // Ensure loading state is reset
-      return; // Exit if no token
-    }
+    // No need for explicit token check here
 
-    // Send POST request to the frequency analysis endpoint
-    const analysisResponse = await fetch(`/analyze/frequency`, { // Use relative path
+    // Send POST request using callApiWithAuth
+    const analysisResponse = await callApiWithAuth(`/analyze/frequency`, { // Use relative path and callApiWithAuth
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
+        // Authorization header is handled by callApiWithAuth
       },
       body: JSON.stringify({
         word: word,
