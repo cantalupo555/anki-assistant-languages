@@ -8,12 +8,10 @@ export const apiServiceOptions: APIServiceOption[] = [
 
 export const llmOptions: { [key: string]: LLMOption[] } = {
   openrouter: [
-    { name: 'Qwen2.5 72B Instruct', value: 'qwen/qwen-2.5-72b-instruct' },
-    { name: 'Llama 3.3 70B Instruct', value: 'meta-llama/llama-3.3-70b-instruct' },
-    { name: 'Nova Lite 1.0', value: 'amazon/nova-lite-v1' },
-    { name: 'Command R (08-2024)', value: 'cohere/command-r-08-2024' },
+    { name: 'Llama 4 Maverick', value: 'meta-llama/llama-4-maverick' },
+    { name: 'DeepSeek V3-0324', value: 'deepseek/deepseek-chat-v3-0324' },
+    { name: 'Gemini 2.0 Flash', value: 'google/gemini-2.0-flash-001' },
     { name: 'Claude 3.5 Haiku', value: 'anthropic/claude-3-5-haiku' },
-    { name: 'DeepSeek V3', value: 'deepseek/deepseek-chat' },
   ],
   google: [
     { name: 'Gemini 2.0 Flash Exp', value: 'gemini-2.0-flash-exp' },
