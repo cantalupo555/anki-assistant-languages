@@ -47,6 +47,8 @@ This file defines the code conventions that should be followed in this project. 
     -   `src/styles`: CSS styles.
     -   `src/utils`: Utility functions.
     -   `src/assets`: Images, fonts, and other static files.
+-   **Security:**
+    -   **Token Storage:** Store Access Tokens in memory (e.g., React state) whenever possible, avoiding `localStorage` or `sessionStorage` to minimize exposure to XSS attacks.
 
 ## Backend (Node.js/TypeScript)
 
@@ -121,7 +123,9 @@ This file defines the code conventions that should be followed in this project. 
     -   **End-to-End (E2E) Tests:** Test the complete system, simulating user interaction.
 -   **Environment Variables:** Use `.env` files to store environment variables.
 -   **Error Handling:** Implement error handling to catch unexpected errors and return appropriate error responses to the client. Use `try...catch` to catch errors and return appropriate HTTP status codes (e.g., 500 for internal server errors) with detailed error messages in JSON.
--   **Security:** Implement security measures such as input data validation, protection against XSS and CSRF attacks, and use HTTPS for secure communication.
+-   **Security:**
+    -   Implement security measures such as input data validation, protection against XSS and CSRF attacks, and use HTTPS for secure communication.
+    -   **CSRF Protection:** Pay special attention to CSRF protection on any endpoint that relies on cookies for authentication or state, such as the token refresh endpoint. Use techniques like `SameSite` cookie attributes and potentially checking the `Origin` header or using anti-CSRF tokens if necessary.
 -   **Logs:** Use logs to monitor the application's behavior.
     -   **Backend:** Use `console` or libraries like `winston` to record logs in a structured and flexible way.
         -   **Log Levels**
@@ -144,7 +148,12 @@ This file defines the code conventions that should be followed in this project. 
 -   **Data Format:** Use JSON for communication between frontend and backend.
 -   **Endpoint Names:** Use descriptive names for API endpoints.
 -   **HTTP Status Codes:** Use appropriate HTTP status codes to indicate the result of requests.
--   **Authentication:** Use a secure authentication system (such as JWT).
+-   **Authentication:**
+    -   **Pattern:** Implement authentication using the Access Token / Refresh Token pattern with JSON Web Tokens (JWT).
+    -   **Access Tokens (AT):** Keep ATs short-lived (e.g., 15 minutes). Send them in the `Authorization: Bearer <token>` header. Store them securely on the frontend, preferably in memory.
+    -   **Refresh Tokens (RT):** Use long-lived RTs (e.g., 7 days). Store RTs securely using `HttpOnly`, `Secure`, and `SameSite=Strict` (or `Lax`) cookies to mitigate XSS and CSRF risks.
+    -   **Refresh Token Rotation:** Implement Refresh Token Rotation. When an RT is used to obtain a new AT via the refresh endpoint (e.g., `/auth/refresh`), the old RT should be invalidated, and a new RT should be issued alongside the new AT. This helps detect and mitigate token theft.
+    -   **Server-Side Validation:** Store a verifiable representation (e.g., hash) of active RTs on the server-side (e.g., in a `user_sessions` table) to allow for session invalidation.
 -   **API Versioning:** Use API versioning in the endpoint path (e.g., `/v1/users`, `/v2/products`).
     -   **Compatibility:** When introducing changes to the API, maintain compatibility with previous versions whenever possible. If a change breaks compatibility, create a new version of the API.
 -   **Documentation:** Keep the API documentation up to date, using tools like Swagger or OpenAPI to generate documentation automatically.
