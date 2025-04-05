@@ -52,65 +52,6 @@ This file defines the code conventions that should be followed in this project. 
 
 ## Backend (Node.js/TypeScript)
 
--   **Database:** Use direct SQL queries with `pg` to interact with the database.
-    -   **Database System:** PostgreSQL
-    -   **SQL Queries:** Construct SQL queries carefully to prevent SQL injection vulnerabilities. Use parameterized queries with `pg` to safely handle user inputs.
-      ```typescript
-      const query = 'SELECT * FROM users WHERE email = $1';
-      const values = [email];
-      client.query(query, values, (err, res) => {
-          if (err) {
-              console.error('Error executing query', err.stack);
-              return;
-          }
-          console.log(res.rows);
-      });
-      ```
-    -   **Transactions:** Use database transactions to ensure data consistency when performing multiple operations.
-      ```typescript
-      client.query('BEGIN', (err) => {
-          if (err) {
-              console.error('Error starting transaction', err.stack);
-              return;
-          }
-          client.query('INSERT INTO users(name) VALUES($1)', ['Alice'], (err) => {
-              if (err) {
-                  console.error('Error inserting user', err.stack);
-                  client.query('ROLLBACK', (err) => {
-                      if (err) {
-                          console.error('Error rolling back transaction', err.stack);
-                      }
-                  });
-                  return;
-              }
-              client.query('COMMIT', (err) => {
-                  if (err) {
-                      console.error('Error committing transaction', err.stack);
-                      return;
-                  }
-                  console.log('Transaction completed successfully');
-              });
-          });
-      });
-      ```
-    -   **Query Organization:** Consider organizing SQL queries in separate files or modules for better maintainability.
-      ```typescript
-      // queries/userQueries.ts
-      export const getUserByEmail = 'SELECT * FROM users WHERE email = $1';
-      export const insertUser = 'INSERT INTO users(name, email) VALUES($1, $2)';
-      ```
-    -   **Error Handling:** Implement proper error handling when executing database queries. Log errors and return appropriate error messages to the client.
-      ```typescript
-      client.query(query, values, (err, res) => {
-          if (err) {
-              console.error('Error executing query', err.stack);
-              // Retorne uma mensagem de erro genérica ao cliente
-              return res.status(500).json({ error: 'Internal Server Error' });
-          }
-          // Processar o resultado da consulta
-          res.json(res.rows);
-      });
-      ```
 -   **Routes:** Organize routes logically and use middlewares for authentication and validation.
     -   **Folder Structure:** Create a `routes` directory to group routes by functionality.
     -   **Middlewares:** Create a `middlewares` directory to group middlewares.
@@ -121,11 +62,13 @@ This file defines the code conventions that should be followed in this project. 
     -   **Unit Tests:** Test individual units of code (functions, components).
     -   **Integration Tests:** Test the interaction between different parts of the system.
     -   **End-to-End (E2E) Tests:** Test the complete system, simulating user interaction.
--   **Environment Variables:** Use `.env` files to store environment variables.
--   **Error Handling:** Implement error handling to catch unexpected errors and return appropriate error responses to the client. Use `try...catch` to catch errors and return appropriate HTTP status codes (e.g., 500 for internal server errors) with detailed error messages in JSON.
+-   **Environment Variables:** Use `.env` files to store environment variables specific to the backend if necessary (most are likely global, listed later).
+-   **Error Handling:** Implement error handling to catch unexpected errors and return appropriate error responses to the client via the API. Use `try...catch` in controllers/services and return appropriate HTTP status codes (e.g., 500 for internal server errors) with detailed error messages in JSON for non-database errors.
 -   **Security:**
-    -   Implement security measures such as input data validation, protection against XSS and CSRF attacks, and use HTTPS for secure communication.
+    -   Implement security measures such as input data validation (in routes/controllers), protection against XSS (via proper output encoding) and CSRF attacks, and use HTTPS for secure communication.
     -   **CSRF Protection:** Pay special attention to CSRF protection on any endpoint that relies on cookies for authentication or state, such as the token refresh endpoint. Use techniques like `SameSite` cookie attributes and potentially checking the `Origin` header or using anti-CSRF tokens if necessary.
+    -   **Password Hashing:** Never store passwords in plain text. Use a strong, salted hashing algorithm like bcrypt when handling user registration or password updates.
+    -   **Token Security:** Never store sensitive tokens (like refresh tokens) directly in the database. Store a secure hash (e.g., SHA256) instead (handled in the Database section conventions).
 -   **Logs:** Use logs to monitor the application's behavior.
     -   **Backend:** Use `console` or libraries like `winston` to record logs in a structured and flexible way.
         -   **Log Levels**
@@ -141,7 +84,60 @@ This file defines the code conventions that should be followed in this project. 
     -   `src`: Backend source code.
     -   `src/routes`: Routes grouped by functionality.
     -   `src/middlewares`: Middlewares for authentication and validation.
-    -   `scripts`: Scripts for tasks such as creating database tables.
+    -   `src/controllers` / `src/services`: (Opcional, dependendo da arquitetura) Lógica de negócio.
+    -   `scripts`: Scripts for tasks such as creating database tables (Referenciado na seção Database).
+
+## Database (PostgreSQL)
+
+-   **Interaction:** Use direct SQL queries with the `pg` library to interact with the PostgreSQL database.
+-   **SQL Queries:**
+    -   Construct SQL queries carefully to prevent SQL injection vulnerabilities.
+    -   **Always use parameterized queries** with `pg` to safely handle user inputs.
+      ```typescript
+      const query = 'SELECT * FROM users WHERE email = $1';
+      const values = [email];
+      client.query(query, values, (err, res) => { /* ... */ });
+      ```
+-   **Transactions:** Use database transactions (`BEGIN`, `COMMIT`, `ROLLBACK`) to ensure data consistency when performing multiple related operations, especially within database setup scripts.
+    ```typescript
+    client.query('BEGIN', (err) => { /* ... */ });
+    ```
+-   **Query Organization:** Consider organizing SQL queries in separate files or modules (e.g., `src/db/queries/userQueries.ts`) for better maintainability, especially for complex queries.
+    ```typescript
+    // queries/userQueries.ts
+    export const getUserByEmail = 'SELECT * FROM users WHERE email = $1';
+    ```
+-   **Error Handling:** Implement proper error handling when executing database queries. Log database-specific errors and potentially return generic error messages (like 500 Internal Server Error) to the client via the API layer.
+    ```typescript
+    client.query(query, values, (err, res) => {
+        if (err) {
+            console.error('Error executing query', err.stack);
+            // A camada de serviço/controller que chamou isso deve retornar um erro apropriado
+            return callback(new Error('Database query failed'));
+        }
+        // ...
+    });
+    ```
+-   **Table Structure and Conventions:**
+    *   **Naming:**
+        *   Tables: `snake_case`, plural (e.g., `users`).
+        *   Columns: `snake_case` (e.g., `user_id`, `created_at`).
+        *   Primary Keys (PK): `id`.
+        *   Foreign Keys (FK): `[referenced_table_singular]_id` (e.g., `user_id`).
+        *   Indexes: `idx_[table]_[columns]` (e.g., `idx_users_email`).
+    *   **Primary Keys:** Use `UUID` (`id UUID PRIMARY KEY DEFAULT gen_random_uuid()`). Requires `pgcrypto`.
+    *   **Foreign Keys:** Define `FOREIGN KEY` constraints. Use `ON DELETE CASCADE` cautiously.
+    *   **Standard Columns:** Include `created_at` and `updated_at` (`TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP`). Use triggers for `updated_at`.
+    *   **Data Types:** Use `TIMESTAMP WITH TIME ZONE`, `TEXT` (preferencialmente), `VARCHAR` (para strings curtas/fixas), `UUID`, `BOOLEAN`, `INTEGER`, `BIGINT`, `NUMERIC`.
+    *   **Constraints:** Use `NOT NULL`, `UNIQUE`, `CHECK` appropriately.
+    *   **Indexes:** Create indexes for FKs and frequently queried columns. Use `CREATE INDEX IF NOT EXISTS`.
+    *   **Documentation:** Use `COMMENT ON COLUMN ... IS '...'`.
+-   **Database Scripts (`scripts/`):**
+    *   Maintain separate, idempotent (`IF NOT EXISTS`) scripts in the `scripts/` directory.
+    *   Use transactions within scripts.
+    *   Ensure scripts enable necessary extensions (e.g., `pgcrypto`).
+    *   Document the execution order and purpose in `scripts/README.md`.
+-   **Migrations:** For schema changes after initial deployment, use a dedicated migration tool (e.g., `node-pg-migrate`) instead of modifying creation scripts. *(Optional: Add this if you plan to use migrations)*.
 
 ## API
 
