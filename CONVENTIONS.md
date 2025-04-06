@@ -2,6 +2,12 @@
 
 This file defines the code conventions that should be followed in this project. The goal is to maintain consistency, readability, and facilitate collaboration.
 
+## Language
+
+- **All commit messages, comments, documentation, and code annotations must be written in English.**
+- This ensures consistency across the project and facilitates collaboration with international contributors.
+- Use clear and concise English to improve readability and maintainability.
+
 ## General
 
 -   **Language:** Use TypeScript for both frontend and backend.
@@ -195,6 +201,16 @@ This file defines the code conventions that should be followed in this project. 
 
     Fixes the bug that prevented new users from registering.
     Adds validation to ensure all fields are filled.
+    ```
+
+-   The **commit title must start with a capital letter** after the prefix and colon.
+-   Example:
+
+    ```
+    feat: Add login functionality
+    fix: Fix bug on registration screen
+    docs: Update `README.md` with installation instructions
+    refactor: Improve `authMiddleware` error handling
     ```
 
 -   **Code Highlighting in Commit Messages:** When mentioning file names, functions, variables, or similar code elements within commit messages, always highlight them using backticks.
