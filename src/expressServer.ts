@@ -1,16 +1,13 @@
-// Import necessary dependencies and utility functions
 import bcrypt from 'bcrypt';
-import cookieParser from 'cookie-parser'; // Added cookie-parser
-import cors from 'cors';
-import crypto from 'crypto'; // Added crypto for hashing refresh tokens
-import express, { NextFunction, Request, Response } from 'express';
+import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid'; // Added for generating token family UUIDs
 
-// Import utilities
+// Import server configuration (Express app, pool, env vars, supportedLanguages)
+import { app, pool, JWT_SECRET, PORT, supportedLanguages, supportedAPIServices, supportedTTSServices } from './config/serverConfig';
+
 import { getFullLanguageName } from '../frontend/src/utils/languageMapping';
-import { supportedLanguageCodes, supportedAPIServices, supportedTTSServices } from './shared/constants';
 
 // Import API handlers
 import { 
@@ -45,14 +42,6 @@ import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
 // Import type definitions and options
 import { TokenCount } from '../frontend/src/utils/Types';
 import { llmOptions } from '../frontend/src/utils/Options';
-
-interface RequestParams {
-    word: string;
-    targetLanguage: string;
-    nativeLanguage: string;
-    apiService: string;
-    llm: string;
-}
 
 /**
  * Validates and extracts common parameters from the request.
@@ -149,40 +138,13 @@ function validateText(text: string): void {
     }
 }
 
-// Create an Express application instance
-const app = express();
-// app.use(cors()); // Remove default CORS middleware which defaults to '*' origin
-
-// Get the port number from the environment variable 'PORT'
-const port = process.env.PORT || 5000;
-
-const JWT_SECRET = process.env.JWT_SECRET; // Use a strong secret key
-if (!JWT_SECRET) {
-    console.error('JWT_SECRET environment variable is not set. Exiting.');
-    process.exit(1);
+interface RequestParams {
+    word: string;
+    targetLanguage: string;
+    nativeLanguage: string;
+    apiService: string;
+    llm: string;
 }
-
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    password: process.env.DB_PASSWORD,
-    port: parseInt(process.env.DB_PORT || '5432'),
-});
-
-// Enable CORS middleware - Ensure origin is specific and credentials allowed
-app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Use specific origin
-    credentials: true // Allow cookies to be sent cross-origin
-}));
-// Parse incoming JSON requests with increased size limit
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
-// Add cookie parser middleware
-app.use(cookieParser());
-
-// Import supported languages from shared constants
-import { supportedLanguageCodes as supportedLanguages } from './shared/constants';
 
 // Registration route
 app.post('/register', async (req: Request, res: Response): Promise<void> => {
@@ -1033,6 +995,6 @@ function hashToken(token: string): string {
 }
 
 // Start the server
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
