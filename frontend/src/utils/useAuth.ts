@@ -27,7 +27,7 @@ const useAuth = () => {
     const handleLogin = async (username: string, password: string) => {
         // Removed setIsCheckingAuth(true). Login loading should be handled locally if needed.
         try {
-            const response = await fetch(`/login`, { // Use relative path
+            const response = await fetch(`/auth/login`, { // Use relative path
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ const useAuth = () => {
     const handleRegister = async (username: string, email: string, password: string) => {
         // Removed setIsCheckingAuth(true). Registration loading should be handled locally if needed.
         try {
-            const response = await fetch(`/register`, { // Use relative path
+            const response = await fetch(`/auth/register`, { // Use relative path
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
