@@ -50,11 +50,12 @@ export const pool = new Pool({
  * Load JWT secret key from environment variables.
  * This secret is used to sign and verify JWT tokens.
  */
-export const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
   console.error('JWT_SECRET not set. Exiting.');
   process.exit(1);
 }
+export const JWT_SECRET = jwtSecret as string;
 
 /**
  * Define the server port.
