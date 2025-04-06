@@ -146,7 +146,7 @@ const useAuth = () => {
         // Removed setIsCheckingAuth(false). Logout shouldn't affect initial loading state.
         // Call backend logout first to invalidate refresh token and clear cookie
         try {
-            const response = await fetch(`/logout`, { // Use relative path
+            const response = await fetch(`/auth/logout`, { // Use relative path
                 method: 'POST',
                 credentials: 'include', // Necessary to send cookie for backend invalidation
             });

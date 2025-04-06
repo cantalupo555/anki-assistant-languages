@@ -161,34 +161,6 @@ app.get('/user', authenticateToken, async (req: Request, res: Response) => {
     }
 });
 
-// Logout route
-app.post('/logout', async (req: Request, res: Response) => {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (refreshToken) {
-        try {
-            const tokenHash = hashToken(refreshToken);
-            // Invalidate the specific session (refresh token) in the database
-            await pool.query(
-                'UPDATE user_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE token_hash = $1 AND revoked_at IS NULL',
-                [tokenHash]
-            );
-        } catch (dbError) {
-            console.error("Error invalidating session token during logout:", dbError);
-            // Continue with clearing the cookie even if DB update fails
-        }
-    }
-
-    // Clear the refresh token cookie
-    res.cookie('refreshToken', '', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        expires: new Date(0) // Set expiry to past date
-    });
-
-    res.status(200).json({ message: 'Logout successful' });
-});
 
 // Route to validate JWT access token (remains mostly the same, validates token from Authorization header)
 // Note: This route might become less necessary if frontend relies more on refresh flow.

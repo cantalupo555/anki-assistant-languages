@@ -367,12 +367,48 @@ export async function refreshToken(req: Request, res: Response) {
 }
 
 /**
- * Logs out the user by revoking the refresh token.
+ * Logs out the user by revoking the refresh token and clearing the cookie.
  * 
- * - TODO: Implement logic to revoke refresh token and clear cookie.
+ * - Retrieves the refresh token from the HttpOnly cookie.
+ * - Hashes the refresh token and revokes the corresponding session in the database.
+ * - Clears the refresh token cookie on the client.
+ * - Handles errors gracefully and always clears the cookie.
  * 
  * @param req - Express request object
  * @param res - Express response object
+ * @returns 200 with success message on success, 500 with error message on failure
  */
 export async function logoutUser(req: Request, res: Response) {
+    try {
+        // Retrieve refresh token from cookies
+        const refreshToken = req.cookies.refreshToken;
+
+        if (refreshToken) {
+            try {
+                // Hash the refresh token
+                const tokenHash = hashToken(refreshToken);
+                // Revoke the refresh token in the database
+                await pool.query(
+                    'UPDATE user_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE token_hash = $1 AND revoked_at IS NULL',
+                    [tokenHash]
+                );
+            } catch (dbError) {
+                console.error("Error invalidating session token during logout:", dbError);
+            }
+        }
+
+        // Clear the refresh token cookie on the client
+        res.cookie('refreshToken', '', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            expires: new Date(0)
+        });
+
+        // Send success response
+        res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+        console.error('Error during logout:', error);
+        res.status(500).json({ error: 'Error during logout' });
+    }
 }
