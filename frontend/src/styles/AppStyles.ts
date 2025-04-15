@@ -161,6 +161,18 @@ export const SentenceList = styled.ul`
   }
 `;
 
+// Loading message display
+export const LoadingMessage = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px;
+  font-size: 1.2em;
+  color: var(--text-color); // Use suas variáveis CSS
+  min-height: 300px; // Para ocupar algum espaço enquanto carrega
+  text-align: center;
+`;
+
 // Pagination container
 export const Pagination = styled.div`
   display: flex;

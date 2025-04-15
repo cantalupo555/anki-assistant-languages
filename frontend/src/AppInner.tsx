@@ -29,7 +29,7 @@ import {
 } from './styles/ButtonStyles';
 
 // Utility function imports
-import { apiServiceOptions, llmOptions, ttsOptions } from './utils/Options';
+// Options are now fetched from the API, removed imports: apiServiceOptions, llmOptions, ttsOptions
 import { getFullLanguageName } from './utils/languageMapping';
 import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
 import { handleExport } from './utils/languageCardExporter';
@@ -37,8 +37,8 @@ import { handleGenerateDialogue } from './utils/handleGenerateDialogue';
 import { handleGenerateTTS } from './utils/handleGenerateTTS';
 import { handleTranslation } from './utils/handleTranslation';
 import { handleSubmit } from './utils/handleSubmit';
-import { voiceOptions } from './utils/voiceOptions';
-import { FrequencyAnalysis, SavedItem, TokenCount } from './utils/Types';
+// Options are now fetched from the API, removed import: voiceOptions
+import { APIServiceOption, FrequencyAnalysis, LLMOption, SavedItem, TokenCount, TTSOption, VoiceOption } from './utils/Types'; // Added Option types
 import useAuth from './utils/useAuth'; // Import useAuth
 
 interface AppInnerProps {
@@ -58,6 +58,20 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
         setSelectedTTS,
         setSelectedVoice,
         targetLanguage,
+        // Consume options lists and status from context
+        apiServiceOptionsList,
+        llmOptionsList,
+        ttsOptionsList,
+        voiceOptionsList,
+        optionsLoading,
+        optionsError,
+        // Consume setters for options lists and status
+        setApiServiceOptionsList,
+        setLlmOptionsList,
+        setTtsOptionsList,
+        setVoiceOptionsList,
+        setOptionsLoading,
+        setOptionsError,
     } = useAppContext();
     const [word, setWord] = useState('');
     const [definitions, setDefinitions] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
@@ -83,10 +97,102 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
     const [dialogue, setDialogue] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
     const [isDialogueModalOpen, setIsDialogueModalOpen] = useState(false);
     const [isFrequencyModalOpen, setIsFrequencyModalOpen] = useState(false);
-    // Get callApiWithAuth function from useAuth instead of accessToken
     const { callApiWithAuth } = useAuth();
 
-    // Effect to load saved items and authentication state from localStorage on component mount
+    // REMOVED: Local state for fetched options - now using context state
+
+
+    // --- Fetch Options from API (updates context state) ---
+    useEffect(() => {
+        // Only fetch if options are currently marked as loading in context
+        if (!optionsLoading) return;
+
+        const fetchOptions = async () => {
+            // Ensure loading state is true before starting
+            setOptionsLoading(true);
+            setOptionsError(null);
+            try {
+                // Fetch all options concurrently
+                const [apiServicesRes, llmOptionsRes, ttsServicesRes, voiceOptionsRes] = await Promise.all([
+                    fetch('/options/api-services'),
+                    fetch('/options/llms'),
+                    fetch('/options/tts-services'),
+                    fetch('/options/voices')
+                ]);
+
+                // Check responses
+                if (!apiServicesRes.ok) throw new Error(`Failed to fetch API services: ${apiServicesRes.statusText}`);
+                if (!llmOptionsRes.ok) throw new Error(`Failed to fetch LLM options: ${llmOptionsRes.statusText}`);
+                if (!ttsServicesRes.ok) throw new Error(`Failed to fetch TTS services: ${ttsServicesRes.statusText}`);
+                if (!voiceOptionsRes.ok) throw new Error(`Failed to fetch voice options: ${voiceOptionsRes.statusText}`);
+
+                // Parse JSON data
+                const apiServicesData: APIServiceOption[] = await apiServicesRes.json();
+                const llmOptionsData: { [key: string]: LLMOption[] } = await llmOptionsRes.json();
+                const ttsServicesData: TTSOption[] = await ttsServicesRes.json();
+                const voiceOptionsData: VoiceOption[] = await voiceOptionsRes.json();
+
+                // Update CONTEXT state
+                setApiServiceOptionsList(apiServicesData);
+                setLlmOptionsList(llmOptionsData);
+                setTtsOptionsList(ttsServicesData);
+                setVoiceOptionsList(voiceOptionsData);
+
+                // --- Set Default Selections AFTER options are loaded (using context lists) ---
+
+                // Set default API service if current selection is invalid or placeholder
+                if (!selectedAPIService.value || !apiServicesData.some(opt => opt.value === selectedAPIService.value)) {
+                    setSelectedAPIService(apiServicesData[0] || { name: 'No Service', value: '' });
+                }
+
+                // Set default TTS service if current selection is invalid or placeholder
+                if (!selectedTTS.value || !ttsServicesData.some(opt => opt.value === selectedTTS.value)) {
+                    setSelectedTTS(ttsServicesData[0] || { name: 'No TTS', value: '' });
+                }
+
+                // Set default LLM based on the (potentially updated) API service
+                // Need to access the potentially updated selectedAPIService value directly
+                const currentApiServiceValue = apiServicesData.some(opt => opt.value === selectedAPIService.value)
+                    ? selectedAPIService.value
+                    : (apiServicesData[0]?.value || '');
+
+                const availableLLMs = llmOptionsData[currentApiServiceValue] || [];
+                if (!selectedLLM.value || !availableLLMs.some(opt => opt.value === selectedLLM.value)) {
+                    setSelectedLLM(availableLLMs[0] || { name: 'No Model', value: '' });
+                }
+
+                // Set default Voice based on target language and (potentially updated) TTS service
+                 // Need to access the potentially updated selectedTTS value directly
+                const currentTtsServiceValue = ttsServicesData.some(opt => opt.value === selectedTTS.value)
+                    ? selectedTTS.value
+                    : (ttsServicesData[0]?.value || '');
+
+                const availableVoices = voiceOptionsData.filter(
+                    voice => voice.language === getFullLanguageName(targetLanguage) && voice.ttsService === currentTtsServiceValue
+                );
+                if (!selectedVoice.value || !availableVoices.some(opt => opt.value === selectedVoice.value)) {
+                     // Find default for the current language/TTS combo, or fallback to the very first voice overall
+                    const defaultVoiceForLangTTS = availableVoices[0];
+                    const overallDefaultVoice = voiceOptionsData[0] || { name: 'No Voice', value: '', language: '', languageCode: '', ttsService: 'google' };
+                    setSelectedVoice(defaultVoiceForLangTTS || overallDefaultVoice);
+                }
+                 // --- End of Default Selections ---
+
+            } catch (error) {
+                console.error("Error fetching options:", error);
+                setOptionsError(error instanceof Error ? error.message : "An unknown error occurred while fetching options.");
+            } finally {
+                setOptionsLoading(false); // Update context loading state
+            }
+        };
+
+        fetchOptions();
+    // Only re-run if context loading state changes back to true (e.g., for a refresh)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [optionsLoading]);
+
+
+    // --- Load saved items from localStorage ---
     useEffect(() => {
         const savedItemsFromStorage = localStorage.getItem('savedItems');
         const audioDataFromStorage = localStorage.getItem('audioData');
@@ -99,27 +205,54 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
         }
     }, []);
 
-    // Effect to set the default voice option based on the selected language
-    useEffect(() => {
-        const defaultVoice = voiceOptions.find(voice => voice.language === getFullLanguageName(targetLanguage)) || voiceOptions[0];
-        setSelectedVoice(defaultVoice);
-    }, [targetLanguage, setSelectedVoice]);
+    // --- Effects to update default selections when dependencies change AFTER initial load ---
 
-    // Effect to fetch Azure voices when Azure TTS is selected
-    useEffect(() => {
-        const defaultVoice = voiceOptions.find(
-            voice => voice.language === getFullLanguageName(targetLanguage) && voice.ttsService === selectedTTS.value
-        ) || voiceOptions[0];
-        setSelectedVoice(defaultVoice);
-    }, [targetLanguage, selectedTTS, setSelectedVoice]);
+    // Update default LLM when API Service changes (and options are loaded)
+     useEffect(() => {
+        if (optionsLoading) return; // Don't run while options are loading
 
-    // Effect to set the default LLM option based on the selected API service
-    useEffect(() => {
-        const defaultLLM = llmOptions[selectedAPIService.value]?.[0] || { name: 'Select AI', value: '' };
-        setSelectedLLM(defaultLLM);
-    }, [selectedAPIService, setSelectedLLM]);
+        const availableLLMs = llmOptionsList[selectedAPIService.value] || [];
+        // Check if the currently selected LLM is valid for the NEW service
+        const currentLLMIsValid = availableLLMs.some(llm => llm.value === selectedLLM.value);
 
-    // Set up a timer to automatically hide notification messages after 3 seconds
+        // If the current LLM is NOT valid for the new service, pick the first available one
+        if (!currentLLMIsValid && availableLLMs.length > 0) {
+            setSelectedLLM(availableLLMs[0]);
+        } else if (!currentLLMIsValid && availableLLMs.length === 0) {
+            // Handle case where the new service has NO models
+            setSelectedLLM({ name: 'No Model Available', value: '' });
+        }
+        // If current LLM *is* valid for the new service, no change needed here.
+     }, [selectedAPIService, llmOptionsList, setSelectedLLM, optionsLoading, selectedLLM.value]); // Depend on context list and loading state
+
+    // Update default Voice when Target Language or TTS Service changes (and options are loaded)
+    useEffect(() => {
+        if (optionsLoading) return; // Don't run while options are loading
+
+        const targetLangName = getFullLanguageName(targetLanguage);
+        // Filter voices from the context list
+        const availableVoices = voiceOptionsList.filter(
+            voice => voice.language === targetLangName && voice.ttsService === selectedTTS.value
+        );
+        // Check if the currently selected voice is valid for the NEW language/TTS combo
+        const currentVoiceIsValid = availableVoices.some(voice => voice.value === selectedVoice.value);
+
+        // If the current voice is NOT valid, pick the first available one for the combo
+        if (!currentVoiceIsValid && availableVoices.length > 0) {
+            setSelectedVoice(availableVoices[0]);
+        } else if (!currentVoiceIsValid && availableVoices.length === 0) { // Handle case where combo has NO voices
+             // Fallback: find first voice for the language regardless of TTS, or first overall voice
+            const firstVoiceForLang = voiceOptionsList.find(v => v.language === targetLangName);
+            const overallDefault = voiceOptionsList[0] || { name: 'No Voice Available', value: '', language: '', languageCode: '', ttsService: 'google' }; // Use placeholder if list is empty
+            setSelectedVoice(firstVoiceForLang || overallDefault);
+        }
+        // If current voice *is* valid for the new combo, no change needed here.
+    }, [targetLanguage, selectedTTS, voiceOptionsList, setSelectedVoice, optionsLoading, selectedVoice.value]); // Depend on context list and loading state
+
+
+    // --- Other Effects ---
+
+    // Timer for notifications
     useEffect(() => {
         if (showSaveNotification || showExportNotification || showRemoveNotification || showClearAllNotification || showGenerateNotification) {
             const timer = setTimeout(() => {
@@ -289,18 +422,37 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
 
     // Function to handle voice change
     const handleVoiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newVoice = voiceOptions.find(voice => voice.value === e.target.value) || voiceOptions[0];
-        setSelectedVoice(newVoice);
-        localStorage.setItem('selectedVoice', JSON.stringify(newVoice));
+        // Find the selected voice from the CONTEXT options list
+        const newVoice = voiceOptionsList.find(voice => voice.value === e.target.value);
+        if (newVoice) {
+            setSelectedVoice(newVoice);
+            // localStorage update is handled by the context's useEffect
+        }
     };
 
     // Function to handle LLM change
     const handleLLMChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newLLM = llmOptions[selectedAPIService.value]?.find(llm => llm.value === e.target.value) || llmOptions[selectedAPIService.value][0];
-        setSelectedLLM(newLLM);
-        localStorage.setItem('selectedLLM', JSON.stringify(newLLM));
+        // Find the selected LLM from the CONTEXT options list for the current API service
+        const newLLM = llmOptionsList[selectedAPIService.value]?.find(llm => llm.value === e.target.value);
+        if (newLLM) {
+            setSelectedLLM(newLLM);
+            // localStorage update is handled by the context's useEffect
+        }
     };
 
+    // --- Render Logic ---
+
+    // Display loading indicator (using context state)
+    if (optionsLoading) {
+        return <S.AppContainer><Header /><S.LoadingMessage>Loading options...</S.LoadingMessage><Footer /></S.AppContainer>;
+    }
+
+    // Display error message if options failed to load (using context state)
+    if (optionsError) {
+        return <S.AppContainer><Header /><S.Error>Failed to load application options: {optionsError}</S.Error><Footer /></S.AppContainer>;
+    }
+
+    // Main render when options are loaded (optionsLoading is false and optionsError is null)
     return (
         <S.AppContainer>
             <>
@@ -318,10 +470,13 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                 <select
                                     id="api-service-select"
                                     value={selectedAPIService.value}
-                                    onChange={(e) => setSelectedAPIService(apiServiceOptions.find(option => option.value === e.target.value) || apiServiceOptions[0])}
+                                    // Find the selected option from the CONTEXT list
+                                    onChange={(e) => setSelectedAPIService(apiServiceOptionsList.find(option => option.value === e.target.value) || apiServiceOptionsList[0])}
                                     required
+                                    disabled={apiServiceOptionsList.length === 0} // Disable if no options loaded
                                 >
-                                    {apiServiceOptions.map((option) => (
+                                    {/* Message handled by main loading/error check */}
+                                    {apiServiceOptionsList.map((option) => (
                                         <option key={option.value} value={option.value}>
                                             {option.name}
                                         </option>
@@ -329,7 +484,7 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                 </select>
                             </S.FormGroup>
 
-                            {/* LLM selection dropdown */}
+                            {/* LLM selection dropdown - options depend on selectedAPIService */}
                             <S.FormGroup>
                                 <label htmlFor="llm-select">AI Model:</label>
                                 <select
@@ -337,8 +492,13 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                     value={selectedLLM.value}
                                     onChange={handleLLMChange}
                                     required
+                                    // Disable if no models for the selected service
+                                    disabled={!llmOptionsList[selectedAPIService.value] || llmOptionsList[selectedAPIService.value].length === 0}
                                 >
-                                    {llmOptions[selectedAPIService.value]?.map((option) => (
+                                    {/* Show message if no models */}
+                                    {(!llmOptionsList[selectedAPIService.value] || llmOptionsList[selectedAPIService.value].length === 0) && <option value="">No models available</option>}
+                                    {/* Map over models from CONTEXT list */}
+                                    {llmOptionsList[selectedAPIService.value]?.map((option) => (
                                         <option key={option.value} value={option.value}>
                                             {option.name}
                                         </option>
@@ -355,10 +515,13 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                 <select
                                     id="tts-select"
                                     value={selectedTTS.value}
-                                    onChange={(e) => setSelectedTTS(ttsOptions.find(option => option.value === e.target.value) || ttsOptions[0])}
+                                    // Find the selected option from the CONTEXT list
+                                    onChange={(e) => setSelectedTTS(ttsOptionsList.find(option => option.value === e.target.value) || ttsOptionsList[0])}
                                     required
+                                    disabled={ttsOptionsList.length === 0} // Disable if no options loaded
                                 >
-                                    {ttsOptions.map((option) => (
+                                    {/* Message handled by main loading/error check */}
+                                    {ttsOptionsList.map((option) => (
                                         <option key={option.value} value={option.value}>
                                             {option.name}
                                         </option>
@@ -366,7 +529,7 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                 </select>
                             </S.FormGroup>
 
-                            {/* Voice selection dropdown */}
+                            {/* Voice selection dropdown - options depend on targetLanguage and selectedTTS */}
                             {supportedLanguageCodes.includes(targetLanguage) && (
                                 <>
                                     <S.FormGroup>
@@ -375,14 +538,21 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                             id="voice-select"
                                             value={selectedVoice.value}
                                             onChange={handleVoiceChange}
+                                            // Disable if no voices for the current language/TTS combo
+                                            disabled={voiceOptionsList.filter(v => v.language === getFullLanguageName(targetLanguage) && v.ttsService === selectedTTS.value).length === 0}
                                         >
-                                            {voiceOptions
+                                            {/* Filter and map voices from CONTEXT list */}
+                                            {voiceOptionsList
                                                 .filter((voice) => voice.language === getFullLanguageName(targetLanguage) && voice.ttsService === selectedTTS.value)
                                                 .map((voice) => (
                                                     <option key={voice.value} value={voice.value}>
                                                         {voice.name}
                                                     </option>
                                                 ))}
+                                            {/* Display message if no voices match */}
+                                            {voiceOptionsList.filter(v => v.language === getFullLanguageName(targetLanguage) && v.ttsService === selectedTTS.value).length === 0 && (
+                                                <option value="">No voices available</option>
+                                            )}
                                         </select>
                                     </S.FormGroup>
                                 </>
