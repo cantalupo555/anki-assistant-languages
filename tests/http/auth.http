@@ -10,3 +10,98 @@ Content-Type: application/json
 ### Logout
 POST {{base_url}}/logout
 Authorization: Bearer {{token}}
+
+### Validate token - Success
+POST {{base_url}}/auth/validate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "token": "{{token}}"
+}
+
+### Validate token - Invalid
+POST {{base_url}}/auth/validate
+Content-Type: application/json
+
+{
+  "token": "invalid_token"
+}
+
+### Validate token - Expired
+POST {{base_url}}/auth/validate
+Content-Type: application/json
+
+{
+  "token": "expired_token"
+}
+
+### Refresh token - Success
+POST {{base_url}}/auth/refresh
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "token": "{{token}}"
+}
+
+### Refresh token - Invalid
+POST {{base_url}}/auth/refresh
+Content-Type: application/json
+
+{
+  "token": "invalid_token"
+}
+
+### Refresh token - Expired
+POST {{base_url}}/auth/refresh
+Content-Type: application/json
+
+{
+  "token": "expired_token"
+}
+
+### Test token refresh flow
+# 1. Get initial token
+POST {{base_url}}/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.global.set("initial_token", response.body.token);
+%}
+
+# 2. Validate initial token
+POST {{base_url}}/auth/validate
+Authorization: Bearer {{initial_token}}
+Content-Type: application/json
+
+{
+  "token": "{{initial_token}}"
+}
+
+# 3. Refresh token
+POST {{base_url}}/auth/refresh
+Authorization: Bearer {{initial_token}}
+Content-Type: application/json
+
+{
+  "token": "{{initial_token}}"
+}
+
+> {%
+    client.global.set("refreshed_token", response.body.token);
+%}
+
+# 4. Validate refreshed token
+POST {{base_url}}/auth/validate
+Authorization: Bearer {{refreshed_token}}
+Content-Type: application/json
+
+{
+  "token": "{{refreshed_token}}"
+}
