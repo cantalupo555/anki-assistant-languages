@@ -1,0 +1,9 @@
+### Register new user
+POST {{base_url}}/register
+Content-Type: application/json
+
+{
+  "username": "new_user1",
+  "email": "new_user1@example.com",
+  "password": "securePassword123!"
+}

@@ -1,0 +1,71 @@
+### Test invalid registration
+POST {{base_url}}/register
+Content-Type: application/json
+
+{
+  "username": "",
+  "email": "invalid-email",
+  "password": "123"
+}
+
+### Test invalid login
+POST {{base_url}}/login
+Content-Type: application/json
+
+{
+  "username": "nonexistent",
+  "password": "wrong"
+}
+
+### Test unauthorized access
+GET {{base_url}}/user
+
+### Test invalid TTS request
+POST {{base_url}}/tts
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "text": "",
+  "voice": "invalid",
+  "languageCode": "xx-XX",
+  "ttsService": "invalid"
+}
+
+### Test invalid translation
+POST {{base_url}}/translate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "text": "",
+  "nativeLanguage": "invalid",
+  "targetLanguage": "invalid",
+  "apiService": "invalid",
+  "llm": "invalid"
+}
+
+### Test expired token validation
+POST {{base_url}}/auth/validate
+Authorization: Bearer expired_token
+Content-Type: application/json
+
+{
+  "token": "expired_token"
+}
+
+### Test invalid token refresh
+POST {{base_url}}/auth/refresh
+Content-Type: application/json
+
+{
+  "token": "invalid_token"
+}
+
+### Test expired token refresh
+POST {{base_url}}/auth/refresh
+Content-Type: application/json
+
+{
+  "token": "expired_token"
+}

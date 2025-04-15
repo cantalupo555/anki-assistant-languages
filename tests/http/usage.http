@@ -1,0 +1,22 @@
+### Get token usage statistics
+POST {{base_url}}/usage/tokens
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "definitionsTokens": {
+    "inputTokens": 100,
+    "outputTokens": 200,
+    "totalTokens": 300
+  },
+  "sentencesTokens": {
+    "inputTokens": 50,
+    "outputTokens": 150,
+    "totalTokens": 200
+  },
+  "translationTokens": {
+    "inputTokens": 75,
+    "outputTokens": 125,
+    "totalTokens": 200
+  }
+}
