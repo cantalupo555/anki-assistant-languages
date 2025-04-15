@@ -412,3 +412,30 @@ export async function logoutUser(req: Request, res: Response) {
         res.status(500).json({ error: 'Error during logout' });
     }
 }
+
+/**
+ * Validates the current access token provided in the Authorization header.
+ * Relies on the `authenticateToken` middleware to perform the actual validation.
+ * If the middleware passes, this controller confirms validity and returns user info.
+ *
+ * @param req - Express request object, expects `req.user` to be populated by `authenticateToken`.
+ * @param res - Express response object.
+ * @returns 200 with { isValid: true, user } if token is valid.
+ * @throws 401 if middleware failed (implicitly, as this controller won't be reached).
+ */
+export function validateAccessToken(req: Request, res: Response) {
+    // The authenticateToken middleware runs *before* this.
+    // If we reach here, the token was successfully verified (not expired, valid signature).
+    const user = (req as any).user;
+
+    if (user) {
+        // Send back the user info attached by the middleware
+        res.status(200).json({ isValid: true, user });
+    } else {
+        // This case should technically not be reachable if authenticateToken is applied correctly
+        // before this route handler, as the middleware would have sent a 401/403 response.
+        // However, adding a fallback for safety.
+        console.error(`[${new Date().toISOString()}] /auth/validate: Reached controller but req.user is missing. Middleware issue?`);
+        res.status(401).json({ isValid: false, error: 'Authentication failed' });
+    }
+}

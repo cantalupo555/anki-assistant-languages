@@ -4,6 +4,9 @@ import { NextFunction, Request, Response } from 'express';
 // Import server configuration (Express app, pool, env vars, supportedLanguages)
 import { app, pool, PORT, supportedLanguages, supportedAPIServices, supportedTTSServices } from './config/serverConfig';
 
+// Re-add middleware imports needed for remaining inline routes
+import { authenticateToken, isActiveUser } from './middlewares/authMiddleware';
+
 import { getFullLanguageName } from '../frontend/src/utils/languageMapping';
 
 // Import API handlers
@@ -147,13 +150,6 @@ import userRoutes from './routes/userRoutes';
 app.use('/auth', authRoutes);
 app.use('/options', optionsRoutes);
 app.use('/user', userRoutes);
-
-// REMOVED: Inline definition for /auth/validate (Consider moving to authRoutes if kept)
-app.post('/auth/validate', (req: Request, res: Response) => {
-     // TODO: Move this logic to authController and authRoutes if needed
-     // For now, just sending a placeholder or removing if unused
-     res.status(501).json({ message: 'Validate endpoint needs refactoring into authRoutes/Controller' });
-});
 
 /**
  * Route to generate word definitions. (Keep for now, move later)
