@@ -1,4 +1,3 @@
-import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 
@@ -29,9 +28,6 @@ import {
     getSentencesOpenRouter, 
     translateSentenceOpenRouter 
 } from './openRouter';
-
-// Import middlewares
-import { authenticateToken, isActiveUser } from './middlewares/authMiddleware';
 
 // Import TTS handlers
 import { textToSpeech as azureTextToSpeech } from './azureTTS';
@@ -146,195 +142,21 @@ interface RequestParams {
 
 import authRoutes from './routes/authRoutes';
 import optionsRoutes from './routes/optionsRoutes';
+import userRoutes from './routes/userRoutes';
 
 app.use('/auth', authRoutes);
 app.use('/options', optionsRoutes);
+app.use('/user', userRoutes);
 
-// Protected route
-app.get('/user', authenticateToken, async (req: Request, res: Response) => {
-    try {
-        const userId = (req as any).user.userId;
-        const user = await pool.query('SELECT id, username, email FROM users WHERE id = $1', [userId]);
-        res.status(200).json(user.rows[0]);
-    } catch (error) {
-        console.error('Error fetching user:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Error fetching user';
-        res.status(500).json({ error: errorMessage });
-    }
-});
-
-
-// Route to validate JWT access token (remains mostly the same, validates token from Authorization header)
-// Note: This route might become less necessary if frontend relies more on refresh flow.
-app.post('/auth/validate', authenticateToken, (req: Request, res: Response) => {
-    // The authenticateToken middleware already validates the access token.
-    // If it reaches here, the token is valid (though maybe expired if not checked by middleware).
-    // We can return the user info attached by the middleware.
-    const user = (req as any).user;
-    if (user) {
-        res.status(200).json({ isValid: true, user });
-    } else {
-        // Should not happen if authenticateToken is working correctly
-        res.status(401).json({ isValid: false, error: 'Invalid token or user not found' });
-    }
-});
-
-app.put('/user/profile', authenticateToken, async (req: Request, res: Response) => {
-    try {
-        const userId = (req as any).user.userId;
-        const { username, email } = req.body;
-
-        // Validations
-        if (!username || !email) {
-            res.status(400).json({ error: 'All fields are required' });
-            return;
-        }
-
-        const updateResult = await pool.query(`
-            UPDATE users 
-            SET username = $1, 
-                email = $2,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id = $3 
-            RETURNING id, username, email
-        `, [username, email, userId]);
-
-        res.status(200).json(updateResult.rows[0]);
-    } catch (error) {
-        console.error('Error updating profile:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Error updating profile';
-        res.status(500).json({ error: errorMessage });
-    }
-});
-
-app.post('/user/change-password', authenticateToken, async (req: Request, res: Response) => {
-    try {
-        const userId = (req as any).user.userId;
-        const { currentPassword, newPassword } = req.body;
-
-        // Fetch current user
-        const userResult = await pool.query('SELECT password_hash FROM users WHERE id = $1', [userId]);
-        const user = userResult.rows[0];
-
-        // Verify current password
-        const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
-        if (!isCurrentPasswordValid) {
-            res.status(400).json({ error: 'Incorrect current password' });
-            return;
-        }
-
-        // Validate new password
-        if (newPassword.length < 8) {
-            res.status(400).json({ error: 'New password must be at least 8 characters' });
-            return;
-        }
-
-        // Update password
-        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-        await pool.query(`
-            UPDATE users 
-            SET password_hash = $1,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id = $2
-        `, [hashedNewPassword, userId]);
-
-        res.status(200).json({ message: 'Password changed successfully' });
-    } catch (error) {
-        console.error('Error changing password:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Error changing password';
-        res.status(500).json({ error: errorMessage });
-    }
-});
-
-// Route to get user settings
-app.get('/user/settings', authenticateToken, async (req: Request, res: Response) => {
-    try {
-        const userId = (req as any).user.userId;
-        const result = await pool.query(
-            `SELECT 
-                preferred_language,
-                theme,
-                native_language,
-                target_language,
-                selected_api_service,
-                selected_tts_service,
-                selected_llm,
-                selected_voice
-             FROM user_settings WHERE user_id = $1`,
-            [userId]
-        );
-
-        if (result.rows.length > 0) {
-            res.json(result.rows[0]);
-        } else {
-            res.status(404).json({ error: 'Settings not found' });
-        }
-    } catch (error) {
-        console.error('Error fetching user settings:', error);
-        res.status(500).json({ error: 'Error fetching settings' });
-    }
-});
-
-// Route to update user settings
-app.put('/user/settings', authenticateToken, async (req: Request, res: Response): Promise<void> => {
-    try {
-        const userId = (req as any).user.userId;
-        const {
-            preferred_language,
-            theme,
-            native_language,
-            target_language,
-            selected_api_service,
-            selected_tts_service,
-            selected_llm,
-            selected_voice
-        } = req.body;
-
-        // Validate service/llm combination
-        const validLLMs = llmOptions[selected_api_service]?.map((llm: { value: string }) => llm.value) || [];
-        if (!validLLMs.includes(selected_llm)) {
-            res.status(400).json({ error: 'Invalid service and model combination' });
-            return;
-        }
-
-        const result = await pool.query(`
-            INSERT INTO user_settings 
-                (user_id, preferred_language, theme, native_language, target_language, 
-                 selected_api_service, selected_tts_service, selected_llm, selected_voice)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            ON CONFLICT (user_id) DO UPDATE SET
-                preferred_language = EXCLUDED.preferred_language,
-                theme = EXCLUDED.theme,
-                native_language = EXCLUDED.native_language,
-                target_language = EXCLUDED.target_language,
-                selected_api_service = EXCLUDED.selected_api_service,
-                selected_tts_service = EXCLUDED.selected_tts_service,
-                selected_llm = EXCLUDED.selected_llm,
-                selected_voice = EXCLUDED.selected_voice
-            RETURNING *
-        `, [
-            userId,
-            preferred_language,
-            theme,
-            native_language,
-            target_language,
-            selected_api_service,
-            selected_tts_service,
-            selected_llm,
-            selected_voice
-        ]);
-
-        res.json(result.rows[0]);
-        return;
-    } catch (error) {
-        console.error('Error updating user settings:', error);
-        res.status(500).json({ error: 'Error updating settings' });
-        return;
-    }
+// REMOVED: Inline definition for /auth/validate (Consider moving to authRoutes if kept)
+app.post('/auth/validate', (req: Request, res: Response) => {
+     // TODO: Move this logic to authController and authRoutes if needed
+     // For now, just sending a placeholder or removing if unused
+     res.status(501).json({ message: 'Validate endpoint needs refactoring into authRoutes/Controller' });
 });
 
 /**
- * Route to generate word definitions.
+ * Route to generate word definitions. (Keep for now, move later)
  * @param req - Express request object.
  * @param res - Express response object.
  */
