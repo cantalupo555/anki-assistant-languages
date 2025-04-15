@@ -37,9 +37,9 @@ import { authenticateToken, isActiveUser } from './middlewares/authMiddleware';
 import { textToSpeech as azureTextToSpeech } from './azureTTS';
 import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
 
-// Import type definitions and options
+// Import type definitions
 import { TokenCount } from '../frontend/src/utils/Types';
-import { llmOptions } from '../frontend/src/utils/Options';
+import { llmOptions } from './config/aiOptions'; 
 
 /**
  * Validates and extracts common parameters from the request.
@@ -145,8 +145,10 @@ interface RequestParams {
 }
 
 import authRoutes from './routes/authRoutes';
+import optionsRoutes from './routes/optionsRoutes';
 
 app.use('/auth', authRoutes);
+app.use('/options', optionsRoutes);
 
 // Protected route
 app.get('/user', authenticateToken, async (req: Request, res: Response) => {

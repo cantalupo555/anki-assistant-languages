@@ -1,7 +1,22 @@
-// Interface for voice options
-import { VoiceOption } from './Types';
+// Import types - Same consideration about type location as in aiOptions.ts
+import { TTSOption, VoiceOption } from '../../frontend/src/utils/Types';
 
-// Array of available voice options for TTS
+/**
+ * @description Array of available Text-to-Speech (TTS) service options.
+ * Each object contains the display name and the internal value used for identification.
+ * @type {TTSOption[]}
+ */
+export const ttsOptions: TTSOption[] = [
+  { name: 'Google TTS', value: 'google' },
+  { name: 'Azure TTS', value: 'azure' },
+];
+
+/**
+ * @description Array of available voice options for TTS, categorized by service and language.
+ * Each object contains the voice name, internal value, full language name, language code,
+ * and the TTS service it belongs to.
+ * @type {VoiceOption[]}
+ */
 export const voiceOptions: VoiceOption[] = [
     // Google Cloud TTS voices
     // English (United States)
