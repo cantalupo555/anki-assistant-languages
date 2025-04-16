@@ -1,6 +1,13 @@
 /**
- * Controller for authentication-related operations.
- * Handles user registration, login, refresh token, and logout.
+ * @fileOverview Controller functions for handling authentication operations.
+ * Includes user registration, login, access token refresh, logout, and token validation.
+ * 
+ * @dependencies
+ * - express (Request, Response): For handling HTTP requests and responses.
+ * - jsonwebtoken (jwt): For generating and verifying JWT tokens.
+ * - bcrypt: For hashing and verifying passwords.
+ * - uuid (v4): For generating unique identifiers (refresh token family).
+ * - ../config/serverConfig (pool, JWT_SECRET): For database access and JWT signing.
  */
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
@@ -18,7 +25,7 @@ function hashToken(token: string): string {
 }
 
 /**
- * Registers a new user.
+ * @description Registers a new user.
  * 
  * - Validates username, email, and password.
  * - Hashes the password with bcrypt.
@@ -140,7 +147,7 @@ export async function registerUser(req: Request, res: Response) {
 }
 
 /**
- * Logs in an existing user.
+ * @description Logs in an existing user.
  * 
  * - Validates username and password.
  * - Checks user status.
@@ -240,20 +247,7 @@ export async function loginUser(req: Request, res: Response) {
 }
 
 /**
- * Refreshes the access token using a valid refresh token cookie.
- * 
- * - Validates refresh token from cookie.
- * - Checks token hash in the database.
- * - Verifies token is not expired or revoked.
- * - Generates a new access token (without rotating refresh token).
- * 
- * @param req - Express request object
- * @param res - Express response object
- * @returns 200 with new access token and user info on success
- * @throws 401, 403, 404, 500 with error message on failure
- */
-/**
- * Refreshes the access token using a valid refresh token cookie.
+ * @description Refreshes the access token using a valid refresh token cookie.
  * 
  * - Validates refresh token from cookie.
  * - Checks token hash in the database.
@@ -367,7 +361,7 @@ export async function refreshToken(req: Request, res: Response) {
 }
 
 /**
- * Logs out the user by revoking the refresh token and clearing the cookie.
+ * @description Logs out the user by revoking the refresh token and clearing the cookie.
  * 
  * - Retrieves the refresh token from the HttpOnly cookie.
  * - Hashes the refresh token and revokes the corresponding session in the database.
@@ -414,7 +408,7 @@ export async function logoutUser(req: Request, res: Response) {
 }
 
 /**
- * Validates the current access token provided in the Authorization header.
+ * @description Validates the current access token provided in the Authorization header.
  * Relies on the `authenticateToken` middleware to perform the actual validation.
  * If the middleware passes, this controller confirms validity and returns user info.
  *

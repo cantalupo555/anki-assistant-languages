@@ -1,7 +1,12 @@
 /**
- * @fileoverview Defines the Express router for user-related endpoints.
+ * @fileOverview Defines the Express router for user-related endpoints.
  * All routes defined in this file are prefixed with `/user` (in expressServer.ts)
  * and require authentication and an active user status via middlewares applied here.
+ * 
+ * @dependencies
+ * - express (Router): For creating and managing the router instance.
+ * - ../controllers/userController: Provides the handler functions for each user route.
+ * - ../middlewares/authMiddleware (authenticateToken, isActiveUser): Applied to all routes in this router.
  */
 import { Router } from 'express';
 import {

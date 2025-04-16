@@ -1,7 +1,16 @@
+/**
+ * @fileOverview Defines the Express router for authentication-related endpoints.
+ * All routes defined here are prefixed with `/auth` (in expressServer.ts).
+ * Handles user registration, login, token refresh, logout, and token validation.
+ * 
+ * @dependencies
+ * - express (Router): For creating and managing the router instance.
+ * - ../controllers/authController: Provides the handler functions for each auth route.
+ * - ../middlewares/authMiddleware (authenticateToken): Used to protect the /validate route.
+ */
 import { Router } from 'express';
-// Import the new controller function and the middleware
 import { registerUser, loginUser, refreshToken, logoutUser, validateAccessToken } from '../controllers/authController';
-import { authenticateToken } from '../middlewares/authMiddleware'; // Import middleware
+import { authenticateToken } from '../middlewares/authMiddleware';
 
 const router = Router();
 

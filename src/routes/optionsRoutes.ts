@@ -1,3 +1,12 @@
+/**
+ * @fileOverview Defines the Express router for configuration option endpoints.
+ * All routes defined here are prefixed with `/options` (in expressServer.ts).
+ * Provides GET endpoints to retrieve lists of available services and models.
+ * 
+ * @dependencies
+ * - express (Router): For creating and managing the router instance.
+ * - ../controllers/optionsController: Provides the handler functions for each options route.
+ */
 import { Router } from 'express';
 import {
     getApiServices,
@@ -6,11 +15,6 @@ import {
     getVoiceOptions
 } from '../controllers/optionsController';
 
-/**
- * @description Express router instance for handling configuration option related routes.
- * Mounts controller functions to specific GET endpoints under the `/options` path prefix.
- * @type {Router}
- */
 const router = Router();
 
 // GET /options/api-services: Returns the list of AI providers

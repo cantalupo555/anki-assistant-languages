@@ -1,6 +1,12 @@
 /**
- * Controller for handling requests related to configuration options.
- * Provides endpoints to retrieve available AI services, LLMs, TTS services, and voices.
+ * @fileOverview Controller functions for retrieving configuration options.
+ * Provides endpoints to fetch available AI services, LLMs, TTS services, and voices,
+ * typically used to populate frontend selection menus.
+ * 
+ * @dependencies
+ * - express (Request, Response): For handling HTTP requests and responses.
+ * - ../config/aiOptions: Source of AI service and LLM options.
+ * - ../config/ttsOptions: Source of TTS service and voice options.
  */
 import { Request, Response } from 'express';
 import { apiServiceOptions, llmOptions } from '../config/aiOptions';

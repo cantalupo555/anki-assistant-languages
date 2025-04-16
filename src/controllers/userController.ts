@@ -1,8 +1,14 @@
 /**
- * @fileoverview Controller functions for handling user-related operations,
+ * @fileOverview Controller functions for handling user-related operations,
  * including profile management, settings, and password changes.
  * All operations require user authentication and active status,
  * enforced by middlewares in the corresponding route file.
+ * 
+ * @dependencies
+ * - express (Request, Response): For handling HTTP requests and responses.
+ * - bcrypt: For hashing new passwords and comparing existing ones.
+ * - ../config/serverConfig (pool): For database access.
+ * - ../config/aiOptions (llmOptions): For validating LLM selection in settings updates.
  */
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
