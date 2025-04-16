@@ -2,34 +2,25 @@ import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 
 // Import server configuration (Express app, pool, env vars, supportedLanguages)
-import { app, pool, PORT, supportedLanguages, supportedAPIServices, supportedTTSServices } from './config/serverConfig';
+import { app, PORT, supportedLanguages, supportedAPIServices, supportedTTSServices } from './config/serverConfig';
 
 // Re-add middleware imports needed for remaining inline routes
 import { authenticateToken, isActiveUser } from './middlewares/authMiddleware';
 
 import { getFullLanguageName } from '../frontend/src/utils/languageMapping';
 
-// Import API handlers
-import { 
-    analyzeFrequencyAnthropicClaude, 
-    getDefinitionsAnthropicClaude, 
-    getDialogueAnthropicClaude, 
-    getSentencesAnthropicClaude, 
-    translateSentenceAnthropicClaude 
+// Import API handlers (Only those still used directly in this file)
+import {
+    analyzeFrequencyAnthropicClaude,
+    translateSentenceAnthropicClaude
 } from './anthropicClaude';
-import { 
-    analyzeFrequencyGoogleGemini, 
-    getDefinitionsGoogleGemini, 
-    getDialogueGoogleGemini, 
-    getSentencesGoogleGemini, 
-    translateSentenceGoogleGemini 
+import {
+    analyzeFrequencyGoogleGemini,
+    translateSentenceGoogleGemini
 } from './googleGemini';
-import { 
-    analyzeFrequencyOpenRouter, 
-    getDefinitionsOpenRouter, 
-    getDialogueOpenRouter, 
-    getSentencesOpenRouter, 
-    translateSentenceOpenRouter 
+import {
+    analyzeFrequencyOpenRouter,
+    translateSentenceOpenRouter
 } from './openRouter';
 
 // Import TTS handlers
@@ -146,113 +137,14 @@ interface RequestParams {
 import authRoutes from './routes/authRoutes';
 import optionsRoutes from './routes/optionsRoutes';
 import userRoutes from './routes/userRoutes';
+import generationRoutes from './routes/generationRoutes';
 
 app.use('/auth', authRoutes);
 app.use('/options', optionsRoutes);
 app.use('/user', userRoutes);
+app.use('/generate', generationRoutes);
 
-/**
- * Route to generate word definitions. (Keep for now, move later)
- * @param req - Express request object.
- * @param res - Express response object.
- */
-app.post('/generate/definitions', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
-    try {
-        console.log('Request body:', req.body); // Debug log
-        const { word, targetLanguage, apiService, llm } = validateRequestParams(req);
-        const targetLanguageFull = getFullLanguageName(targetLanguage);
-        console.log('Validated params:', { word, targetLanguageFull, apiService, llm }); // Debug log
-
-        let definitions = '';
-        let definitionsTokens = initializeTokenCount();
-
-        console.log(`Calling ${apiService} API for definitions...`);
-
-        if (apiService === 'anthropic') {
-            [definitions, definitionsTokens] = await getDefinitionsAnthropicClaude(word, targetLanguage, llm);
-        } else if (apiService === 'openrouter') {
-            [definitions, definitionsTokens] = await getDefinitionsOpenRouter(word, targetLanguage, llm);
-        } else if (apiService === 'google') {
-            [definitions, definitionsTokens] = await getDefinitionsGoogleGemini(word, targetLanguage, llm);
-        }
-
-        console.log('Definitions generated successfully:', {
-            definitions: definitions.substring(0, 100) + '...', // Log the first 100 characters
-            tokenCount: definitionsTokens
-        });
-
-        res.json({ definitions: { text: definitions, tokenCount: definitionsTokens } });
-    } catch (error) {
-        console.error('Error in /generate/definitions:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the request';
-
-        // Log detailed error information
-        console.error('Error details:', {
-            message: errorMessage,
-            stack: error instanceof Error ? error.stack : 'No stack trace available'
-        });
-
-        res.status(500).json({
-            error: errorMessage,
-            details: 'Check server logs for more information'
-        });
-    }
-});
-
-// Route to handle the generation of sentences
-app.post('/generate/sentences', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
-    try {
-        console.log('Request body:', req.body); // Debug log
-        const { word, targetLanguage, apiService, llm } = validateRequestParams(req);
-        const targetLanguageFull = getFullLanguageName(targetLanguage);
-        console.log('Validated params:', { word, targetLanguageFull, apiService, llm }); // Debug log
-
-        let sentences = '';
-        let sentencesTokens = initializeTokenCount();
-
-        console.log(`Calling ${apiService} API for sentences...`);
-
-        if (apiService === 'anthropic') {
-            [sentences, sentencesTokens] = await getSentencesAnthropicClaude(word, targetLanguage, llm);
-        } else if (apiService === 'openrouter') {
-            [sentences, sentencesTokens] = await getSentencesOpenRouter(word, targetLanguage, llm);
-        } else if (apiService === 'google') {
-            [sentences, sentencesTokens] = await getSentencesGoogleGemini(word, targetLanguage, llm);
-        }
-
-        console.log('Sentences generated successfully:', {
-            sentences: sentences.substring(0, 100) + '...', // Log the first 100 characters
-            tokenCount: sentencesTokens
-        });
-
-        // Split sentences into an array
-        const sentencesArray = sentences.split('\n').filter(sentence => sentence.trim() !== '');
-
-        res.json({
-            sentences: {
-                text: sentencesArray,
-                tokenCount: sentencesTokens,
-                totalPages: Math.ceil(sentencesArray.length / 5)
-            }
-        });
-    } catch (error) {
-        console.error('Error in /generate/sentences:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the request';
-
-        // Log detailed error information
-        console.error('Error details:', {
-            message: errorMessage,
-            stack: error instanceof Error ? error.stack : 'No stack trace available'
-        });
-
-        res.status(500).json({
-            error: errorMessage,
-            details: 'Check server logs for more information'
-        });
-    }
-});
-
-// Route to handle the translation request
+// Route to handle the translation request (Keep for now, move later)
 app.post('/translate', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
         console.log('Request body:', req.body); // Debug log
@@ -314,66 +206,10 @@ app.post('/translate', authenticateToken, isActiveUser, async (req: Request, res
             error: errorMessage,
             details: 'Check server logs for more information'
         });
-    }
-});
+    } // <-- Add this closing brace for the 'catch' block
+}); // <-- Keep this closing brace/parenthesis for app.post('/translate', ...)
 
-// Route to handle the generation of a dialogue
-app.post('/generate/dialogue', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
-    try {
-        console.log('Request body:', req.body); // Debug log
-        const { word, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req, true);
-        const targetLanguageFull = getFullLanguageName(targetLanguage);
-        const nativeLanguageFull = getFullLanguageName(nativeLanguage);
-
-        console.log('Validated params:', {
-            word,
-            targetLanguage: targetLanguageFull,
-            nativeLanguage: nativeLanguageFull,
-            apiService,
-            llm
-        });
-
-        let dialogue = '';
-        let dialogueTokens = initializeTokenCount();
-
-        console.log(`Calling ${apiService} API for dialogue...`);
-
-        if (apiService === 'anthropic') {
-            [dialogue, dialogueTokens] = await getDialogueAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
-        } else if (apiService === 'openrouter') {
-            [dialogue, dialogueTokens] = await getDialogueOpenRouter(word, targetLanguage, nativeLanguage, llm);
-        } else if (apiService === 'google') {
-            [dialogue, dialogueTokens] = await getDialogueGoogleGemini(word, targetLanguage, nativeLanguage, llm);
-        }
-
-        console.log('Dialogue generated successfully:', {
-            dialogue: dialogue.substring(0, 100) + '...',
-            tokenCount: dialogueTokens
-        });
-
-        res.json({ 
-            dialogue: {
-                text: dialogue,
-                tokenCount: dialogueTokens
-            }
-        });
-    } catch (error) {
-        console.error('Error in /generate/dialogue:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the request';
-
-        console.error('Error details:', {
-            message: errorMessage,
-            stack: error instanceof Error ? error.stack : 'No stack trace available'
-        });
-
-        res.status(500).json({
-            error: errorMessage,
-            details: 'Check server logs for more information'
-        });
-    }
-});
-
-// Route to handle the word frequency analysis request
+// Route to handle the word frequency analysis request (Keep for now, move later)
 app.post('/analyze/frequency', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
     try {
         console.log('Request body:', req.body); // Log request body
