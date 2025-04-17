@@ -18,9 +18,18 @@ import { getFullLanguageName } from '../../frontend/src/utils/languageMapping'; 
 import { TokenCount } from '../../frontend/src/utils/Types'; // Path might need adjustment
 
 // Import API handlers (adjust paths if needed)
-import { getDefinitionsAnthropicClaude, getSentencesAnthropicClaude, getDialogueAnthropicClaude } from '../anthropicClaude';
-import { getDefinitionsGoogleGemini, getSentencesGoogleGemini, getDialogueGoogleGemini } from '../googleGemini';
-import { getDefinitionsOpenRouter, getSentencesOpenRouter, getDialogueOpenRouter } from '../openRouter';
+import {
+    getDefinitionsAnthropicClaude, getSentencesAnthropicClaude, getDialogueAnthropicClaude,
+    translateSentenceAnthropicClaude, analyzeFrequencyAnthropicClaude
+} from '../anthropicClaude';
+import {
+    getDefinitionsGoogleGemini, getSentencesGoogleGemini, getDialogueGoogleGemini,
+    translateSentenceGoogleGemini, analyzeFrequencyGoogleGemini
+} from '../googleGemini';
+import {
+    getDefinitionsOpenRouter, getSentencesOpenRouter, getDialogueOpenRouter,
+    translateSentenceOpenRouter, analyzeFrequencyOpenRouter
+} from '../openRouter';
 
 // --- Helper Functions (Consider moving to a shared utility file) ---
 
@@ -170,6 +179,120 @@ export async function generateSentences(req: Request, res: Response): Promise<vo
     } catch (error) {
         console.error(`[${new Date().toISOString()}] Error in ${endpoint}:`, error);
         const errorMessage = error instanceof Error ? error.message : 'An error occurred generating sentences';
+        // Send error response
+        res.status(500).json({ error: errorMessage });
+    }
+}
+
+/**
+ * @description Translates text from the target language to the native language using the selected AI service.
+ * @route POST /generate/translate (Note: Route defined as /translate in generationRoutes.ts)
+ * @access Private (Requires authentication and active status via middleware)
+ * @param {Request} req - Express request object. Body should contain { word/text, targetLanguage, nativeLanguage, apiService, llm }.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Sends JSON response with the translation or error.
+ */
+export async function translateText(req: Request, res: Response): Promise<void> {
+    const endpoint = '/generate/translate'; // For logging context
+    try {
+        // Translation requires native language
+        const { word: content, targetLanguage, nativeLanguage, apiService, llm } = validateGenerationParams(req, true);
+         if (!nativeLanguage) { // Double check
+             throw new Error('Native language is required for translation but was not validated.');
+        }
+
+        const targetLanguageFull = getFullLanguageName(targetLanguage);
+        const nativeLanguageFull = getFullLanguageName(nativeLanguage);
+        console.log(`[${new Date().toISOString()}] ${endpoint}: Validated params:`, { content, targetLanguage: targetLanguageFull, nativeLanguage: nativeLanguageFull, apiService, llm });
+
+        let translation = '';
+        let translationTokens = initializeTokenCount();
+
+        console.log(`[${new Date().toISOString()}] ${endpoint}: Calling ${apiService} API...`);
+
+        // Select the appropriate API handler
+        if (apiService === 'anthropic') {
+            [translation, translationTokens] = await translateSentenceAnthropicClaude(content, targetLanguage, nativeLanguageFull, llm);
+        } else if (apiService === 'openrouter') {
+            [translation, translationTokens] = await translateSentenceOpenRouter(content, targetLanguage, nativeLanguageFull, llm);
+        } else if (apiService === 'google') {
+            [translation, translationTokens] = await translateSentenceGoogleGemini(content, targetLanguage, nativeLanguageFull, llm);
+        } else {
+            console.warn(`[${new Date().toISOString()}] ${endpoint}: Unsupported API service requested: ${apiService}`);
+            res.status(400).json({ error: `Unsupported API service: ${apiService}` });
+            return;
+        }
+
+        console.log(`[${new Date().toISOString()}] ${endpoint}: Success from ${apiService}`, { tokenCount: translationTokens });
+        // Send successful response
+        res.status(200).json({
+            translation: {
+                text: translation,
+                tokenCount: translationTokens
+            }
+        });
+
+    } catch (error) {
+        console.error(`[${new Date().toISOString()}] Error in ${endpoint}:`, error);
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred generating translation';
+        // Send error response
+        res.status(500).json({ error: errorMessage });
+    }
+}
+
+/**
+ * @description Analyzes the frequency of a word in the target language using the selected AI service.
+ * @route POST /generate/frequency (Note: Route defined as /frequency in generationRoutes.ts)
+ * @access Private (Requires authentication and active status via middleware)
+ * @param {Request} req - Express request object. Body should contain { word, targetLanguage, nativeLanguage, apiService, llm }.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Sends JSON response with the frequency analysis or error.
+ */
+export async function analyzeFrequency(req: Request, res: Response): Promise<void> {
+    const endpoint = '/generate/frequency'; // For logging context
+    try {
+        // Frequency analysis requires native language for the response
+        const { word, targetLanguage, nativeLanguage, apiService, llm } = validateGenerationParams(req, true);
+         if (!nativeLanguage) { // Double check
+             throw new Error('Native language is required for frequency analysis but was not validated.');
+        }
+
+        const targetLanguageFull = getFullLanguageName(targetLanguage);
+        const nativeLanguageFull = getFullLanguageName(nativeLanguage);
+        console.log(`[${new Date().toISOString()}] ${endpoint}: Validated params:`, { word, targetLanguage: targetLanguageFull, nativeLanguage: nativeLanguageFull, apiService, llm });
+
+        let analysis = '';
+        let analysisTokens = initializeTokenCount();
+
+        console.log(`[${new Date().toISOString()}] ${endpoint}: Calling ${apiService} API...`);
+
+        // Select the appropriate API handler
+        if (apiService === 'anthropic') {
+            [analysis, analysisTokens] = await analyzeFrequencyAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
+        } else if (apiService === 'openrouter') {
+            [analysis, analysisTokens] = await analyzeFrequencyOpenRouter(word, targetLanguage, nativeLanguage, llm);
+        } else if (apiService === 'google') {
+            [analysis, analysisTokens] = await analyzeFrequencyGoogleGemini(word, targetLanguage, nativeLanguage, llm);
+        } else {
+            console.warn(`[${new Date().toISOString()}] ${endpoint}: Unsupported API service requested: ${apiService}`);
+            res.status(400).json({ error: `Unsupported API service: ${apiService}` });
+            return;
+        }
+
+        console.log(`[${new Date().toISOString()}] ${endpoint}: Success from ${apiService}`, { tokenCount: analysisTokens });
+        // Send successful response
+        // The API response structure for frequency analysis might differ, adjust as needed
+        // Assuming the handler returns the analysis text and token count directly for now
+        res.status(200).json({
+            analysis: { // Wrapping in an 'analysis' object for consistency, adjust if needed
+                text: analysis,
+                tokenCount: analysisTokens
+            }
+         });
+
+    } catch (error) {
+        console.error(`[${new Date().toISOString()}] Error in ${endpoint}:`, error);
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred during frequency analysis';
         // Send error response
         res.status(500).json({ error: errorMessage });
     }

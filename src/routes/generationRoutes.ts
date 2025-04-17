@@ -9,7 +9,10 @@
  * - ../middlewares/authMiddleware (authenticateToken, isActiveUser): Applied to all routes in this router.
  */
 import { Router } from 'express';
-import { generateDefinitions, generateSentences, generateDialogue } from '../controllers/generationController';
+import {
+    generateDefinitions, generateSentences, generateDialogue,
+    translateText, analyzeFrequency // Added translate/analyze controllers
+} from '../controllers/generationController';
 import { authenticateToken, isActiveUser } from '../middlewares/authMiddleware';
 
 const router = Router();
@@ -26,5 +29,11 @@ router.post('/sentences', generateSentences);
 
 // POST /generate/dialogue - Generate a dialogue using a word/expression
 router.post('/dialogue', generateDialogue);
+
+// POST /generate/translate - Translate text
+router.post('/translate', translateText); // Note: Path is /translate relative to /generate prefix
+
+// POST /generate/frequency - Analyze word frequency
+router.post('/frequency', analyzeFrequency); // Note: Path is /frequency relative to /generate prefix
 
 export default router;

@@ -9,19 +9,7 @@ import { authenticateToken, isActiveUser } from './middlewares/authMiddleware';
 
 import { getFullLanguageName } from '../frontend/src/utils/languageMapping';
 
-// Import API handlers (Only those still used directly in this file)
-import {
-    analyzeFrequencyAnthropicClaude,
-    translateSentenceAnthropicClaude
-} from './anthropicClaude';
-import {
-    analyzeFrequencyGoogleGemini,
-    translateSentenceGoogleGemini
-} from './googleGemini';
-import {
-    analyzeFrequencyOpenRouter,
-    translateSentenceOpenRouter
-} from './openRouter';
+// REMOVED: API Handlers for translate/analyze (now used in generationController.ts)
 
 // Import TTS handlers
 import { textToSpeech as azureTextToSpeech } from './azureTTS';
@@ -143,113 +131,6 @@ app.use('/auth', authRoutes);
 app.use('/options', optionsRoutes);
 app.use('/user', userRoutes);
 app.use('/generate', generationRoutes);
-
-// Route to handle the translation request (Keep for now, move later)
-app.post('/translate', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
-    try {
-        console.log('Request body:', req.body); // Debug log
-        const { word: content, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req, true);
-        const targetLanguageFull = getFullLanguageName(targetLanguage);
-        const nativeLanguageFull = getFullLanguageName(nativeLanguage);
-
-        console.log('Validated params:', {
-            content,
-            targetLanguage: targetLanguageFull,
-            nativeLanguage: nativeLanguageFull,
-            apiService,
-            llm
-        });
-
-        let translation = '';
-        let translationTokens = initializeTokenCount();
-
-        console.log(`Calling ${apiService} API for translation...`);
-        console.log('Translation parameters:', {
-            content,
-            targetLanguage: targetLanguageFull,
-            nativeLanguage: nativeLanguageFull,
-            llm
-        });
-
-        // Process the translation based on the selected API service
-        if (apiService === 'anthropic') {
-            [translation, translationTokens] = await translateSentenceAnthropicClaude(content, targetLanguage, nativeLanguageFull, llm);
-        } else if (apiService === 'openrouter') {
-            [translation, translationTokens] = await translateSentenceOpenRouter(content, targetLanguage, nativeLanguageFull, llm);
-        } else if (apiService === 'google') {
-            [translation, translationTokens] = await translateSentenceGoogleGemini(content, targetLanguage, nativeLanguageFull, llm);
-        }
-
-        console.log('Translation generated successfully:', {
-            translation: translation.substring(0, 100) + '...',
-            tokenCount: translationTokens
-        });
-
-        // Returns the translation and token count
-        res.json({ 
-            translation: { 
-                text: translation, 
-                tokenCount: translationTokens 
-            } 
-        });
-    } catch (error) {
-        console.error('Error in /translate:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the request';
-
-        // Log detailed error information
-        console.error('Error details:', {
-            message: errorMessage,
-            stack: error instanceof Error ? error.stack : 'No stack trace available'
-        });
-
-        res.status(500).json({
-            error: errorMessage,
-            details: 'Check server logs for more information'
-        });
-    } // <-- Add this closing brace for the 'catch' block
-}); // <-- Keep this closing brace/parenthesis for app.post('/translate', ...)
-
-// Route to handle the word frequency analysis request (Keep for now, move later)
-app.post('/analyze/frequency', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
-    try {
-        console.log('Request body:', req.body); // Log request body
-        const { word, targetLanguage, nativeLanguage, apiService, llm } = validateRequestParams(req, true);
-        const targetLanguageFull = getFullLanguageName(targetLanguage);
-        const nativeLanguageFull = getFullLanguageName(nativeLanguage);
-
-        console.log('Validated params:', { // Log validated parameters
-            word,
-            targetLanguage: targetLanguageFull,
-            nativeLanguage: nativeLanguageFull,
-            apiService,
-            llm
-        });
-
-        let analysis = '';
-        let tokenCount: TokenCount = initializeTokenCount();
-
-        console.log(`Calling ${apiService} API for frequency analysis...`); // Log indicating which API will be called
-
-        if (apiService === 'anthropic') {
-            [analysis, tokenCount] = await analyzeFrequencyAnthropicClaude(word, targetLanguage, nativeLanguage, llm);
-        } else if (apiService === 'openrouter') {
-            [analysis, tokenCount] = await analyzeFrequencyOpenRouter(word, targetLanguage, nativeLanguage, llm);
-        } else if (apiService === 'google') {
-            [analysis, tokenCount] = await analyzeFrequencyGoogleGemini(word, targetLanguage, nativeLanguage, llm);
-        }
-
-        console.log('Frequency analysis generated successfully:', { // Log the result
-            analysis: analysis.substring(0, 100) + '...', // Show first 100 characters
-            tokenCount
-        });
-
-        res.json({ analysis, tokenCount });
-    } catch (error) {
-        console.error('Error in /analyze/frequency:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the frequency analysis request';
-        res.status(500).json({ error: errorMessage });
-    }
-});
 
 // Route to handle token sum
 app.post('/token/sum', authenticateToken, (req: Request, res: Response) => {
