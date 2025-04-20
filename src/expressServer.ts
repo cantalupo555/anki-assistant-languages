@@ -9,79 +9,9 @@ import { authenticateToken, isActiveUser } from './middlewares/authMiddleware';
 
 import { getFullLanguageName } from '../frontend/src/utils/languageMapping';
 
-// REMOVED: API Handlers for translate/analyze (now used in generationController.ts)
-
-// Import TTS handlers
-import { textToSpeech as azureTextToSpeech } from './azureTTS';
-import { textToSpeech as googleTextToSpeech } from './googleCloudTTS';
-
-// Import type definitions
+// Import type definitions (Keep TokenCount if still needed by /token/sum)
 import { TokenCount } from '../frontend/src/utils/Types';
-import { llmOptions } from './config/aiOptions'; 
-
-/**
- * Validates and extracts common parameters from the request.
- * @param req - Express request object.
- * @returns Validated parameters.
- * @throws {Error} If any parameter is invalid.
- */
-function validateRequestParams(req: Request, requireNativeLanguage = false): RequestParams {
-    const { word, text, targetLanguage, language, nativeLanguage, apiService, llm } = req.body;
-
-    // Debug log to check the request body
-    console.log('Request body in validate:', req.body);
-
-    const content = word || text;
-    if (!content || typeof content !== 'string' || content.trim() === '') {
-        throw new Error('Valid word or text is required');
-    }
-
-    // Accepts both targetLanguage and language
-    const targetLang = targetLanguage || language;
-    if (!targetLang || typeof targetLang !== 'string' || !supportedLanguages.includes(targetLang)) {
-        throw new Error('Valid target language is required');
-    }
-    if (!apiService || !supportedAPIServices.includes(apiService)) {
-        throw new Error(`Valid API service (${supportedAPIServices.join(', ')}) is required`);
-    }
-    if (!llm || typeof llm !== 'string') {
-        throw new Error('Valid llm is required');
-    }
-
-    // Only validate nativeLanguage if required
-    if (requireNativeLanguage && (!nativeLanguage || typeof nativeLanguage !== 'string' || !supportedLanguages.includes(nativeLanguage))) {
-        throw new Error('Valid native language is required');
-    }
-
-    return { 
-        word: content, 
-        targetLanguage: targetLang, 
-        nativeLanguage: nativeLanguage || '', // Allow undefined if not required
-        apiService, 
-        llm 
-    };
-}
-
-/**
- * Validates parameters related to TTS.
- * @param ttsService - TTS service (google or azure).
- * @param languageCode - Supported language code.
- * @param voice - Selected voice.
- * @throws {Error} If any parameter is invalid.
- */
-function validateTTSParams(ttsService: string, languageCode: string, voice: string): void {
-    const supportedLanguageCodes = ['en-US', 'it-IT', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'nl-NL', 'pl-PL', 'ru-RU', 'cmn-CN', 'ja-JP', 'ko-KR'];
-
-    if (!ttsService || !supportedTTSServices.includes(ttsService)) {
-        throw new Error(`Valid TTS service (${supportedTTSServices.join(', ')}) is required`);
-    }
-    if (!languageCode || !supportedLanguageCodes.includes(languageCode)) {
-        throw new Error('Invalid language code');
-    }
-    if (!voice || !voice.startsWith(languageCode)) {
-        throw new Error('Voice does not match the language code');
-    }
-}
+import { llmOptions } from './config/aiOptions';
 
 /**
  * Middleware for error handling.
@@ -108,31 +38,20 @@ function initializeTokenCount(): TokenCount {
  * @param text - Text to be validated.
  * @throws {Error} If the text is invalid.
  */
-function validateText(text: string): void {
-    if (!text || typeof text !== 'string' || text.trim() === '') {
-        throw new Error('Valid text is required');
-    }
-}
-
-interface RequestParams {
-    word: string;
-    targetLanguage: string;
-    nativeLanguage: string;
-    apiService: string;
-    llm: string;
-}
 
 import authRoutes from './routes/authRoutes';
 import optionsRoutes from './routes/optionsRoutes';
 import userRoutes from './routes/userRoutes';
 import generationRoutes from './routes/generationRoutes';
+import ttsRoutes from './routes/ttsRoutes';
 
 app.use('/auth', authRoutes);
 app.use('/options', optionsRoutes);
 app.use('/user', userRoutes);
 app.use('/generate', generationRoutes);
+app.use('/tts', ttsRoutes); // Montar o router de TTS
 
-// Route to handle token sum
+// Route to handle token sum (Manter por enquanto)
 app.post('/token/sum', authenticateToken, (req: Request, res: Response) => {
     try {
         const { definitionsTokens, sentencesTokens, translationTokens } = req.body;
@@ -156,22 +75,6 @@ app.post('/token/sum', authenticateToken, (req: Request, res: Response) => {
  * @param req - Express request object.
  * @param res - Express response object.
  */
-app.post('/tts', authenticateToken, isActiveUser, async (req: Request, res: Response) => {
-    const { text, voice, languageCode, ttsService } = req.body;
-
-    validateText(text);
-    validateTTSParams(ttsService, languageCode, voice);
-
-    let audioBuffer;
-    if (ttsService === 'google') {
-        audioBuffer = await googleTextToSpeech(text, voice, languageCode);
-    } else {
-        audioBuffer = await azureTextToSpeech(text, voice, languageCode);
-    }
-
-    res.set('Content-Type', 'audio/wav');
-    res.send(audioBuffer);
-});
 
 // Add the error handling middleware
 app.use(errorHandler);
