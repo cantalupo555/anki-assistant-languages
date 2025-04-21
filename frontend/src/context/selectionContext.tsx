@@ -5,9 +5,12 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { 
     APIServiceOption, 
     LLMOption,
+    APIServiceOption,
+    LLMOption,
     TokenCount,
-    TTSOption, 
+    TTSOption,
     VoiceOption,
+    LanguageOption,
 } from '../utils/Types';
 
 // Define the shape of the context
@@ -40,6 +43,9 @@ interface AppContextType {
     setOptionsLoading: React.Dispatch<React.SetStateAction<boolean>>;
     optionsError: string | null;
     setOptionsError: React.Dispatch<React.SetStateAction<string | null>>;
+    // Add states for language options
+    languageOptionsList: LanguageOption[];
+    setLanguageOptionsList: React.Dispatch<React.SetStateAction<LanguageOption[]>>;
 }
 
 // Create the context with an initial value of undefined
@@ -93,6 +99,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [voiceOptionsList, setVoiceOptionsList] = useState<VoiceOption[]>([]);
     const [optionsLoading, setOptionsLoading] = useState<boolean>(true); // Start as loading
     const [optionsError, setOptionsError] = useState<string | null>(null);
+    const [languageOptionsList, setLanguageOptionsList] = useState<LanguageOption[]>([]);
 
 
     // Effect to save the user selections to localStorage whenever it changes
@@ -138,7 +145,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             optionsLoading,
             setOptionsLoading,
             optionsError,
-            setOptionsError
+            setOptionsError,
+            // Expose language options
+            languageOptionsList,
+            setLanguageOptionsList,
         }}>
             {children}
         </AppContext.Provider>

@@ -11,6 +11,7 @@
 import { Request, Response } from 'express';
 import { apiServiceOptions, llmOptions } from '../config/aiOptions';
 import { ttsOptions, voiceOptions } from '../config/ttsOptions';
+import { languageOptions } from '../config/languageOptions';
 
 /**
  * @description Retrieves the list of available AI service providers.
@@ -77,5 +78,22 @@ export function getVoiceOptions(req: Request, res: Response): void {
     } catch (error) {
         console.error("Error fetching voice options:", error);
         res.status(500).json({ error: "Failed to fetch voice options" });
+    }
+}
+
+/**
+ * @description Retrieves the list of available language options (code and label).
+ * Sends a JSON response containing the `languageOptions` array.
+ * Handles potential errors during the process.
+ *
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
+ */
+export function getLanguageOptions(req: Request, res: Response): void {
+    try {
+        res.status(200).json(languageOptions);
+    } catch (error) {
+        console.error("Error fetching language options:", error);
+        res.status(500).json({ error: "Failed to fetch language options" });
     }
 }

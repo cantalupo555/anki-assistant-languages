@@ -6,7 +6,7 @@
  * @dependencies
  * - express (Request, Response): For handling HTTP requests and responses.
  * - ../config/serverConfig (pool): Potentially for logging or limits (currently unused here).
- * - ../../frontend/src/utils/languageMapping (getFullLanguageName): To get full language names.
+ * - ../config/languageOptions (getFullLanguageName): To get full language names.
  * - ../../frontend/src/utils/Types (TokenCount): For typing token counts.
  * - ../anthropicClaude: API handler for Anthropic Claude.
  * - ../googleGemini: API handler for Google Gemini.
@@ -14,7 +14,7 @@
  */
 import { Request, Response } from 'express';
 // import { pool } from '../config/serverConfig'; // Assuming pool might be needed later
-import { getFullLanguageName } from '../../frontend/src/utils/languageMapping'; // Path might need adjustment if moved
+import { getFullLanguageName } from '../config/languageOptions'; // Path might need adjustment if moved
 import { TokenCount } from '../../frontend/src/utils/Types'; // Path might need adjustment
 
 // Import API handlers (adjust paths if needed)

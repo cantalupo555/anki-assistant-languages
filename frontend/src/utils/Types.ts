@@ -64,3 +64,9 @@ export interface LoginProps {
 export interface RegisterProps {
     onRegister: (username: string, email: string, password: string) => void;
 }
+
+// Define a type for language options used in selectors
+export interface LanguageOption {
+    label: string;
+    value: string; // Language code (e.g., 'en-US')
+}

@@ -1,3 +1,14 @@
+/**
+ * @fileOverview Utility functions for mapping language codes to full names and vice versa.
+ * This file provides mappings for language codes (e.g., 'en-US') to human-readable names (e.g., 'English (United States)').
+ *
+ * This file contains:
+ * - `languageOptions`: An array listing supported languages with their codes (e.g., 'en-US')
+ *   and user-friendly labels (e.g., 'English (United States)'). Exposed via API for frontend selectors.
+ * - `getFullLanguageName`: A function to convert a language code to its full name. Used internally by the backend.
+ * - `getLanguageCode`: A function to convert a full language name back to its code. Used internally by the backend.
+ */
+
 // Array of supported languages with their display labels and language codes
 export const languageOptions = [
     { label: 'English (United States)', value: 'en-US' }, // English language option

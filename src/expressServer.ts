@@ -7,8 +7,6 @@ import { app, PORT, supportedLanguages, supportedAPIServices, supportedTTSServic
 // Re-add middleware imports needed for remaining inline routes
 import { authenticateToken, isActiveUser } from './middlewares/authMiddleware';
 
-import { getFullLanguageName } from '../frontend/src/utils/languageMapping';
-
 // Import type definitions (Keep TokenCount if still needed by /token/sum)
 import { TokenCount } from '../frontend/src/utils/Types';
 import { llmOptions } from './config/aiOptions';

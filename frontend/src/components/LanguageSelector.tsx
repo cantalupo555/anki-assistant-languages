@@ -3,14 +3,22 @@ import React from 'react';
 
 // Import internal context
 import { useAppContext } from '../context/selectionContext';
-import { languageOptions } from '../utils/languageMapping';
 
 // Interface to define the props for the LanguageSelector component
 interface LanguageSelectorProps {}
 
 // LanguageSelector component
 const LanguageSelector: React.FC<LanguageSelectorProps> = () => {
-    const { nativeLanguage, setNativeLanguage, targetLanguage, setTargetLanguage } = useAppContext();
+    const {
+        nativeLanguage, setNativeLanguage, targetLanguage, setTargetLanguage,
+        languageOptionsList
+    } = useAppContext();
+
+    // Add a check in case the list hasn't loaded yet (optional, but good practice)
+    if (!languageOptionsList || languageOptionsList.length === 0) {
+         // Can return null, a loader, or a disabled select
+         return <div>Loading languages...</div>;
+    }
 
     return (
         <div className="language-selector">
@@ -23,7 +31,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = () => {
                 required
             >
                 <option value="">Select your native language</option>
-                {languageOptions.map(option => (
+                {/* Mapear sobre languageOptionsList */}
+                {languageOptionsList.map(option => (
                     <option key={option.value} value={option.value}>
                         {option.label}
                     </option>
@@ -39,7 +48,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = () => {
                 required
             >
                 <option value="">Select target language</option>
-                {languageOptions.map(option => (
+                {/* Mapear sobre languageOptionsList */}
+                {languageOptionsList.map(option => (
                     <option key={option.value} value={option.value}>
                         {option.label}
                     </option>

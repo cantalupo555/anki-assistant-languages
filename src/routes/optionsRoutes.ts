@@ -12,7 +12,8 @@ import {
     getApiServices,
     getLlmOptions,
     getTtsServices,
-    getVoiceOptions
+    getVoiceOptions,
+    getLanguageOptions
 } from '../controllers/optionsController';
 
 const router = Router();
@@ -28,5 +29,8 @@ router.get('/tts-services', getTtsServices);
 
 // GET /options/voices: Returns the complete list of TTS voices
 router.get('/voices', getVoiceOptions);
+
+// GET /options/languages: Returns the list of language options
+router.get('/languages', getLanguageOptions);
 
 export default router;

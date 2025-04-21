@@ -30,7 +30,6 @@ import {
 
 // Utility function imports
 // Options are now fetched from the API, removed imports: apiServiceOptions, llmOptions, ttsOptions
-import { getFullLanguageName } from './utils/languageMapping';
 import { handleAnalyzeFrequency } from './utils/handleAnalyzeFrequency';
 import { handleExport } from './utils/languageCardExporter';
 import { handleGenerateDialogue } from './utils/handleGenerateDialogue';
@@ -38,7 +37,7 @@ import { handleGenerateTTS } from './utils/handleGenerateTTS';
 import { handleTranslation } from './utils/handleTranslation';
 import { handleSubmit } from './utils/handleSubmit';
 // Options are now fetched from the API, removed import: voiceOptions
-import { APIServiceOption, FrequencyAnalysis, LLMOption, SavedItem, TokenCount, TTSOption, VoiceOption } from './utils/Types'; // Added Option types
+import { APIServiceOption, FrequencyAnalysis, LLMOption, SavedItem, TokenCount, TTSOption, VoiceOption, LanguageOption } from './utils/Types'; // Added Option types and LanguageOption
 import useAuth from './utils/useAuth'; // Import useAuth
 
 interface AppInnerProps {
@@ -72,6 +71,9 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
         setVoiceOptionsList,
         setOptionsLoading,
         setOptionsError,
+        // Consume language options list and setter
+        languageOptionsList,
+        setLanguageOptionsList,
     } = useAppContext();
     const [word, setWord] = useState('');
     const [definitions, setDefinitions] = useState<{ text: string; tokenCount: TokenCount } | null>(null);
@@ -99,8 +101,6 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
     const [isFrequencyModalOpen, setIsFrequencyModalOpen] = useState(false);
     const { callApiWithAuth } = useAuth();
 
-    // REMOVED: Local state for fetched options - now using context state
-
 
     // --- Fetch Options from API (updates context state) ---
     useEffect(() => {
@@ -112,12 +112,13 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
             setOptionsLoading(true);
             setOptionsError(null);
             try {
-                // Fetch all options concurrently
-                const [apiServicesRes, llmOptionsRes, ttsServicesRes, voiceOptionsRes] = await Promise.all([
+                // Fetch all options concurrently, including languages
+                const [apiServicesRes, llmOptionsRes, ttsServicesRes, voiceOptionsRes, languageOptionsRes] = await Promise.all([
                     fetch('/options/api-services'),
                     fetch('/options/llms'),
                     fetch('/options/tts-services'),
-                    fetch('/options/voices')
+                    fetch('/options/voices'),
+                    fetch('/options/languages') // <-- Adicionar fetch
                 ]);
 
                 // Check responses
@@ -125,18 +126,21 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                 if (!llmOptionsRes.ok) throw new Error(`Failed to fetch LLM options: ${llmOptionsRes.statusText}`);
                 if (!ttsServicesRes.ok) throw new Error(`Failed to fetch TTS services: ${ttsServicesRes.statusText}`);
                 if (!voiceOptionsRes.ok) throw new Error(`Failed to fetch voice options: ${voiceOptionsRes.statusText}`);
+                if (!languageOptionsRes.ok) throw new Error(`Failed to fetch language options: ${languageOptionsRes.statusText}`);
 
                 // Parse JSON data
                 const apiServicesData: APIServiceOption[] = await apiServicesRes.json();
                 const llmOptionsData: { [key: string]: LLMOption[] } = await llmOptionsRes.json();
                 const ttsServicesData: TTSOption[] = await ttsServicesRes.json();
                 const voiceOptionsData: VoiceOption[] = await voiceOptionsRes.json();
+                const languageOptionsData: LanguageOption[] = await languageOptionsRes.json(); // <-- Adicionar parse
 
                 // Update CONTEXT state
                 setApiServiceOptionsList(apiServicesData);
                 setLlmOptionsList(llmOptionsData);
                 setTtsOptionsList(ttsServicesData);
                 setVoiceOptionsList(voiceOptionsData);
+                setLanguageOptionsList(languageOptionsData); // <-- Adicionar update de estado
 
                 // --- Set Default Selections AFTER options are loaded (using context lists) ---
 
@@ -167,8 +171,12 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                     ? selectedTTS.value
                     : (ttsServicesData[0]?.value || '');
 
+                // Find the full name of the target language from the fetched list
+                const targetLanguageObject = languageOptionsData.find(lang => lang.value === targetLanguage);
+                const targetLangName = targetLanguageObject ? targetLanguageObject.label : ''; // Use the label from the list
+
                 const availableVoices = voiceOptionsData.filter(
-                    voice => voice.language === getFullLanguageName(targetLanguage) && voice.ttsService === currentTtsServiceValue
+                    voice => voice.language === targetLangName && voice.ttsService === currentTtsServiceValue
                 );
                 if (!selectedVoice.value || !availableVoices.some(opt => opt.value === selectedVoice.value)) {
                      // Find default for the current language/TTS combo, or fallback to the very first voice overall
@@ -227,9 +235,12 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
 
     // Update default Voice when Target Language or TTS Service changes (and options are loaded)
     useEffect(() => {
-        if (optionsLoading) return; // Don't run while options are loading
+        if (optionsLoading || languageOptionsList.length === 0) return; // Don't run while loading or if language list is empty
 
-        const targetLangName = getFullLanguageName(targetLanguage);
+        // Find the full name of the target language from the fetched list
+        const targetLanguageObject = languageOptionsList.find(lang => lang.value === targetLanguage);
+        const targetLangName = targetLanguageObject ? targetLanguageObject.label : ''; // Use the label from the list
+
         // Filter voices from the context list
         const availableVoices = voiceOptionsList.filter(
             voice => voice.language === targetLangName && voice.ttsService === selectedTTS.value
@@ -247,7 +258,8 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
             setSelectedVoice(firstVoiceForLang || overallDefault);
         }
         // If current voice *is* valid for the new combo, no change needed here.
-    }, [targetLanguage, selectedTTS, voiceOptionsList, setSelectedVoice, optionsLoading, selectedVoice.value]); // Depend on context list and loading state
+    // Depend on languageOptionsList as well
+    }, [targetLanguage, selectedTTS, voiceOptionsList, setSelectedVoice, optionsLoading, selectedVoice.value, languageOptionsList]);
 
 
     // --- Other Effects ---
@@ -453,6 +465,10 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
     }
 
     // Main render when options are loaded (optionsLoading is false and optionsError is null)
+    // Get the full name of the target language to filter voices
+    const targetLanguageObject = languageOptionsList.find(lang => lang.value === targetLanguage);
+    const targetLangNameForFilter = targetLanguageObject ? targetLanguageObject.label : '';
+
     return (
         <S.AppContainer>
             <>
@@ -538,19 +554,19 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                             id="voice-select"
                                             value={selectedVoice.value}
                                             onChange={handleVoiceChange}
-                                            // Disable if no voices for the current language/TTS combo
-                                            disabled={voiceOptionsList.filter(v => v.language === getFullLanguageName(targetLanguage) && v.ttsService === selectedTTS.value).length === 0}
+                                            // Use targetLangNameForFilter here
+                                            disabled={voiceOptionsList.filter(v => v.language === targetLangNameForFilter && v.ttsService === selectedTTS.value).length === 0}
                                         >
-                                            {/* Filter and map voices from CONTEXT list */}
+                                            {/* Use targetLangNameForFilter here */}
                                             {voiceOptionsList
-                                                .filter((voice) => voice.language === getFullLanguageName(targetLanguage) && voice.ttsService === selectedTTS.value)
+                                                .filter((voice) => voice.language === targetLangNameForFilter && voice.ttsService === selectedTTS.value)
                                                 .map((voice) => (
                                                     <option key={voice.value} value={voice.value}>
                                                         {voice.name}
                                                     </option>
                                                 ))}
-                                            {/* Display message if no voices match */}
-                                            {voiceOptionsList.filter(v => v.language === getFullLanguageName(targetLanguage) && v.ttsService === selectedTTS.value).length === 0 && (
+                                            {/* Use targetLangNameForFilter here */}
+                                            {voiceOptionsList.filter(v => v.language === targetLangNameForFilter && v.ttsService === selectedTTS.value).length === 0 && (
                                                 <option value="">No voices available</option>
                                             )}
                                         </select>
@@ -577,11 +593,11 @@ const AppInner: React.FC<AppInnerProps> = ({ showStats = false }) => {
                                     setDialogue, 
                                     setIsDialogueLoading, 
                                     setError, 
-                                    updateTotalTokenCount, 
-                                    setIsDialogueModalOpen, 
-                                    nativeLanguage, 
-                                    targetLanguage, // Passar o código da língua (ex: 'de-DE')
-                                    selectedAPIService, 
+                                    updateTotalTokenCount,
+                                    setIsDialogueModalOpen,
+                                    nativeLanguage,
+                                    targetLanguage, // Pass the language code (e.g., 'de-DE')
+                                    selectedAPIService,
                                     selectedTTS,
                                     word,
                                     selectedLLM,
