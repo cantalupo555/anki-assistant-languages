@@ -44,7 +44,7 @@ export const handleAnalyzeFrequency = async (
     // No need for explicit token check here
 
     // Send POST request using callApiWithAuth
-    const analysisResponse = await callApiWithAuth(`/analyze/frequency`, { // Use relative path and callApiWithAuth
+    const analysisResponse = await callApiWithAuth(`/generate/frequency`, { // Corrected path: /generate/frequency
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
