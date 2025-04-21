@@ -11,9 +11,9 @@ import { APIServiceOption, LLMOption, TTSOption, VoiceOption } from '../utils/Ty
 // Import internal utility functions
 import useAuth from '../utils/useAuth';
 import { useAppContext } from '../context/selectionContext'; // Import context hook
+import { LanguageOption } from '../utils/Types'; // Import LanguageOption type
 
-// Import language options
-import { languageOptions } from '../utils/languageMapping';
+// REMOVED: import { languageOptions } from '../utils/languageMapping'; // No longer needed
 
 interface UserSettingsState {
     preferred_language: string;
@@ -35,7 +35,8 @@ const UserSettings: React.FC = () => {
         ttsOptionsList,
         voiceOptionsList,
         optionsLoading,
-        optionsError: contextOptionsError // Rename to avoid conflict with local error state
+        optionsError: contextOptionsError, // Rename to avoid conflict with local error state
+        languageOptionsList // <-- Get language options list from context
     } = useAppContext();
 
     const [settings, setSettings] = useState<UserSettingsState>({
@@ -93,10 +94,11 @@ const UserSettings: React.FC = () => {
                     theme: ['light', 'dark'].includes(data.theme || '')
                         ? data.theme || 'light'
                         : 'light',
-                    native_language: languageOptions.some(opt => opt.value === data.native_language)
+                    // Use languageOptionsList from context for validation
+                    native_language: languageOptionsList.some((opt: LanguageOption) => opt.value === data.native_language)
                         ? data.native_language || 'en-US' // Default native
                         : 'en-US',
-                    target_language: languageOptions.some(opt => opt.value === data.target_language)
+                    target_language: languageOptionsList.some((opt: LanguageOption) => opt.value === data.target_language)
                         ? data.target_language || 'en-US' // Default target
                         : 'en-US',
                     selected_api_service: apiServiceOptionsList.some(opt => opt.value === data.selected_api_service)
@@ -144,7 +146,7 @@ const UserSettings: React.FC = () => {
              setIsLoading(false);
         }
 
-    }, [user, optionsLoading, contextOptionsError, apiServiceOptionsList, llmOptionsList, ttsOptionsList, voiceOptionsList]); // Depend on user and options status/lists
+    }, [user, optionsLoading, contextOptionsError, apiServiceOptionsList, llmOptionsList, ttsOptionsList, voiceOptionsList, languageOptionsList]); // Added languageOptionsList dependency
 
     // --- Validation Effects (run after settings are loaded or changed) ---
 
@@ -294,7 +296,8 @@ const UserSettings: React.FC = () => {
                         required
                     >
                         <option value="">Select your native language</option>
-                        {languageOptions.map(option => (
+                        {/* Map over languageOptionsList from context */}
+                        {languageOptionsList.map((option: LanguageOption) => (
                             <option key={option.value} value={option.value}>
                                 {option.label}
                             </option>
@@ -312,7 +315,8 @@ const UserSettings: React.FC = () => {
                         required
                     >
                         <option value="">Select the language you are learning</option>
-                        {languageOptions.map(option => (
+                        {/* Map over languageOptionsList from context */}
+                        {languageOptionsList.map((option: LanguageOption) => (
                             <option key={option.value} value={option.value}>
                                 {option.label}
                             </option>
