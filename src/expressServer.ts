@@ -7,8 +7,8 @@ import { app, PORT, supportedLanguages, supportedAPIServices, supportedTTSServic
 // Re-add middleware imports needed for remaining inline routes
 import { authenticateToken, isActiveUser } from './middlewares/authMiddleware';
 
-// Import type definitions (Keep TokenCount if still needed by /token/sum)
-import { TokenCount } from '../frontend/src/utils/Types';
+// Import type definitions
+// import { TokenCount } from '../frontend/src/utils/Types'; // No longer used directly here
 import { llmOptions } from './config/aiOptions';
 
 /**
@@ -27,9 +27,9 @@ function errorHandler(err: Error, req: Request, res: Response, next: NextFunctio
  * Initializes a `TokenCount` object with default values.
  * @returns Initialized `TokenCount` object.
  */
-function initializeTokenCount(): TokenCount {
-    return { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
-}
+// function initializeTokenCount(): TokenCount { // No longer used here
+//     return { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
+// }
 
 /**
  * Validates the `text` parameter.
@@ -42,31 +42,14 @@ import optionsRoutes from './routes/optionsRoutes';
 import userRoutes from './routes/userRoutes';
 import generationRoutes from './routes/generationRoutes';
 import ttsRoutes from './routes/ttsRoutes';
+import tokenRoutes from './routes/tokenRoutes';
 
 app.use('/auth', authRoutes);
 app.use('/options', optionsRoutes);
 app.use('/user', userRoutes);
 app.use('/generate', generationRoutes);
-app.use('/tts', ttsRoutes); // Montar o router de TTS
-
-// Route to handle token sum (Manter por enquanto)
-app.post('/token/sum', authenticateToken, (req: Request, res: Response) => {
-    try {
-        const { definitionsTokens, sentencesTokens, translationTokens } = req.body;
-
-        const totalTokenCount = {
-            inputTokens: (definitionsTokens?.inputTokens || 0) + (sentencesTokens?.inputTokens || 0) + (translationTokens?.inputTokens || 0),
-            outputTokens: (definitionsTokens?.outputTokens || 0) + (sentencesTokens?.outputTokens || 0) + (translationTokens?.outputTokens || 0),
-            totalTokens: (definitionsTokens?.totalTokens || 0) + (sentencesTokens?.totalTokens || 0) + (translationTokens?.totalTokens || 0)
-        };
-
-        res.json(totalTokenCount);
-    } catch (error) {
-        console.error('Error:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An error occurred while processing the request';
-        res.status(500).json({ error: errorMessage });
-    }
-});
+app.use('/tts', ttsRoutes); 
+app.use('/token', tokenRoutes); // Used
 
 /**
  * Route to generate audio using TTS.
